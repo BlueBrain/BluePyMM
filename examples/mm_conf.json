@@ -1,0 +1,5 @@
+{
+    "emodel_path": "./",
+    "tmp_emodels_path": "./etype_dirs",
+    "scores_db": "./scores.sqlite"
+}
