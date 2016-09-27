@@ -1,0 +1,42 @@
+{
+    "cADpyr_L23PC": {
+        "cADpyr":
+            [2, 3]
+    },
+    "cADpyr_L4PC": {
+        "cADpyr":
+            [4]
+    },
+    "cADpyr_L5PC": {
+        "cADpyr":
+            [5]
+    },
+    "cADpyr_L6UTPC": {
+        "cADpyr":
+            [6]
+    },
+    "bNAC_L2SBC": {
+        "bNAC":
+            [1, 2, 3, 4, 5, 6]
+    },
+    "bAC_L3BTC": {
+        "bAC":
+            [1, 2, 3, 4, 5, 6]
+    },                                                                             
+    "cACint_L23MC": {
+        "cACint":
+            [1, 2, 3, 4, 5, 6]
+    },                                                                             
+    "bNAC_L2SBC": {
+        "bNAC":
+            [1, 2, 3, 4, 5, 6]
+    },                                                                             
+    "cNAC_L2SBC": {
+        "cNAC":
+            [1, 2, 3, 4, 5, 6]
+    },                                                                             
+    "dNAC_L2SBC": {
+        "dNAC":
+            [1, 2, 3, 4, 5, 6]
+    }                                                                             
+}

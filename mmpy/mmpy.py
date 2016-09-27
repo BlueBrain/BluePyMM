@@ -14,6 +14,8 @@ import sqlite3
 import traceback
 import sh
 
+import mmpy
+
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
 final_json = 'final.json'
@@ -50,8 +52,6 @@ def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir):
             os.chdir(emodel)
             sh.nrnivmodl('mechanisms')
             os.chdir(old_dir)
-
-
 
             checkpoint_subdir = 'run/%s/checkpoints/run.%s/' % (
                 emodel_githash, emodel_githash)
@@ -187,19 +187,8 @@ def save_scores(scores_db_filename, uid, scores):
             [json.dumps(scores), uid])
 
 
-def main():
-    """Main"""
-
-    if len(sys.argv) != 2:
-        raise Exception(
-            "Run mmpy with an argument pointing to the mm conf file")
-    conf_filename = sys.argv[1]
-    conf_dict = json.loads(open(conf_filename).read())
-
-    opt_dir = os.path.abspath(conf_dict['emodels_path'])
-    emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
-    # emodels_gitrepo = conf_dict['emodels_gitrepo']
-    scores_db_filename = conf_dict['scores_db']
+def calculate_scores(opt_dir, emodels_dir, scores_db_filename):
+    """Calculate scores"""
 
     final_dict = json.loads(open(os.path.join(opt_dir, final_json)).read())
 
@@ -227,6 +216,30 @@ def main():
 
         save_scores(scores_db_filename, uid, scores)
 
+
+def main():
+    """Main"""
+
+    if len(sys.argv) != 2:
+        raise Exception(
+            "Run mmpy with an argument pointing to the mm conf file")
+    conf_filename = sys.argv[1]
+    conf_dict = json.loads(open(conf_filename).read())
+
+    opt_dir = os.path.abspath(conf_dict['emodels_path'])
+    emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
+    scores_db_filename = conf_dict['scores_db']
+    recipe_filename = conf_dict['recipe_path']
+    neurondb_filename = os.path.join(conf_dict['morph_path'], 'neuronDB.xml')
+    emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
+
+    mmpy.create_mm_sqlite(
+        scores_db_filename,
+        recipe_filename,
+        neurondb_filename,
+        emodel_etype_map_filename)
+
+    calculate_scores(opt_dir, emodels_dir, scores_db_filename)
 
 if __name__ == '__main__':
     main()

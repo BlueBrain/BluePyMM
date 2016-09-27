@@ -54,7 +54,7 @@ def read_mm_recipe(recipe_filename):
                                     'handle this case')
 
                             yield [
-                                layer.attrib['id'],
+                                int(layer.attrib['id']),
                                 structural_type.attrib['id'],
                                 electro_type.attrib['id']
                             ]
@@ -71,7 +71,7 @@ def xmlmorphinfo_from_xml(xml_morph):
     '''extracts properties from a neurondb.xml <morphology> stanza'''
     name = xml_morph.findtext('name')
     mtype = xml_morph.findtext('mtype')
-    layer = xml_morph.findtext('layer')
+    layer = int(xml_morph.findtext('layer'))
     return (name, mtype, layer)
 
 
@@ -115,56 +115,34 @@ def read_emodel_etype_map(json_filename):
             'layer'])
 
 
-def main():
-    """Main"""
+def create_mm_sqlite(
+        output_filename,
+        recipe_filename,
+        neurondb_filename,
+        emodel_etype_map_filename):
 
     # Contains layer, mtype, etype
-    mtype_etype_map = read_mm_recipe(
-        '/gpfs/bbp.cscs.ch/project/proj1/entities/bionames/SomatosensoryCxS1-v5.r0/bluerecipe_release_ChC_intervention_GSYNrescale/builderRecipeAllPathways.xml')
+    mtype_etype_map = read_mm_recipe(recipe_filename)
 
     # Contains layer, mtype, morph_name
-    mtype_morph_map = read_mtype_morh_map(
-        '/gpfs/bbp.cscs.ch/project/proj59/morphology_release/output/07_ScaleMorphologies/neuronDB.xml')
-    # print mm_recipe
-    # print mtype_morph_map
+    mtype_morph_map = read_mtype_morh_map(neurondb_filename)
 
     # Contains layer, mtype, etype, morph_name
     morph_mtype_etype_map = mtype_morph_map.merge(
-        mtype_etype_map, on=[
-            'mtype', 'layer'], how='left')
+        mtype_etype_map, on=['mtype', 'layer'], how='left')
 
-    print morph_mtype_etype_map
-
+    #  Contains emodel, etype
     emodel_etype_map = read_emodel_etype_map('emodel_etype_map.json')
-
-    print emodel_etype_map
 
     # Contains layer, mtype, etype, morph_name, e_model
     morph_mtype_emodel_map = morph_mtype_etype_map.merge(
         emodel_etype_map, on=[
-            'etype'], how='left')
+            'layer', 'etype'], how='left')
 
-    print morph_mtype_emodel_map
+    full_map = morph_mtype_emodel_map.copy()
+    full_map.insert(len(full_map.columns), 'scores', None)
 
-    """
     import sqlite3
 
-    conn = sqlite3.connect('scores.sqlite')
-
-    conn.execute('''CREATE TABLE scores
-                         (id integer primary key, emodel text, morph_dir text, morph_filename text, scores text)''')
-
-    insert_stm = 'INSERT INTO scores (emodel, morph_dir, morph_filename) VALUES (?, ?, ?)'
-
-    conn.execute(insert_stm, ('cADpyr_L5PC', './morph_dir', 'tkb060924b2_ch5_cc2_n_og_100x_1.asc'))
-    conn.execute(insert_stm, ('cADpyr_L5PC_legacy', './morph_dir', 'tkb060924b2_ch5_cc2_n_og_100x_1.asc'))
-    conn.execute(insert_stm, ('cADpyr_L4PC_legacy', './morph_dir', 'tkb060924b2_ch5_cc2_n_og_100x_1.asc'))
-    conn.execute(insert_stm, ('cADpyr_L4PC', './morph_dir', 'tkb060924b2_ch5_cc2_n_og_100x_1.asc'))
-    conn.execute(insert_stm, ('cADpyr_L4PC', './morph_dir', 'C310897A-P4.asc'))
-    conn.commit()
-
-    conn.close()
-    """
-
-if __name__ == '__main__':
-    main()
+    with sqlite3.connect(output_filename) as conn:
+        full_map.to_sql('scores', conn)
