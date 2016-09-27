@@ -1,5 +1,6 @@
 {
-    "emodel_path": "./",
-    "tmp_emodels_path": "./etype_dirs",
+    "morph_path": "/gpfs/bbp.cscs.ch/project/proj59/morphology_release/output/07_ScaleMorphologies",
+    "emodels_path": "/gpfs/bbp.cscs.ch/home/roessert/proj38/singlecell/optimization/RatSSCx",
+    "tmp_emodels_path": "./emodels_dir",
     "scores_db": "./scores.sqlite"
 }

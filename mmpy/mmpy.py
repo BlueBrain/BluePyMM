@@ -8,37 +8,62 @@ import os
 import json
 import multiprocessing
 import multiprocessing.pool
-import ipyparallel
+# import ipyparallel
+import shutil
 import sqlite3
 import traceback
+import sh
 
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
 final_json = 'final.json'
 
 
-def prepare_emodel_dirs(final_dict, emodels_dir):
+def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir):
     """Prepare the directories for the emodels"""
+
+    if not os.path.exists(emodels_dir):
+        os.makedirs(emodels_dir)
 
     emodel_dirs = {}
 
-    for emodel, _ in final_dict.iteritems():
-        # convert emodel to str instead of unicode
-        emodel = str(emodel)
+    for emodel, emodel_dict in final_dict.iteritems():
         if emodel == "cADpyr_L5PC" or emodel == 'cADpyr_L4PC':
-            # src_emodel_dir = emodel_dict['path']
-            emodel_dir = os.path.join(emodels_dir, emodel)
+            emodel_dirs[emodel] = os.path.join(emodels_dir, emodel)
+            emodel_githash = emodel_dict['githash']
 
-            '''
-            shutil.copytree(
-                src_emodel_dir,
-                emodel_dir,
-                ignore=shutil.ignore_patterns(
-                    '*.ipython*',
-                    '*.inc*'))
-            '''
+            tar_filename = os.path.join(emodels_dir, '%s.tar' % emodel)
 
-            emodel_dirs[emodel] = emodel_dir
+            old_dir = os.getcwd()
+            os.chdir(opt_dir)
+            sh.git(
+                'archive',
+                '--format=tar',
+                '--prefix=%s/' % emodel,
+                emodel_dict['branch'],
+                _out=tar_filename)
+            os.chdir(old_dir)
+
+            old_dir = os.getcwd()
+            os.chdir(emodels_dir)
+            sh.tar('xf', tar_filename)
+            os.chdir(emodel)
+            sh.nrnivmodl('mechanisms')
+            os.chdir(old_dir)
+
+
+
+            checkpoint_subdir = 'run/%s/checkpoints/run.%s/' % (
+                emodel_githash, emodel_githash)
+            src_checkpoint_dir = os.path.join(opt_dir, checkpoint_subdir)
+            dest_checkpoint_dir = os.path.join(
+                emodel_dirs[emodel],
+                checkpoint_subdir)
+
+            shutil.copytree(src_checkpoint_dir, dest_checkpoint_dir)
+            print(
+                'Copied checkpoint from %s to %s' %
+                (src_checkpoint_dir, dest_checkpoint_dir))
 
     return emodel_dirs
 
@@ -171,13 +196,14 @@ def main():
     conf_filename = sys.argv[1]
     conf_dict = json.loads(open(conf_filename).read())
 
-    opt_dir = conf_dict['emodel_path']
-    emodels_dir = conf_dict['tmp_emodels_path']
+    opt_dir = os.path.abspath(conf_dict['emodels_path'])
+    emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
+    # emodels_gitrepo = conf_dict['emodels_gitrepo']
     scores_db_filename = conf_dict['scores_db']
 
     final_dict = json.loads(open(os.path.join(opt_dir, final_json)).read())
 
-    emodel_dirs = prepare_emodel_dirs(final_dict, emodels_dir)
+    emodel_dirs = prepare_emodel_dirs(final_dict, emodels_dir, opt_dir)
 
     arg_list = create_arg_list(scores_db_filename, emodel_dirs, final_dict)
 

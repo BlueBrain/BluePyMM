@@ -1,0 +1,22 @@
+{
+    "cADpyr_L5PC": {
+        "cADpyr":
+            [5]
+    },
+    "cADpyr_L4PC": {
+        "cADpyr":
+            [4]
+    },
+    "cADpyr_L23PC": {
+        "cADpyr":
+            [2, 3]
+    },
+    "cADpyr_L6PC": {
+        "cADpyr":
+            [6]
+    },
+    "bNAC_L2SBC": {
+        "bNAC":
+            [1, 2, 3, 4, 5, 6]
+    }
+}

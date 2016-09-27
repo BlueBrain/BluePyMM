@@ -25,7 +25,7 @@ import setuptools
 setuptools.setup(
     name="mmpy",
     version='0.1',
-    install_requires=['bluepyopt'],
+    install_requires=['bluepyopt', 'sh'],
     packages=['mmpy'],
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",
