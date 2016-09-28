@@ -14,8 +14,6 @@ import sqlite3
 import traceback
 import sh
 
-import mmpy
-
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
 final_json = 'final.json'
@@ -159,7 +157,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
         scores_cursor = scores_db.execute('SELECT * FROM scores')
 
         for row in scores_cursor.fetchall():
-            print row['id'], row['emodel']
+            print row['index'], row['emodel']
             morph_path = os.path.abspath(
                 os.path.join(
                     row['morph_dir'],
@@ -215,31 +213,3 @@ def calculate_scores(opt_dir, emodels_dir, scores_db_filename):
             (uid, uids_received, len(arg_list)))
 
         save_scores(scores_db_filename, uid, scores)
-
-
-def main():
-    """Main"""
-
-    if len(sys.argv) != 2:
-        raise Exception(
-            "Run mmpy with an argument pointing to the mm conf file")
-    conf_filename = sys.argv[1]
-    conf_dict = json.loads(open(conf_filename).read())
-
-    opt_dir = os.path.abspath(conf_dict['emodels_path'])
-    emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
-    scores_db_filename = conf_dict['scores_db']
-    recipe_filename = conf_dict['recipe_path']
-    neurondb_filename = os.path.join(conf_dict['morph_path'], 'neuronDB.xml')
-    emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
-
-    mmpy.create_mm_sqlite(
-        scores_db_filename,
-        recipe_filename,
-        neurondb_filename,
-        emodel_etype_map_filename)
-
-    calculate_scores(opt_dir, emodels_dir, scores_db_filename)
-
-if __name__ == '__main__':
-    main()

@@ -2,9 +2,11 @@
 
 """Some Code based on BrainBuilder and morph repair code"""
 
-import xml.etree.ElementTree
+import os
 import collections
 import pandas
+
+import xml.etree.ElementTree
 
 
 def _parse_recipe(recipe_filename):
@@ -118,8 +120,10 @@ def read_emodel_etype_map(json_filename):
 def create_mm_sqlite(
         output_filename,
         recipe_filename,
-        neurondb_filename,
+        morph_dir,
         emodel_etype_map_filename):
+
+    neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
 
     # Contains layer, mtype, etype
     mtype_etype_map = read_mm_recipe(recipe_filename)
@@ -140,9 +144,10 @@ def create_mm_sqlite(
             'layer', 'etype'], how='left')
 
     full_map = morph_mtype_emodel_map.copy()
+    full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
     full_map.insert(len(full_map.columns), 'scores', None)
 
     import sqlite3
 
     with sqlite3.connect(output_filename) as conn:
-        full_map.to_sql('scores', conn)
+        full_map.to_sql('scores', conn, if_exists='replace')

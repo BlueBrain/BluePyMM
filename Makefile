@@ -1,6 +1,6 @@
 all: install
 install:
-	pip install -q . --upgrade
+	pip install . --upgrade
 test: install clean
 	cd examples; rm -rf emodels_dir; mmpy ./mm_conf.json	
 clean:
