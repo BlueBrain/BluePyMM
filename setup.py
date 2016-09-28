@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""MMPy  setup """
+"""bluepymm  setup """
 
 """
 Copyright (c) 2016, EPFL/Blue Brain Project
@@ -23,14 +23,14 @@ Copyright (c) 2016, EPFL/Blue Brain Project
 import setuptools
 
 setuptools.setup(
-    name="mmpy",
+    name="bluepymm",
     version='0.1',
     install_requires=['bluepyopt', 'sh'],
-    packages=['mmpy'],
+    packages=['bluepymm'],
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",
-    description="Model Management Python Library (mmpy)",
-    long_description="Model Management Python Library (mmpy)",
+    description="Model Management Python Library (bluepymm)",
+    long_description="Model Management Python Library (bluepymm)",
     license="LGPLv3",
     keywords=(
         'optimisation',
@@ -45,5 +45,5 @@ setuptools.setup(
         'Operating System :: POSIX',
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities'],
-    scripts=['bin/mmpy']
+    scripts=['bin/bluepymm']
 )

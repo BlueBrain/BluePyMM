@@ -7,7 +7,7 @@ import sys
 import os
 import json
 
-import mmpy
+import bluepymm
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     # Parse arguments
     if len(sys.argv) != 2:
         raise Exception(
-            "Run mmpy with an argument pointing to the mm conf file")
+            "Run bluepymm with an argument pointing to the mm conf file")
     conf_filename = sys.argv[1]
 
     # Read configuration
@@ -30,14 +30,14 @@ def main():
     emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
 
     # Create a sqlite3 db with all the combos
-    mmpy.create_mm_sqlite(
+    bluepymm.create_mm_sqlite(
         scores_db_filename,
         recipe_filename,
         morph_dir,
         emodel_etype_map_filename)
 
     # Calculate scores for combinations in sqlite3 db
-    mmpy.calculate_scores(opt_dir, emodels_dir, scores_db_filename)
+    bluepymm.calculate_scores(opt_dir, emodels_dir, scores_db_filename)
 
 if __name__ == '__main__':
     main()
