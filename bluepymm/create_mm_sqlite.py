@@ -10,7 +10,7 @@ import xml.etree.ElementTree
 
 
 def _parse_recipe(recipe_filename):
-    '''parse a BBP recipe and return the corresponding etree'''
+    """parse a BBP recipe and return the corresponding etree"""
 
     parser = xml.etree.ElementTree.XMLParser()
     parser.entity = collections.defaultdict(lambda: '')
@@ -18,13 +18,7 @@ def _parse_recipe(recipe_filename):
 
 
 def read_mm_recipe(recipe_filename):
-    """
-    Take a BBP builder recipe and return the probability distributions for each type
-
-    Returns:
-        A DataFrame with one row for each possibility and columns:
-            layer, mtype, etype, mClass, sClass, percentage
-    """
+    """Take a BBP builder recipe and return possible me combinations"""
     recipe_tree = _parse_recipe(recipe_filename)
 
     def read_records():
@@ -55,11 +49,9 @@ def read_mm_recipe(recipe_filename):
                                     'in recipe, script cant to '
                                     'handle this case')
 
-                            yield [
-                                int(layer.attrib['id']),
-                                structural_type.attrib['id'],
-                                electro_type.attrib['id']
-                            ]
+                            yield (int(layer.attrib['id']),
+                                   structural_type.attrib['id'],
+                                   electro_type.attrib['id'])
 
     return pandas.DataFrame(
         read_records(),
@@ -126,9 +118,11 @@ def create_mm_sqlite(
     neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
 
     # Contains layer, mtype, etype
+    print('Reading recipe at %s' % recipe_filename)
     mtype_etype_map = read_mm_recipe(recipe_filename)
 
     # Contains layer, mtype, morph_name
+    print('Reading neuronDB at %s' % neurondb_filename)
     mtype_morph_map = read_mtype_morh_map(neurondb_filename)
 
     # Contains layer, mtype, etype, morph_name
@@ -136,7 +130,8 @@ def create_mm_sqlite(
         mtype_etype_map, on=['mtype', 'layer'], how='left')
 
     #  Contains emodel, etype
-    emodel_etype_map = read_emodel_etype_map('emodel_etype_map.json')
+    print('Reading emodel etype map at %s' % emodel_etype_map_filename)
+    emodel_etype_map = read_emodel_etype_map(emodel_etype_map_filename)
 
     # Contains layer, mtype, etype, morph_name, e_model
     morph_mtype_emodel_map = morph_mtype_etype_map.merge(
@@ -151,3 +146,5 @@ def create_mm_sqlite(
 
     with sqlite3.connect(output_filename) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
+
+    print('Created sqlite db at %s' % output_filename)

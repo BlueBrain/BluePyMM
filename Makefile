@@ -1,7 +1,7 @@
 all: install
 install:
-	pip install . --upgrade
+	pip install -q . --upgrade
 test: install clean
-	cd examples; rm -rf emodels_dir; bluepymm ./mm_conf.json	
+	cd examples; bluepymm ./mm_conf.json	
 clean:
-	# rm -rf examples/etype_dirs
+	rm -rf examples/emodels_dir; rm -f examples/scores.sqlite;

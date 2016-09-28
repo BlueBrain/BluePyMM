@@ -9,7 +9,6 @@ import json
 import multiprocessing
 import multiprocessing.pool
 # import ipyparallel
-import shutil
 import sqlite3
 import traceback
 import sh
@@ -27,41 +26,51 @@ def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir):
 
     emodel_dirs = {}
 
-    for emodel, emodel_dict in final_dict.iteritems():
-        if emodel == "cADpyr_L5PC" or emodel == 'cADpyr_L4PC':
-            emodel_dirs[emodel] = os.path.join(emodels_dir, emodel)
-            emodel_githash = emodel_dict['githash']
+    for legacy_emodel, emodel_dict in final_dict.iteritems():
 
-            tar_filename = os.path.join(emodels_dir, '%s.tar' % emodel)
+        if '_legacy' in legacy_emodel:
+            emodel = legacy_emodel[:-7]
+        else:
+            raise Exception('Found model in emodel dict thats not legacy, '
+                            'this is not supported: %s' % legacy_emodel)
 
-            old_dir = os.getcwd()
-            os.chdir(opt_dir)
-            sh.git(
-                'archive',
-                '--format=tar',
-                '--prefix=%s/' % emodel,
-                emodel_dict['branch'],
-                _out=tar_filename)
-            os.chdir(old_dir)
+        print('Preparing: %s' % emodel)
+        emodel_dirs[emodel] = os.path.join(emodels_dir, emodel)
 
-            old_dir = os.getcwd()
-            os.chdir(emodels_dir)
-            sh.tar('xf', tar_filename)
-            os.chdir(emodel)
-            sh.nrnivmodl('mechanisms')
-            os.chdir(old_dir)
+        tar_filename = os.path.join(emodels_dir, '%s.tar' % emodel)
 
-            checkpoint_subdir = 'run/%s/checkpoints/run.%s/' % (
-                emodel_githash, emodel_githash)
-            src_checkpoint_dir = os.path.join(opt_dir, checkpoint_subdir)
-            dest_checkpoint_dir = os.path.join(
-                emodel_dirs[emodel],
-                checkpoint_subdir)
+        old_dir = os.getcwd()
+        os.chdir(opt_dir)
+        sh.git(
+            'archive',
+            '--format=tar',
+            '--prefix=%s/' % emodel,
+            emodel_dict['branch'],
+            _out=tar_filename)
+        os.chdir(old_dir)
 
-            shutil.copytree(src_checkpoint_dir, dest_checkpoint_dir)
-            print(
-                'Copied checkpoint from %s to %s' %
-                (src_checkpoint_dir, dest_checkpoint_dir))
+        old_dir = os.getcwd()
+        os.chdir(emodels_dir)
+        sh.tar('xf', tar_filename)
+        os.chdir(emodel)
+        sh.nrnivmodl('mechanisms')
+        os.chdir(old_dir)
+
+        '''
+        emodel_githash = emodel_dict['githash']
+
+        checkpoint_subdir = 'run/%s/checkpoints/run.%s/' % (
+            emodel_githash, emodel_githash)
+        src_checkpoint_dir = os.path.join(opt_dir, checkpoint_subdir)
+        dest_checkpoint_dir = os.path.join(
+            emodel_dirs[emodel],
+            checkpoint_subdir)
+
+        shutil.copytree(src_checkpoint_dir, dest_checkpoint_dir)
+        print(
+            'Copied checkpoint from %s to %s' %
+            (src_checkpoint_dir, dest_checkpoint_dir))
+        '''
 
     return emodel_dirs
 
@@ -157,21 +166,29 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
         scores_cursor = scores_db.execute('SELECT * FROM scores')
 
         for row in scores_cursor.fetchall():
-            print row['index'], row['emodel']
+            index = row['index']
+            morph_name = row['morph_name']
+            morph_filename = '%s.asc' % morph_name
             morph_path = os.path.abspath(
                 os.path.join(
                     row['morph_dir'],
-                    row['morph_filename']))
+                    morph_filename))
             if row['scores'] is None:
                 emodel = row['emodel']
-                if '_legacy' in emodel:
-                    real_emodel = emodel[:-7]
-                else:
-                    real_emodel = emodel
-                arg_list.append((row['id'], emodel,
-                                os.path.abspath(emodel_dirs[real_emodel]),
-                                final_dict[real_emodel]['params'],
-                                morph_path))
+                if emodel is None:
+                    continue
+                    # TODO Reenable this exception !
+                    raise Exception(
+                        'scores db row %s for morph %s doesnt '
+                        'have an emodel assigned to it' %
+                        (index, morph_name))
+                legacy_emodel = '%s_legacy' % emodel
+                args = (index, emodel,
+                        os.path.abspath(emodel_dirs[emodel]),
+                        final_dict[legacy_emodel]['params'],
+                        morph_path)
+
+                arg_list.append(args)
 
     return arg_list
 
@@ -190,8 +207,10 @@ def calculate_scores(opt_dir, emodels_dir, scores_db_filename):
 
     final_dict = json.loads(open(os.path.join(opt_dir, final_json)).read())
 
+    print('Preparing emodels at %s' % emodels_dir)
     emodel_dirs = prepare_emodel_dirs(final_dict, emodels_dir, opt_dir)
 
+    print('Creating argument list for parallelisation')
     arg_list = create_arg_list(scores_db_filename, emodel_dirs, final_dict)
 
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))

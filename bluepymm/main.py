@@ -13,11 +13,17 @@ import bluepymm
 def main():
     """Main"""
 
+    print('\n#####################')
+    print('# Starting BluePyMM #')
+    print('#####################\n')
+
     # Parse arguments
     if len(sys.argv) != 2:
         raise Exception(
             "Run bluepymm with an argument pointing to the mm conf file")
-    conf_filename = sys.argv[1]
+    conf_filename = os.path.abspath(sys.argv[1])
+
+    print('Reading configuration at %s' % conf_filename)
 
     # Read configuration
     conf_dict = json.loads(open(conf_filename).read())
@@ -38,6 +44,8 @@ def main():
 
     # Calculate scores for combinations in sqlite3 db
     bluepymm.calculate_scores(opt_dir, emodels_dir, scores_db_filename)
+
+    print('BluePyMM finished\n')
 
 if __name__ == '__main__':
     main()
