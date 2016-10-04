@@ -1,0 +1,11 @@
+{
+    "recipe_path": "/gpfs/bbp.cscs.ch/project/proj59/morphology_release/input/recipe/Production_MESO/SomatosensoryCxS1-v6/baserecipe/builderRecipeAllPathways.xml",
+    "emodel_etype_map_path": "./emodel_etype_map.json",
+    "morph_path": "/gpfs/bbp.cscs.ch/project/proj59/morphology_release/output/07_ScaleMorphologies",
+    "emodels_repo": "ssh://bbpcode.epfl.ch/project/proj38/singlecell-optimization",
+    "emodels_githash": "master",
+    "final_json_path": "RatSSCx/final.json",
+    "tmp_optdir_path": "./opt_dir",
+    "tmp_emodels_path": "./emodels_dir",
+    "scores_db": "./scores.sqlite"
+}

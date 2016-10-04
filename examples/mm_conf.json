@@ -1,8 +1,0 @@
-{
-    "recipe_path": "/gpfs/bbp.cscs.ch/project/proj1/entities/bionames/SomatosensoryCxS1-v5.r0/bluerecipe_release_ChC_intervention_GSYNrescale/builderRecipeAllPathways.xml",
-    "emodel_etype_map_path": "./emodel_etype_map.json",
-    "morph_path": "/gpfs/bbp.cscs.ch/project/proj59/morphology_release/output/07_ScaleMorphologies",
-    "emodels_path": "/gpfs/bbp.cscs.ch/home/roessert/proj38/singlecell/optimization/RatSSCx",
-    "tmp_emodels_path": "./emodels_dir",
-    "scores_db": "./scores.sqlite"
-}

@@ -2,6 +2,8 @@ all: install
 install:
 	pip install -q . --upgrade
 test: install clean
-	cd examples; bluepymm ./mm_conf.json	
+	cd examples/test_run; bluepymm ./mm_conf.json	
 clean:
-	rm -rf examples/emodels_dir; rm -f examples/scores.sqlite;
+	rm -rf examples/test_run/emodels_dir;
+	rm -rf examples/test_run/opt_dir;
+	rm -f examples/test_run/scores.sqlite;

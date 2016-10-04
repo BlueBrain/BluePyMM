@@ -2,7 +2,6 @@
 
 
 # pylint: disable=C0325, W0223
-
 import sys
 import os
 import json
@@ -28,7 +27,20 @@ def main():
     # Read configuration
     conf_dict = json.loads(open(conf_filename).read())
 
-    opt_dir = os.path.abspath(conf_dict['emodels_path'])
+    emodels_repo = conf_dict['emodels_repo']
+    emodels_githash = conf_dict['emodels_githash']
+    final_json_path = conf_dict['final_json_path']
+    opt_dir = os.path.abspath(conf_dict['tmp_optdir_path'])
+
+    print(
+        'Getting final emodels dict from: %s in %s hash %s' %
+        (final_json_path, emodels_repo, emodels_githash))
+    final_dict = bluepymm.get_final_dict(
+        emodels_repo,
+        emodels_githash,
+        final_json_path,
+        opt_dir)
+
     emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
     scores_db_filename = conf_dict['scores_db']
     recipe_filename = conf_dict['recipe_path']
@@ -40,10 +52,15 @@ def main():
         scores_db_filename,
         recipe_filename,
         morph_dir,
-        emodel_etype_map_filename)
+        emodel_etype_map_filename,
+        final_dict)
 
     # Calculate scores for combinations in sqlite3 db
-    bluepymm.calculate_scores(opt_dir, emodels_dir, scores_db_filename)
+    bluepymm.calculate_scores(
+        final_dict,
+        opt_dir,
+        emodels_dir,
+        scores_db_filename)
 
     print('BluePyMM finished\n')
 

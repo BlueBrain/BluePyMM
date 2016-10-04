@@ -15,8 +15,6 @@ import sh
 
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
-final_json = 'final.json'
-
 
 def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir):
     """Prepare the directories for the emodels"""
@@ -55,22 +53,6 @@ def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir):
         os.chdir(emodel)
         sh.nrnivmodl('mechanisms')
         os.chdir(old_dir)
-
-        '''
-        emodel_githash = emodel_dict['githash']
-
-        checkpoint_subdir = 'run/%s/checkpoints/run.%s/' % (
-            emodel_githash, emodel_githash)
-        src_checkpoint_dir = os.path.join(opt_dir, checkpoint_subdir)
-        dest_checkpoint_dir = os.path.join(
-            emodel_dirs[emodel],
-            checkpoint_subdir)
-
-        shutil.copytree(src_checkpoint_dir, dest_checkpoint_dir)
-        print(
-            'Copied checkpoint from %s to %s' %
-            (src_checkpoint_dir, dest_checkpoint_dir))
-        '''
 
     return emodel_dirs
 
@@ -202,10 +184,8 @@ def save_scores(scores_db_filename, uid, scores):
             [json.dumps(scores), uid])
 
 
-def calculate_scores(opt_dir, emodels_dir, scores_db_filename):
+def calculate_scores(final_dict, opt_dir, emodels_dir, scores_db_filename):
     """Calculate scores"""
-
-    final_dict = json.loads(open(os.path.join(opt_dir, final_json)).read())
 
     print('Preparing emodels at %s' % emodels_dir)
     emodel_dirs = prepare_emodel_dirs(final_dict, emodels_dir, opt_dir)
