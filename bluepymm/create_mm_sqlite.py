@@ -59,8 +59,6 @@ def add_exemplar_rows(
                 is_exemplar,
                 scores)
 
-            print new_row
-
             full_map.loc[
                 len(full_map)] = new_row
 
