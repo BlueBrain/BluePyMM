@@ -8,7 +8,7 @@ import os
 import json
 import multiprocessing
 import multiprocessing.pool
-# import ipyparallel
+import ipyparallel
 import sqlite3
 import traceback
 
@@ -145,7 +145,11 @@ def save_scores(scores_db_filename, uid, scores):
             (json.dumps(scores), uid))
 
 
-def calculate_scores(final_dict, emodel_dirs, scores_db_filename):
+def calculate_scores(
+        final_dict,
+        emodel_dirs,
+        scores_db_filename,
+        use_ipyparallel=True):
     """Calculate scores"""
 
     print('Creating argument list for parallelisation')
@@ -153,11 +157,13 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename):
 
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))
 
-    # client = ipyparallel.Client()
-    # lview = client.load_balanced_view()
-    # results = lview.imap(run_emodel_morph_isolated, arg_list, ordered=False)
-    pool = NestedPool()
-    results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
+    if use_ipyparallel:
+        client = ipyparallel.Client()
+        lview = client.load_balanced_view()
+        results = lview.imap(run_emodel_morph_isolated, arg_list, ordered=False)
+    else:
+        pool = NestedPool()
+        results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
     uids_received = 0
     for result in results:
