@@ -139,7 +139,6 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
 def save_scores(scores_db_filename, uid, scores):
     """Save scores in db"""
 
-    print uid, scores
     with sqlite3.connect(scores_db_filename) as scores_db:
         scores_db.execute(
             'UPDATE scores SET scores=? WHERE `index`=?',
