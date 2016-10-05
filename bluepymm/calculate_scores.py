@@ -11,50 +11,8 @@ import multiprocessing.pool
 # import ipyparallel
 import sqlite3
 import traceback
-import sh
 
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
-
-
-def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir):
-    """Prepare the directories for the emodels"""
-
-    if not os.path.exists(emodels_dir):
-        os.makedirs(emodels_dir)
-
-    emodel_dirs = {}
-
-    for legacy_emodel, emodel_dict in final_dict.iteritems():
-
-        if '_legacy' in legacy_emodel:
-            emodel = legacy_emodel[:-7]
-        else:
-            raise Exception('Found model in emodel dict thats not legacy, '
-                            'this is not supported: %s' % legacy_emodel)
-
-        print('Preparing: %s' % emodel)
-        emodel_dirs[emodel] = os.path.join(emodels_dir, emodel)
-
-        tar_filename = os.path.join(emodels_dir, '%s.tar' % emodel)
-
-        old_dir = os.getcwd()
-        os.chdir(opt_dir)
-        sh.git(
-            'archive',
-            '--format=tar',
-            '--prefix=%s/' % emodel,
-            emodel_dict['branch'],
-            _out=tar_filename)
-        os.chdir(old_dir)
-
-        old_dir = os.getcwd()
-        os.chdir(emodels_dir)
-        sh.tar('xf', tar_filename)
-        os.chdir(emodel)
-        sh.nrnivmodl('mechanisms')
-        os.chdir(old_dir)
-
-    return emodel_dirs
 
 
 def run_emodel_morph_isolated(
@@ -164,7 +122,10 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                         'scores db row %s for morph %s doesnt '
                         'have an emodel assigned to it' %
                         (index, morph_name))
-                legacy_emodel = '%s_legacy' % emodel
+                if '_legacy' in emodel:
+                    legacy_emodel = emodel
+                else:
+                    legacy_emodel = '%s_legacy' % emodel
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[legacy_emodel]['params'],
@@ -178,17 +139,15 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
 def save_scores(scores_db_filename, uid, scores):
     """Save scores in db"""
 
+    print uid, scores
     with sqlite3.connect(scores_db_filename) as scores_db:
         scores_db.execute(
-            'UPDATE scores SET scores=? WHERE id=?',
-            [json.dumps(scores), uid])
+            'UPDATE scores SET scores=? WHERE `index`=?',
+            (json.dumps(scores), uid))
 
 
-def calculate_scores(final_dict, opt_dir, emodels_dir, scores_db_filename):
+def calculate_scores(final_dict, emodel_dirs, scores_db_filename):
     """Calculate scores"""
-
-    print('Preparing emodels at %s' % emodels_dir)
-    emodel_dirs = prepare_emodel_dirs(final_dict, emodels_dir, opt_dir)
 
     print('Creating argument list for parallelisation')
     arg_list = create_arg_list(scores_db_filename, emodel_dirs, final_dict)

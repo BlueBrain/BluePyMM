@@ -10,11 +10,17 @@ import bluepymm
 def add_exemplar_rows(
         full_map,
         final_dict,
-        morph_mtype_etype_map,
-        emodel_etype_map):
+        fullmtype_morph_map,
+        emodel_etype_map,
+        emodel_dirs):
     """Create exemplar rows"""
 
-    for legacy_emodel, legacy_emodel_dict in final_dict.iteritems():
+    emodels = emodel_etype_map['emodel'].unique()
+
+    for emodel in emodels:
+        legacy_emodel = '%s_legacy' % emodel
+
+        legacy_emodel_dict = final_dict[legacy_emodel]
 
         if '_legacy' in legacy_emodel:
             emodel = legacy_emodel[:-7]
@@ -22,32 +28,41 @@ def add_exemplar_rows(
             raise Exception('Found model in emodel dict thats not legacy, '
                             'this is not supported: %s' % legacy_emodel)
 
+        layer = None
         morph_name = os.path.basename(legacy_emodel_dict['morph_path'])[:-4]
-        etype = legacy_emodel_dict['etype']
-        print etype
-        morph_dir = None  # os.path.dirname(legacy_emodel_dict['morph_path'])
-        #full_map_row = full_map.loc[
-        #    (full_map['morph_name'] == morph_name) & (
-        #        full_map['etype'] == etype)]
-        full_map_row = full_map.loc[
-            (full_map['morph_name'] == morph_name)]
 
-        print morph_name
-        print full_map_row
+        _, fullmtype, mtype, msubtype, _ = fullmtype_morph_map[
+            fullmtype_morph_map['morph_name'] == morph_name].values[0]
 
-        layer, fullmtype, mtype, msubtype, etype, _, _, _, _ = full_map_row
-        print etype
-        full_map.loc[
-            len(full_map)] = (
-            layer,
-            fullmtype,
-            mtype,
-            msubtype,
-            etype,
-            morph_name,
-            emodel,
-            morph_dir,
-            None)
+        morph_dir = None
+        scores = None
+
+        _, etype, _ = emodel_etype_map[
+            emodel_etype_map['emodel'] == emodel].values[0]
+
+        morph_dir = os.path.dirname(os.path.abspath(
+            os.path.join(
+                emodel_dirs[emodel],
+                legacy_emodel_dict['morph_path'])))
+        is_exemplar = True
+
+        for stored_emodel in [emodel, legacy_emodel]:
+            new_row = (
+                layer,
+                fullmtype,
+                mtype,
+                msubtype,
+                etype,
+                morph_name,
+                stored_emodel,
+                morph_dir,
+                is_exemplar,
+                scores)
+
+            print new_row
+
+            full_map.loc[
+                len(full_map)] = new_row
 
 
 def create_mm_sqlite(
@@ -55,7 +70,8 @@ def create_mm_sqlite(
         recipe_filename,
         morph_dir,
         emodel_etype_map_filename,
-        final_dict):
+        final_dict,
+        emodel_dirs):
 
     neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
 
@@ -72,7 +88,9 @@ def create_mm_sqlite(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
 
     # Contains emodel, etype
-    print('Reading emodel etype map at %s' % emodel_etype_map_filename)
+    print(
+        'Reading emodel etype map at %s' %
+        os.path.abspath(emodel_etype_map_filename))
     emodel_etype_map = bluepymm.read_emodel_etype_map(
         emodel_etype_map_filename)
 
@@ -82,14 +100,16 @@ def create_mm_sqlite(
 
     full_map = morph_fullmtype_emodel_map.copy()
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
+    full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'scores', None)
 
     print('Adding exemplar rows')
     add_exemplar_rows(
         full_map,
         final_dict,
-        morph_fullmtype_etype_map,
-        emodel_etype_map)
+        fullmtype_morph_map,
+        emodel_etype_map,
+        emodel_dirs)
 
     import sqlite3
 

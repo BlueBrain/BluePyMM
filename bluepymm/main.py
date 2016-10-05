@@ -30,16 +30,16 @@ def main():
     emodels_repo = conf_dict['emodels_repo']
     emodels_githash = conf_dict['emodels_githash']
     final_json_path = conf_dict['final_json_path']
-    opt_dir = os.path.abspath(conf_dict['tmp_optdir_path'])
+    tmp_opt_repo = os.path.abspath(conf_dict['tmp_opt_repo_path'])
 
     print(
         'Getting final emodels dict from: %s in %s hash %s' %
         (final_json_path, emodels_repo, emodels_githash))
-    final_dict = bluepymm.get_final_dict(
+    final_dict, opt_dir = bluepymm.get_final_dict(
         emodels_repo,
         emodels_githash,
         final_json_path,
-        opt_dir)
+        tmp_opt_repo)
 
     emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
     scores_db_filename = conf_dict['scores_db']
@@ -47,19 +47,22 @@ def main():
     morph_dir = conf_dict['morph_path']
     emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
 
+    print('Preparing emodels at %s' % emodels_dir)
+    emodel_dirs = bluepymm.prepare_emodel_dirs(final_dict, emodels_dir, opt_dir)
+
     # Create a sqlite3 db with all the combos
     bluepymm.create_mm_sqlite(
         scores_db_filename,
         recipe_filename,
         morph_dir,
         emodel_etype_map_filename,
-        final_dict)
+        final_dict,
+        emodel_dirs)
 
     # Calculate scores for combinations in sqlite3 db
     bluepymm.calculate_scores(
         final_dict,
-        opt_dir,
-        emodels_dir,
+        emodel_dirs,
         scores_db_filename)
 
     print('BluePyMM finished\n')

@@ -11,19 +11,28 @@ import sh
 import xml.etree.ElementTree
 
 
-def get_final_dict(emodels_repo, emodels_githash, final_json_path, opt_dir):
+def get_final_dict(
+        emodels_repo,
+        emodels_githash,
+        final_json_path,
+        tmp_opt_repo):
     """Get dictionary with final emodels"""
 
-    sh.git('clone', '%s' % emodels_repo, opt_dir)
+    sh.git('clone', '%s' % emodels_repo, tmp_opt_repo)
 
     old_dir = os.getcwd()
-    os.chdir(opt_dir)
+    os.chdir(tmp_opt_repo)
     sh.git('checkout', '%s' % emodels_githash)
     os.chdir(old_dir)
 
-    final_dict = json.loads(open(os.path.join(opt_dir, final_json_path)).read())
+    final_dict = json.loads(
+        open(
+            os.path.join(
+                tmp_opt_repo,
+                final_json_path)).read())
 
-    return final_dict
+    opt_dir = os.path.dirname(os.path.join(tmp_opt_repo, final_json_path))
+    return final_dict, opt_dir
 
 
 def _parse_recipe(recipe_filename):
