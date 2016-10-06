@@ -45,6 +45,8 @@ def add_exemplar_rows(
                 emodel_dirs[emodel],
                 legacy_emodel_dict['morph_path'])))
         is_exemplar = True
+        to_run = True
+        exception = None
 
         for stored_emodel in [emodel, legacy_emodel]:
             new_row = (
@@ -57,7 +59,9 @@ def add_exemplar_rows(
                 stored_emodel,
                 morph_dir,
                 is_exemplar,
-                scores)
+                scores,
+                exception,
+                to_run)
 
             full_map.loc[
                 len(full_map)] = new_row
@@ -77,9 +81,13 @@ def create_mm_sqlite(
     print('Reading recipe at %s' % recipe_filename)
     fullmtype_etype_map = bluepymm.read_mm_recipe(recipe_filename)
 
+    print fullmtype_etype_map
+
     # Contains layer, fullmtype, mtype, submtype, morph_name
     print('Reading neuronDB at %s' % neurondb_filename)
     fullmtype_morph_map = bluepymm.read_mtype_morph_map(neurondb_filename)
+
+    print fullmtype_morph_map
 
     # Contains layer, mtype, etype, morph_name
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
@@ -100,6 +108,8 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'scores', None)
+    full_map.insert(len(full_map.columns), 'exception', None)
+    full_map.insert(len(full_map.columns), 'to_run', True)
 
     print('Adding exemplar rows')
     add_exemplar_rows(

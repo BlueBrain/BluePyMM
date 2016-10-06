@@ -2,11 +2,11 @@
 
 
 # pylint: disable=C0325, W0223
-import sys
 import os
 import json
 
 import bluepymm
+import argparse
 
 
 def main():
@@ -16,16 +16,16 @@ def main():
     print('# Starting BluePyMM #')
     print('#####################\n')
 
-    # Parse arguments
-    if len(sys.argv) != 2:
-        raise Exception(
-            "Run bluepymm with an argument pointing to the mm conf file")
-    conf_filename = os.path.abspath(sys.argv[1])
+    parser = argparse.ArgumentParser(description='Blue Brain Model Management')
+    parser.add_argument('conf_filename')
+    parser.add_argument('--continu', action='store_true')
 
-    print('Reading configuration at %s' % conf_filename)
+    args = parser.parse_args()
+
+    print('Reading configuration at %s' % args.conf_filename)
 
     # Read configuration
-    conf_dict = json.loads(open(conf_filename).read())
+    conf_dict = json.loads(open(args.conf_filename).read())
 
     emodels_repo = conf_dict['emodels_repo']
     emodels_githash = conf_dict['emodels_githash']
@@ -39,7 +39,8 @@ def main():
         emodels_repo,
         emodels_githash,
         final_json_path,
-        tmp_opt_repo)
+        tmp_opt_repo,
+        continu=args.continu)
 
     emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
     scores_db_filename = conf_dict['scores_db']
@@ -48,22 +49,27 @@ def main():
     emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
 
     print('Preparing emodels at %s' % emodels_dir)
-    emodel_dirs = bluepymm.prepare_emodel_dirs(final_dict, emodels_dir, opt_dir)
-
-    # Create a sqlite3 db with all the combos
-    bluepymm.create_mm_sqlite(
-        scores_db_filename,
-        recipe_filename,
-        morph_dir,
-        emodel_etype_map_filename,
+    emodel_dirs = bluepymm.prepare_emodel_dirs(
         final_dict,
-        emodel_dirs)
+        emodels_dir,
+        opt_dir,
+        continu=args.continu)
 
-    # Calculate scores for combinations in sqlite3 db
-    bluepymm.calculate_scores(
-        final_dict,
-        emodel_dirs,
-        scores_db_filename)
+    if not args.continu:
+        # Create a sqlite3 db with all the combos
+        bluepymm.create_mm_sqlite(
+            scores_db_filename,
+            recipe_filename,
+            morph_dir,
+            emodel_etype_map_filename,
+            final_dict,
+            emodel_dirs)
+    else:
+        # Calculate scores for combinations in sqlite3 db
+        bluepymm.calculate_scores(
+            final_dict,
+            emodel_dirs,
+            scores_db_filename)
 
     print('BluePyMM finished\n')
 

@@ -15,15 +15,17 @@ def get_final_dict(
         emodels_repo,
         emodels_githash,
         final_json_path,
-        tmp_opt_repo):
+        tmp_opt_repo,
+        continu=False):
     """Get dictionary with final emodels"""
 
-    sh.git('clone', '%s' % emodels_repo, tmp_opt_repo)
+    if not continu:
+        sh.git('clone', '%s' % emodels_repo, tmp_opt_repo)
 
-    old_dir = os.getcwd()
-    os.chdir(tmp_opt_repo)
-    sh.git('checkout', '%s' % emodels_githash)
-    os.chdir(old_dir)
+        old_dir = os.getcwd()
+        os.chdir(tmp_opt_repo)
+        sh.git('checkout', '%s' % emodels_githash)
+        os.chdir(old_dir)
 
     final_dict = json.loads(
         open(

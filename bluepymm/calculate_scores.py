@@ -25,15 +25,22 @@ def run_emodel_morph_isolated(
 
     return_dict = {}
     return_dict['uid'] = uid
+    return_dict['exception'] = None
 
     pool = NestedPool(1, maxtasksperchild=1)
 
-    return_dict['scores'] = pool.apply(
-        run_emodel_morph,
-        (emodel,
-         emodel_dir,
-         emodel_params,
-         morph_path))
+    try:
+        return_dict['scores'] = pool.apply(
+            run_emodel_morph,
+            (emodel,
+             emodel_dir,
+             emodel_params,
+             morph_path))
+    except:
+        return_dict['scores'] = None
+        return_dict['exception'] = "".join(
+            traceback.format_exception(
+                *sys.exc_info()))
 
     pool.terminate()
     pool.join()
@@ -113,11 +120,9 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 os.path.join(
                     row['morph_dir'],
                     morph_filename))
-            if row['scores'] is None:
+            if row['to_run']:
                 emodel = row['emodel']
                 if emodel is None:
-                    continue
-                    # TODO Reenable this exception !
                     raise Exception(
                         'scores db row %s for morph %s doesnt '
                         'have an emodel assigned to it' %
@@ -133,16 +138,18 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
 
                 arg_list.append(args)
 
+        print('Found %d rows in score database to run' % len(arg_list))
+
     return arg_list
 
 
-def save_scores(scores_db_filename, uid, scores):
+def save_scores(scores_db_filename, uid, scores, exception):
     """Save scores in db"""
 
     with sqlite3.connect(scores_db_filename) as scores_db:
         scores_db.execute(
-            'UPDATE scores SET scores=? WHERE `index`=?',
-            (json.dumps(scores), uid))
+            'UPDATE scores SET scores=?, exception=?, to_run=? WHERE `index`=?',
+            (json.dumps(scores), exception, False, uid))
 
 
 def calculate_scores(
@@ -169,10 +176,11 @@ def calculate_scores(
     for result in results:
         uid = result['uid']
         scores = result['scores']
+        exception = result['exception']
         uids_received += 1
 
         print(
             'Saving scores for uid %s (%d out of %d)' %
             (uid, uids_received, len(arg_list)))
 
-        save_scores(scores_db_filename, uid, scores)
+        save_scores(scores_db_filename, uid, scores, exception)
