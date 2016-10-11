@@ -19,6 +19,8 @@ def main():
     parser = argparse.ArgumentParser(description='Blue Brain Model Management')
     parser.add_argument('conf_filename')
     parser.add_argument('--continu', action='store_true')
+    parser.add_argument('--ipyp', action='store_true')
+    parser.add_argument('--ipyp_profile')
 
     args = parser.parse_args()
 
@@ -30,7 +32,10 @@ def main():
     emodels_repo = conf_dict['emodels_repo']
     emodels_githash = conf_dict['emodels_githash']
     final_json_path = conf_dict['final_json_path']
-    tmp_opt_repo = os.path.abspath(conf_dict['tmp_opt_repo_path'])
+    tmp_dir = conf_dict['tmp_dir']
+
+    opt_repo_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels_repo'))
+    emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
 
     print(
         'Getting final emodels dict from: %s in %s hash %s' %
@@ -39,11 +44,12 @@ def main():
         emodels_repo,
         emodels_githash,
         final_json_path,
-        tmp_opt_repo,
+        opt_repo_dir,
         continu=args.continu)
 
-    emodels_dir = os.path.abspath(conf_dict['tmp_emodels_path'])
-    scores_db_filename = conf_dict['scores_db']
+    print opt_dir
+
+    scores_db_path = os.path.abspath(conf_dict['scores_db'])
     recipe_filename = conf_dict['recipe_path']
     morph_dir = conf_dict['morph_path']
     emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
@@ -55,21 +61,25 @@ def main():
         opt_dir,
         continu=args.continu)
 
+    print('Creating sqlite db at %s' % scores_db_path)
     if not args.continu:
         # Create a sqlite3 db with all the combos
         bluepymm.create_mm_sqlite(
-            scores_db_filename,
+            scores_db_path,
             recipe_filename,
             morph_dir,
             emodel_etype_map_filename,
             final_dict,
             emodel_dirs)
-    else:
-        # Calculate scores for combinations in sqlite3 db
-        bluepymm.calculate_scores(
-            final_dict,
-            emodel_dirs,
-            scores_db_filename)
+
+    print('Calculating scores')
+    # Calculate scores for combinations in sqlite3 db
+    bluepymm.calculate_scores(
+        final_dict,
+        emodel_dirs,
+        scores_db_path,
+        use_ipyp=args.ipyp,
+        ipyp_profile=args.ipyp_profile)
 
     print('BluePyMM finished\n')
 

@@ -120,7 +120,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 os.path.join(
                     row['morph_dir'],
                     morph_filename))
-            if row['to_run']:
+            if row['to_run'] == 1:
                 emodel = row['emodel']
                 if emodel is None:
                     raise Exception(
@@ -156,7 +156,8 @@ def calculate_scores(
         final_dict,
         emodel_dirs,
         scores_db_filename,
-        use_ipyparallel=True):
+        use_ipyp=None,
+        ipyp_profile=None):
     """Calculate scores"""
 
     print('Creating argument list for parallelisation')
@@ -164,8 +165,8 @@ def calculate_scores(
 
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))
 
-    if use_ipyparallel:
-        client = ipyparallel.Client()
+    if use_ipyp:
+        client = ipyparallel.Client(profile=ipyp_profile)
         lview = client.load_balanced_view()
         results = lview.imap(run_emodel_morph_isolated, arg_list, ordered=False)
     else:

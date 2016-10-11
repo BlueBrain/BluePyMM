@@ -33,7 +33,11 @@ def prepare_emodel_dir(
     emodel_dirs['%s_legacy' % emodel] = emodel_dir
 
     if not continu:
-        tar_filename = os.path.join(emodels_dir, '%s.tar' % emodel)
+        tar_filename = os.path.abspath(
+            os.path.join(
+                emodels_dir,
+                '%s.tar' %
+                emodel))
 
         old_dir = os.getcwd()
         os.chdir(opt_dir)
@@ -43,9 +47,7 @@ def prepare_emodel_dir(
             '--prefix=%s/' % emodel,
             'origin/%s' % emodel_dict['branch'],
             _out=tar_filename)
-        os.chdir(old_dir)
 
-        old_dir = os.getcwd()
         os.chdir(emodels_dir)
         sh.tar('xf', tar_filename)
         os.chdir(emodel)

@@ -20,6 +20,7 @@ def get_final_dict(
     """Get dictionary with final emodels"""
 
     if not continu:
+        print('Cloning emodels repo in %s' % tmp_opt_repo)
         sh.git('clone', '%s' % emodels_repo, tmp_opt_repo)
 
         old_dir = os.getcwd()
@@ -111,9 +112,19 @@ def read_mtype_morph_map(neurondb_xml_filename):
 
     xml_tree = _parse_recipe(neurondb_xml_filename)
 
-    return pandas.DataFrame(
+    mtype_morph_map = pandas.DataFrame(
         extract_morphinfo_from_xml(xml_tree.getroot()), columns=[
             'morph_name', 'fullmtype', 'mtype', 'submtype', 'layer'])
+
+    # TODO Remove this !
+    mtype_morph_map = mtype_morph_map.drop(
+        mtype_morph_map[(mtype_morph_map['layer'] == 2) &
+                        (mtype_morph_map['submtype'] == 'L3')].index)
+    mtype_morph_map = mtype_morph_map.drop(
+        mtype_morph_map[(mtype_morph_map['layer'] == 3) &
+                        (mtype_morph_map['submtype'] == 'L2')].index)
+
+    return mtype_morph_map
 
 
 def extract_emodel_etype_json(json_filename):

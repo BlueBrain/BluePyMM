@@ -7,13 +7,15 @@ import os
 import bluepymm
 
 
-def add_exemplar_rows(
+def create_exemplar_rows(
         full_map,
         final_dict,
         fullmtype_morph_map,
         emodel_etype_map,
         emodel_dirs):
     """Create exemplar rows"""
+
+    exemplar_rows = []
 
     emodels = emodel_etype_map['emodel'].unique()
 
@@ -49,22 +51,24 @@ def add_exemplar_rows(
         exception = None
 
         for stored_emodel in [emodel, legacy_emodel]:
-            new_row = (
-                layer,
-                fullmtype,
-                mtype,
-                msubtype,
-                etype,
-                morph_name,
-                stored_emodel,
-                morph_dir,
-                is_exemplar,
-                scores,
-                exception,
-                to_run)
+            new_row_dict = {
+                'layer': layer,
+                'fullmtype': fullmtype,
+                'mtype': mtype,
+                'msubtype': msubtype,
+                'etype': etype,
+                'morph_name': morph_name,
+                'emodel': stored_emodel,
+                'morph_dir': morph_dir,
+                'is_exemplar': is_exemplar,
+                'scores': scores,
+                'exception': exception,
+                'to_run': to_run}
 
-            full_map.loc[
-                len(full_map)] = new_row
+            exemplar_rows.append(
+                new_row_dict)
+
+    return exemplar_rows
 
 
 def create_mm_sqlite(
@@ -81,13 +85,9 @@ def create_mm_sqlite(
     print('Reading recipe at %s' % recipe_filename)
     fullmtype_etype_map = bluepymm.read_mm_recipe(recipe_filename)
 
-    print fullmtype_etype_map
-
     # Contains layer, fullmtype, mtype, submtype, morph_name
     print('Reading neuronDB at %s' % neurondb_filename)
     fullmtype_morph_map = bluepymm.read_mtype_morph_map(neurondb_filename)
-
-    print fullmtype_morph_map
 
     # Contains layer, mtype, etype, morph_name
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
@@ -112,12 +112,14 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'to_run', True)
 
     print('Adding exemplar rows')
-    add_exemplar_rows(
+    exemplar_rows = create_exemplar_rows(
         full_map,
         final_dict,
         fullmtype_morph_map,
         emodel_etype_map,
         emodel_dirs)
+
+    full_map = full_map.append(exemplar_rows, ignore_index=True)
 
     import sqlite3
 

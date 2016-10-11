@@ -5,7 +5,6 @@
     "emodels_repo": "ssh://bbpcode.epfl.ch/project/proj38/singlecell-optimization",
     "emodels_githash": "2ca537c0d196ffa014e9b8273ea95405b94c8e67",
     "final_json_path": "RatSSCx/final.json",
-    "tmp_opt_repo_path": "./opt_dir",
-    "tmp_emodels_path": "./emodels_dir",
+    "tmp_dir": "./tmp",
     "scores_db": "./scores.sqlite"
 }
