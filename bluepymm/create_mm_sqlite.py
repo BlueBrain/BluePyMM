@@ -21,6 +21,7 @@ def create_exemplar_rows(
     emodels = emodel_etype_map['emodel'].unique()
 
     for emodel in emodels:
+        print('Adding exemplar row for emodel %s' % emodel)
         legacy_emodel = '%s_legacy' % emodel
 
         legacy_emodel_dict = final_dict[legacy_emodel]
@@ -34,8 +35,16 @@ def create_exemplar_rows(
         layer = None
         morph_name = os.path.basename(legacy_emodel_dict['morph_path'])[:-4]
 
+        # TODO reenable the lines below once we're sure all the emodels have
+        # a morphology that ends up in the final morpho release.
+        '''
         _, fullmtype, mtype, msubtype, _ = fullmtype_morph_map[
             fullmtype_morph_map['morph_name'] == morph_name].values[0]
+        '''
+
+        fullmtype = None
+        mtype = None
+        msubtype = None
 
         scores = None
 
@@ -51,16 +60,21 @@ def create_exemplar_rows(
             unrep_morph_dir,
             '%s.asc' %
             morph_name)
-        rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
+        # rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
 
         if not os.path.isfile(unrep_morph_filename):
             raise Exception(
                 'Unrepaired morphology %s doesnt exist in %s' %
                 (morph_name, unrep_morph_dir))
+
+        # Disable this once we're sure all the emodel morpho's are in the final
+        # release !
+        '''
         if not os.path.isfile(rep_morph_filename):
             raise Exception(
                 'Repaired morphology %s doesnt exist in %s' %
                 (morph_name, rep_morph_dir))
+        '''
 
         is_exemplar = True
         to_run = True
@@ -128,6 +142,7 @@ def create_mm_sqlite(
     full_map = morph_fullmtype_emodel_map.copy()
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
+    full_map.insert(len(full_map.columns), 'repaired', True)
     full_map.insert(len(full_map.columns), 'scores', None)
     full_map.insert(len(full_map.columns), 'exception', None)
     full_map.insert(len(full_map.columns), 'to_run', True)
