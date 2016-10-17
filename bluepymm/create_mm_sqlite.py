@@ -12,7 +12,8 @@ def create_exemplar_rows(
         final_dict,
         fullmtype_morph_map,
         emodel_etype_map,
-        emodel_dirs):
+        emodel_dirs,
+        rep_morph_dir):
     """Create exemplar rows"""
 
     exemplar_rows = []
@@ -36,21 +37,40 @@ def create_exemplar_rows(
         _, fullmtype, mtype, msubtype, _ = fullmtype_morph_map[
             fullmtype_morph_map['morph_name'] == morph_name].values[0]
 
-        morph_dir = None
         scores = None
 
         _, etype, _ = emodel_etype_map[
             emodel_etype_map['emodel'] == emodel].values[0]
 
-        morph_dir = os.path.dirname(os.path.abspath(
+        unrep_morph_dir = os.path.dirname(os.path.abspath(
             os.path.join(
                 emodel_dirs[emodel],
                 legacy_emodel_dict['morph_path'])))
+
+        unrep_morph_filename = os.path.join(
+            unrep_morph_dir,
+            '%.asc' %
+            morph_name)
+        rep_morph_filename = os.path.join(rep_morph_dir, '%.asc' % morph_name)
+
+        if not os.path.isfile(unrep_morph_filename):
+            raise Exception(
+                'Unrepaired morphology %s doesnt exist in %s' %
+                (morph_name, unrep_morph_dir))
+        if not os.path.isfile(rep_morph_filename):
+            raise Exception(
+                'Repaired morphology %s doesnt exist in %s' %
+                (morph_name, rep_morph_dir))
+
         is_exemplar = True
         to_run = True
         exception = None
 
-        for stored_emodel in [emodel, legacy_emodel]:
+        for (stored_emodel, repaired) in [
+                (emodel, True),
+                (legacy_emodel, True),
+                (emodel, False),
+                (legacy_emodel, False)]:
             new_row_dict = {
                 'layer': layer,
                 'fullmtype': fullmtype,
@@ -59,11 +79,12 @@ def create_exemplar_rows(
                 'etype': etype,
                 'morph_name': morph_name,
                 'emodel': stored_emodel,
-                'morph_dir': morph_dir,
+                'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
                 'is_exemplar': is_exemplar,
                 'scores': scores,
                 'exception': exception,
-                'to_run': to_run}
+                'to_run': to_run,
+                'repaired': repaired}
 
             exemplar_rows.append(
                 new_row_dict)
@@ -117,7 +138,8 @@ def create_mm_sqlite(
         final_dict,
         fullmtype_morph_map,
         emodel_etype_map,
-        emodel_dirs)
+        emodel_dirs,
+        morph_dir)
 
     full_map = full_map.append(exemplar_rows, ignore_index=True)
 
