@@ -117,12 +117,14 @@ def read_mtype_morph_map(neurondb_xml_filename):
             'morph_name', 'fullmtype', 'mtype', 'submtype', 'layer'])
 
     # TODO Remove this !
+    '''
     mtype_morph_map = mtype_morph_map.drop(
         mtype_morph_map[(mtype_morph_map['layer'] == 2) &
                         (mtype_morph_map['submtype'] == 'L3')].index)
     mtype_morph_map = mtype_morph_map.drop(
         mtype_morph_map[(mtype_morph_map['layer'] == 3) &
                         (mtype_morph_map['submtype'] == 'L2')].index)
+    '''
 
     return mtype_morph_map
 
