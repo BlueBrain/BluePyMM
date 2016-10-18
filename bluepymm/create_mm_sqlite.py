@@ -5,6 +5,7 @@
 import os
 
 import bluepymm
+import pandas
 
 
 def create_exemplar_rows(
@@ -60,7 +61,7 @@ def create_exemplar_rows(
             unrep_morph_dir,
             '%s.asc' %
             morph_name)
-        # rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
+        rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
 
         if not os.path.isfile(unrep_morph_filename):
             raise Exception(
@@ -69,13 +70,15 @@ def create_exemplar_rows(
 
         # Disable this once we're sure all the emodel morpho's are in the final
         # release !
-        '''
         if not os.path.isfile(rep_morph_filename):
+            print(
+                """### WARNING ### Repaired morphology %s doesnt exist in %s !""" %
+                (morph_name, rep_morph_dir))
+            '''
             raise Exception(
                 'Repaired morphology %s doesnt exist in %s' %
                 (morph_name, rep_morph_dir))
-        '''
-
+            '''
         is_exemplar = True
         to_run = True
         exception = None
@@ -156,7 +159,10 @@ def create_mm_sqlite(
         emodel_dirs,
         morph_dir)
 
-    full_map = full_map.append(exemplar_rows, ignore_index=True)
+    # Prepend exemplar rows to full_map
+    full_map = pandas.concat(
+        [pandas.DataFrame(exemplar_rows), full_map], ignore_index=True)
+    # full_map.append(exemplar_rows, ignore_index=True)
 
     import sqlite3
 
