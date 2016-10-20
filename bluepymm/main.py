@@ -32,6 +32,7 @@ def main():
     emodels_repo = conf_dict['emodels_repo']
     emodels_githash = conf_dict['emodels_githash']
     final_json_path = conf_dict['final_json_path']
+    emodel_etype_map_path = conf_dict['emodel_etype_map_path']
     tmp_dir = conf_dict['tmp_dir']
 
     opt_repo_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels_repo'))
@@ -40,24 +41,23 @@ def main():
     print(
         'Getting final emodels dict from: %s in %s hash %s' %
         (final_json_path, emodels_repo, emodels_githash))
-    final_dict, opt_dir = bluepymm.get_final_dict(
+    final_dict, emodel_etype_map, opt_dir = bluepymm.get_emodel_dicts(
         emodels_repo,
         emodels_githash,
         final_json_path,
+        emodel_etype_map_path,
         opt_repo_dir,
         continu=args.continu)
-
-    print opt_dir
 
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
     recipe_filename = conf_dict['recipe_path']
     morph_dir = conf_dict['morph_path']
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
-    emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
 
     print('Preparing emodels at %s' % emodels_dir)
     emodel_dirs = bluepymm.prepare_emodel_dirs(
         final_dict,
+        emodel_etype_map,
         emodels_dir,
         opt_dir,
         emodels_hoc_dir,
@@ -70,7 +70,7 @@ def main():
             scores_db_path,
             recipe_filename,
             morph_dir,
-            emodel_etype_map_filename,
+            emodel_etype_map,
             final_dict,
             emodel_dirs)
 

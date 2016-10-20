@@ -13,7 +13,8 @@ json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
 
 def prepare_emodel_dir(
-    (legacy_emodel,
+    (original_emodel,
+     emodel,
      emodel_dict,
      emodels_dir,
      opt_dir,
@@ -23,16 +24,10 @@ def prepare_emodel_dir(
 
     emodel_dirs = {}
 
-    if '_legacy' in legacy_emodel:
-        emodel = legacy_emodel[:-7]
-    else:
-        raise Exception('Found model in emodel dict thats not legacy, '
-                        'this is not supported: %s' % legacy_emodel)
-
     print('Preparing: %s' % emodel)
     emodel_dir = os.path.join(emodels_dir, emodel)
     emodel_dirs[emodel] = emodel_dir
-    emodel_dirs['%s_legacy' % emodel] = emodel_dir
+    emodel_dirs[original_emodel] = emodel_dir
 
     if not continu:
         tar_filename = os.path.abspath(
@@ -71,6 +66,7 @@ def prepare_emodel_dir(
 
 def prepare_emodel_dirs(
         final_dict,
+        emodel_etype_map,
         emodels_dir,
         opt_dir,
         emodels_hoc_dir,
@@ -83,9 +79,12 @@ def prepare_emodel_dirs(
     emodel_dirs = {}
 
     arg_list = []
-    for legacy_emodel, emodel_dict in final_dict.iteritems():
+    for original_emodel in emodel_etype_map:
+        emodel = emodel_etype_map[original_emodel]['mm_recipe']
+        emodel_dict = final_dict[original_emodel]
         arg_list.append(
-            (legacy_emodel,
+            (original_emodel,
+             emodel,
              emodel_dict,
              emodels_dir,
              opt_dir,

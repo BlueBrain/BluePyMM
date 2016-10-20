@@ -11,10 +11,11 @@ import sh
 import xml.etree.ElementTree
 
 
-def get_final_dict(
+def get_emodel_dicts(
         emodels_repo,
         emodels_githash,
         final_json_path,
+        emodel_etype_map_path,
         tmp_opt_repo,
         continu=False):
     """Get dictionary with final emodels"""
@@ -34,8 +35,14 @@ def get_final_dict(
                 tmp_opt_repo,
                 final_json_path)).read())
 
+    emodel_etype_map = json.loads(
+        open(
+            os.path.join(
+                tmp_opt_repo,
+                emodel_etype_map_path)).read())
+
     opt_dir = os.path.dirname(os.path.join(tmp_opt_repo, final_json_path))
-    return final_dict, opt_dir
+    return final_dict, emodel_etype_map, opt_dir
 
 
 def _parse_recipe(recipe_filename):
@@ -142,11 +149,14 @@ def extract_emodel_etype_json(json_filename):
                 yield (emodel, etype, layer)
 
 
-def read_emodel_etype_map(json_filename):
+def convert_emodel_etype_map(emodel_etype_map):
 
-    return pandas.DataFrame(
-        extract_emodel_etype_json(json_filename),
-        columns=[
-            'emodel',
-            'etype',
-            'layer'])
+    return_df = pandas.DataFrame()
+    for original_emodel in emodel_etype_map:
+        emodel = emodel_etype_map[original_emodel]['mm_recipe']
+        layers = emodel_etype_map[original_emodel]['layer']
+        etype = emodel_etype_map[original_emodel]['etype']
+        for layer in layers:
+            return_df.append({'emodel': emodel, 'layer': layer, 'etype': etype})
+
+    return return_df
