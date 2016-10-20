@@ -6,6 +6,7 @@ import os
 
 import bluepymm
 import pandas
+import sqlite3
 
 
 def create_exemplar_rows(
@@ -88,7 +89,7 @@ def create_exemplar_rows(
             exemplar_rows.append(
                 new_row_dict)
 
-    return exemplar_rows
+    return pandas.DataFrame(exemplar_rows)
 
 
 def create_mm_sqlite(
@@ -157,15 +158,9 @@ def create_mm_sqlite(
         emodel_dirs,
         morph_dir)
 
-    if exemplar_rows.isnull().sum().sum() > 0:
-        raise Exception(
-            'There are None values in the exemplar rows !')
-
     # Prepend exemplar rows to full_map
     full_map = pandas.concat(
-        [pandas.DataFrame(exemplar_rows), full_map], ignore_index=True)
-
-    import sqlite3
+        [exemplar_rows, full_map], ignore_index=True)
 
     with sqlite3.connect(output_filename) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
