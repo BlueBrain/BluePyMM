@@ -123,16 +123,6 @@ def read_mtype_morph_map(neurondb_xml_filename):
         extract_morphinfo_from_xml(xml_tree.getroot()), columns=[
             'morph_name', 'fullmtype', 'mtype', 'submtype', 'layer'])
 
-    # TODO Remove this !
-    '''
-    mtype_morph_map = mtype_morph_map.drop(
-        mtype_morph_map[(mtype_morph_map['layer'] == 2) &
-                        (mtype_morph_map['submtype'] == 'L3')].index)
-    mtype_morph_map = mtype_morph_map.drop(
-        mtype_morph_map[(mtype_morph_map['layer'] == 3) &
-                        (mtype_morph_map['submtype'] == 'L2')].index)
-    '''
-
     return mtype_morph_map
 
 
@@ -157,6 +147,8 @@ def convert_emodel_etype_map(emodel_etype_map):
         layers = emodel_etype_map[original_emodel]['layer']
         etype = emodel_etype_map[original_emodel]['etype']
         for layer in layers:
-            return_df.append({'emodel': emodel, 'layer': layer, 'etype': etype})
+            return_df = return_df.append(
+                {'emodel': emodel, 'layer': layer, 'etype': etype,
+                 'original_emodel': original_emodel}, ignore_index=True)
 
     return return_df

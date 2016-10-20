@@ -37,8 +37,7 @@ def create_exemplar_rows(
 
         scores = None
 
-        _, etype, _ = emodel_etype_map[
-            emodel_etype_map['emodel'] == emodel].values[0]
+        etype = emodel_etype_map[original_emodel]['etype']
 
         unrep_morph_dir = os.path.dirname(os.path.abspath(
             os.path.join(
@@ -47,8 +46,8 @@ def create_exemplar_rows(
 
         unrep_morph_filename = os.path.join(
             unrep_morph_dir,
-            '%s.asc' %
-            morph_name)
+            os.path.basename(original_emodel_dict['morph_path']))
+
         rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
 
         if not os.path.isfile(unrep_morph_filename):
@@ -57,11 +56,6 @@ def create_exemplar_rows(
                 (morph_name, unrep_morph_dir))
 
         if not os.path.isfile(rep_morph_filename):
-            '''
-            print(
-                """### WARNING ### Repaired morphology %s doesnt exist in %s !""" %
-                (morph_name, rep_morph_dir))
-            '''
             raise Exception(
                 'Repaired morphology %s doesnt exist in %s' %
                 (morph_name, rep_morph_dir))
@@ -82,6 +76,7 @@ def create_exemplar_rows(
                 'etype': etype,
                 'morph_name': morph_name,
                 'emodel': stored_emodel,
+                'original_emodel': original_emodel,
                 'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
                 'scores': scores,
                 'exception': exception,
@@ -100,7 +95,7 @@ def create_mm_sqlite(
         output_filename,
         recipe_filename,
         morph_dir,
-        emodel_etype_map,
+        original_emodel_etype_map,
         final_dict,
         emodel_dirs):
 
@@ -117,10 +112,15 @@ def create_mm_sqlite(
     # Contains layer, mtype, etype, morph_name
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
+    pandas.set_option('display.max_rows', 1000000)
+
+    # Contains layer, etype, emodel, original_emodel
+    emodel_etype_map = bluepymm.convert_emodel_etype_map(
+        original_emodel_etype_map)
 
     # Contains layer, mtype, etype, morph_name, e_model
     morph_fullmtype_emodel_map = morph_fullmtype_etype_map.merge(
-        bluepymm.convert_emodel_etype_map(emodel_etype_map),
+        emodel_etype_map,
         on=['layer', 'etype'], how='left')
 
     full_map = morph_fullmtype_emodel_map.copy()
@@ -137,7 +137,7 @@ def create_mm_sqlite(
         full_map,
         final_dict,
         fullmtype_morph_map,
-        emodel_etype_map,
+        original_emodel_etype_map,
         emodel_dirs,
         morph_dir)
 

@@ -122,18 +122,17 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                     morph_filename))
             if row['to_run'] == 1:
                 emodel = row['emodel']
+                original_emodel = row['original_emodel']
                 if emodel is None:
                     raise Exception(
-                        'scores db row %s for morph %s doesnt '
-                        'have an emodel assigned to it' %
-                        (index, morph_name))
-                if '_legacy' in emodel:
-                    legacy_emodel = emodel
-                else:
-                    legacy_emodel = '%s_legacy' % emodel
+                        'scores db row %s for morph %s, etype %s, mtype %s, '
+                        'layer %s,'
+                        'doesnt have an emodel assigned to it' %
+                        (index, morph_name, row['etype'], row['mtype'],
+                            row['layer']))
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
-                        final_dict[legacy_emodel]['params'],
+                        final_dict[original_emodel]['params'],
                         morph_path)
 
                 arg_list.append(args)

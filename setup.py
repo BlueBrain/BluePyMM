@@ -25,7 +25,7 @@ import setuptools
 setuptools.setup(
     name="bluepymm",
     version='0.1',
-    install_requires=['bluepyopt', 'sh'],
+    install_requires=['sh'],
     packages=['bluepymm'],
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",
