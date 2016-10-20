@@ -105,25 +105,41 @@ def create_mm_sqlite(
     print('Reading recipe at %s' % recipe_filename)
     fullmtype_etype_map = bluepymm.read_mm_recipe(recipe_filename)
 
+    if fullmtype_etype_map.isnull().sum().sum() > 0:
+        raise Exception('There are None values in the fullmtype-etype map !')
+
     # Contains layer, fullmtype, mtype, submtype, morph_name
     print('Reading neuronDB at %s' % neurondb_filename)
     fullmtype_morph_map = bluepymm.read_mtype_morph_map(neurondb_filename)
 
+    if fullmtype_morph_map.isnull().sum().sum() > 0:
+        raise Exception('There are None values in the fullmtype-morph map !')
+
     # Contains layer, mtype, etype, morph_name
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
-    pandas.set_option('display.max_rows', 1000000)
+
+    if morph_fullmtype_etype_map.isnull().sum().sum() > 0:
+        raise Exception(
+            'There are None values in the fullmtype-morph-etype map !')
 
     # Contains layer, etype, emodel, original_emodel
     emodel_etype_map = bluepymm.convert_emodel_etype_map(
         original_emodel_etype_map)
 
+    if emodel_etype_map.isnull().sum().sum() > 0:
+        raise Exception(
+            'There are None values in the emodel-etype map !')
+
     # Contains layer, mtype, etype, morph_name, e_model
-    morph_fullmtype_emodel_map = morph_fullmtype_etype_map.merge(
+    full_map = morph_fullmtype_etype_map.merge(
         emodel_etype_map,
         on=['layer', 'etype'], how='left')
 
-    full_map = morph_fullmtype_emodel_map.copy()
+    if full_map.isnull().sum().sum() > 0:
+        raise Exception(
+            'There are None values in the full map !')
+
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'is_repaired', True)
@@ -140,6 +156,10 @@ def create_mm_sqlite(
         original_emodel_etype_map,
         emodel_dirs,
         morph_dir)
+
+    if exemplar_rows.isnull().sum().sum() > 0:
+        raise Exception(
+            'There are None values in the exemplar rows !')
 
     # Prepend exemplar rows to full_map
     full_map = pandas.concat(
