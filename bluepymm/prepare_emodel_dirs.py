@@ -3,6 +3,7 @@
 
 # pylint: disable=C0325, W0223
 
+import sys
 import os
 import json
 import sh
@@ -16,6 +17,7 @@ def prepare_emodel_dir(
      emodel_dict,
      emodels_dir,
      opt_dir,
+     emodels_hoc_dir,
      continu)):
     """Prepare emodel dir"""
 
@@ -53,12 +55,26 @@ def prepare_emodel_dir(
         os.chdir(emodel)
         print('Compiling mechanisms ...')
         sh.nrnivmodl('mechanisms')
+
+        sys.path.append(emodel_dir)
+        import setup
+        evaluator = setup.evaluator.create(etype='%s' % emodel)
+        emodel_hoc_code = evaluator.cell_model.create_hoc(emodel['params'])
+        emodel_hoc_path = os.path.join(emodels_hoc_dir, '%s.hoc' % emodel)
+        with open(emodel_hoc_path, 'w') as emodel_hoc_file:
+            emodel_hoc_file.write(emodel_hoc_code)
+
         os.chdir(old_dir)
 
     return emodel_dirs
 
 
-def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir, continu=False):
+def prepare_emodel_dirs(
+        final_dict,
+        emodels_dir,
+        opt_dir,
+        emodels_hoc_dir,
+        continu=False):
     """Prepare the directories for the emodels"""
 
     if not os.path.exists(emodels_dir):
@@ -73,6 +89,7 @@ def prepare_emodel_dirs(final_dict, emodels_dir, opt_dir, continu=False):
              emodel_dict,
              emodels_dir,
              opt_dir,
+             emodels_hoc_dir,
              continu))
 
     print('Parallelising preparation of emodel dirs')

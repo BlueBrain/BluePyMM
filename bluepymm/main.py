@@ -52,6 +52,7 @@ def main():
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
     recipe_filename = conf_dict['recipe_path']
     morph_dir = conf_dict['morph_path']
+    emodels_hoc_dir = os.path.abspatch(conf_dict['emodels_hoc_dir'])
     emodel_etype_map_filename = conf_dict['emodel_etype_map_path']
 
     print('Preparing emodels at %s' % emodels_dir)
@@ -59,6 +60,7 @@ def main():
         final_dict,
         emodels_dir,
         opt_dir,
+        emodels_hoc_dir,
         continu=args.continu)
 
     print('Creating sqlite db at %s' % scores_db_path)
