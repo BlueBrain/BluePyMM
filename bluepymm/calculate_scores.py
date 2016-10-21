@@ -89,7 +89,12 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
         with bluepymm.tools.cd(emodel_dir):
             evaluator = setup.evaluator.create(etype='%s' % emodel)
             evaluator.cell_model.morphology.morphology_path = morph_path
-            scores = evaluator.evaluate_with_dicts(emodel_params)
+
+            responses = evaluator.run_protocols(
+                evaluator.fitness_protocols.values(),
+                emodel_params)
+
+            scores = evaluator.fitness_calculator.calculate_scores(responses)
 
         return scores
     except:
@@ -192,8 +197,8 @@ def calculate_scores(
         exception = result['exception']
         uids_received += 1
 
-        print(
-            'Saving scores for uid %s (%d out of %d)' %
-            (uid, uids_received, len(arg_list)))
-
         save_scores(scores_db_filename, uid, scores, exception)
+
+        print('Saved scores for uid %s (%d out of %d)' %
+              (uid, uids_received, len(arg_list)))
+        sys.stdout.flush()

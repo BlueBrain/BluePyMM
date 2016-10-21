@@ -1,4 +1,4 @@
-import .tools #NOQA
+from . import tools #NOQA
 
 from .parse_files import *  # NOQA
 from .prepare_emodel_dirs import *  # NOQA
