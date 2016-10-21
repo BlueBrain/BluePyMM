@@ -10,6 +10,8 @@ import sh
 
 import xml.etree.ElementTree
 
+import bluepymm
+
 
 def get_emodel_dicts(
         emodels_repo,
@@ -24,10 +26,8 @@ def get_emodel_dicts(
         print('Cloning emodels repo in %s' % tmp_opt_repo)
         sh.git('clone', '%s' % emodels_repo, tmp_opt_repo)
 
-        old_dir = os.getcwd()
-        os.chdir(tmp_opt_repo)
-        sh.git('checkout', '%s' % emodels_githash)
-        os.chdir(old_dir)
+        with bluepymm.tools.cd(tmp_opt_repo):
+            sh.git('checkout', '%s' % emodels_githash)
 
     final_dict = json.loads(
         open(

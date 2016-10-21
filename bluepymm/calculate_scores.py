@@ -12,6 +12,8 @@ import ipyparallel
 import sqlite3
 import traceback
 
+import bluepymm
+
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
 
@@ -83,17 +85,11 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
         import setup
 
         print("Changing path to %s" % emodel_dir)
-        old_dir = os.getcwd()
-        os.chdir(emodel_dir)
 
-        evaluator = setup.evaluator.create(etype='%s' % emodel)
-        evaluator.cell_model.morphology.morphology_path = morph_path
-
-        print evaluator.cell_model
-
-        scores = evaluator.evaluate_with_dicts(emodel_params)
-
-        os.chdir(old_dir)
+        with bluepymm.tools.cd(emodel_dir):
+            evaluator = setup.evaluator.create(etype='%s' % emodel)
+            evaluator.cell_model.morphology.morphology_path = morph_path
+            scores = evaluator.evaluate_with_dicts(emodel_params)
 
         return scores
     except:

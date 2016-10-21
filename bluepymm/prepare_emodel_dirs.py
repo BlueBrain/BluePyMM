@@ -10,6 +10,8 @@ import sh
 import traceback
 import multiprocessing
 
+import bluepymm
+
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
 
 
@@ -38,36 +40,38 @@ def prepare_emodel_dir(
                     '%s.tar' %
                     emodel))
 
-            old_dir = os.getcwd()
-            os.chdir(opt_dir)
-            sh.git(
-                'archive',
-                '--format=tar',
-                '--prefix=%s/' % emodel,
-                'origin/%s' % emodel_dict['branch'],
-                _out=tar_filename)
+            with bluepymm.tools.cd(opt_dir):
+                sh.git(
+                    'archive',
+                    '--format=tar',
+                    '--prefix=%s/' % emodel,
+                    'origin/%s' % emodel_dict['branch'],
+                    _out=tar_filename)
 
-            os.chdir(emodels_dir)
-            sh.tar('xf', tar_filename)
-            os.chdir(emodel)
-            print('Compiling mechanisms ...')
-            sh.nrnivmodl('mechanisms')
+            with bluepymm.tools.cd(emodels_dir):
+                sh.tar('xf', tar_filename)
 
-            sys.path.append(emodel_dir)
-            import setup
-            with open(os.devnull, 'w') as devnull:
-                old_stdout = sys.stdout
-                sys.stdout = devnull
-                evaluator = setup.evaluator.create(etype='%s' % emodel)
-                sys.stdout = old_stdout
+                os.chdir(emodel)
+                print('Compiling mechanisms ...')
+                sh.nrnivmodl('mechanisms')
 
-            emodel_hoc_code = evaluator.cell_model.create_hoc(
-                emodel_dict['params'])
-            emodel_hoc_path = os.path.join(emodels_hoc_dir, '%s.hoc' % emodel)
-            with open(emodel_hoc_path, 'w') as emodel_hoc_file:
-                emodel_hoc_file.write(emodel_hoc_code)
+                sys.path.append(emodel_dir)
+                import setup
+                with open(os.devnull, 'w') as devnull:
+                    old_stdout = sys.stdout
+                    sys.stdout = devnull
+                    evaluator = setup.evaluator.create(etype='%s' % emodel)
+                    sys.stdout = old_stdout
 
-            os.chdir(old_dir)
+                emodel_hoc_code = evaluator.cell_model.create_hoc(
+                    emodel_dict['params'])
+                emodel_hoc_path = os.path.join(
+                    emodels_hoc_dir,
+                    '%s.hoc' %
+                    emodel)
+                with open(emodel_hoc_path, 'w') as emodel_hoc_file:
+                    emodel_hoc_file.write(emodel_hoc_code)
+
     except:
         raise Exception(
             "".join(traceback.format_exception(*sys.exc_info())))
