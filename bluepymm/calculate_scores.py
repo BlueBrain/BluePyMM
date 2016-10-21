@@ -97,6 +97,7 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
         return scores
     except:
+        # Make sure exception and backtrace are thrown back to parent process
         raise Exception(
             "".join(traceback.format_exception(*sys.exc_info())))
 
@@ -137,7 +138,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
 
                 arg_list.append(args)
 
-        print('Found %d rows in score database to run' % len(arg_list))
+    print('Found %d rows in score database to run' % len(arg_list))
 
     return arg_list
 
@@ -146,9 +147,20 @@ def save_scores(scores_db_filename, uid, scores, exception):
     """Save scores in db"""
 
     with sqlite3.connect(scores_db_filename) as scores_db:
-        scores_db.execute(
-            'UPDATE scores SET scores=?, exception=?, to_run=? WHERE `index`=?',
-            (json.dumps(scores), exception, False, uid))
+
+        # Make sure we don't update a row that was already executed
+        scores_cursor = scores_db.execute(
+            'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
+            (uid, False))
+        if scores_cursor.fetchone() is None:
+            # Update row with calculate scores
+            scores_db.execute(
+                'UPDATE scores SET scores=?, exception=?, to_run=? '
+                'WHERE `index`=?',
+                (json.dumps(scores), exception, False, uid))
+        else:
+            raise Exception('save_scores: trying to update scores in row that '
+                            'was already executed: %d' % uid)
 
 
 def calculate_scores(
@@ -165,14 +177,19 @@ def calculate_scores(
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))
 
     if use_ipyp:
+        # use ipyparallel
         client = ipyparallel.Client(profile=ipyp_profile)
         lview = client.load_balanced_view()
         results = lview.imap(run_emodel_morph_isolated, arg_list, ordered=False)
     else:
+        # use multiprocessing
         pool = NestedPool()
         results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
+    # Keep track of the number of received results
     uids_received = 0
+
+    # Every time a result comes in, save the score in the database
     for result in results:
         uid = result['uid']
         scores = result['scores']
