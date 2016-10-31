@@ -149,6 +149,7 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'is_repaired', True)
     full_map.insert(len(full_map.columns), 'is_original', False)
     full_map.insert(len(full_map.columns), 'scores', None)
+    full_map.insert(len(full_map.columns), 'extra_values', None)
     full_map.insert(len(full_map.columns), 'exception', None)
     full_map.insert(len(full_map.columns), 'to_run', True)
 

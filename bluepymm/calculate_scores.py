@@ -32,14 +32,11 @@ def run_emodel_morph_isolated(
     pool = NestedPool(1, maxtasksperchild=1)
 
     try:
-        return_dict['scores'] = pool.apply(
-            run_emodel_morph,
-            (emodel,
-             emodel_dir,
-             emodel_params,
-             morph_path))
+        return_dict['scores'], return_dict['extra_values'] = pool.apply(
+            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
     except:
         return_dict['scores'] = None
+        return_dict['extra_values'] = None
         return_dict['exception'] = "".join(
             traceback.format_exception(
                 *sys.exc_info()))
@@ -94,9 +91,19 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
                 evaluator.fitness_protocols.values(),
                 emodel_params)
 
+            extra_values = {}
+            extra_values['holding_current'] = \
+                responses['bpo_holding_current'] \
+                if 'bpo_holding_current' in responses \
+                else None
+            extra_values['threshold_current'] = \
+                responses['bpo_threshold_current'] \
+                if 'bpo_threshold_current' in responses \
+                else None
+
             scores = evaluator.fitness_calculator.calculate_scores(responses)
 
-        return scores
+        return scores, extra_values
     except:
         # Make sure exception and backtrace are thrown back to parent process
         raise Exception(
@@ -144,7 +151,12 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
     return arg_list
 
 
-def save_scores(scores_db_filename, uid, scores, exception):
+def save_scores(
+        scores_db_filename,
+        uid,
+        scores,
+        extra_values,
+        exception):
     """Save scores in db"""
 
     with sqlite3.connect(scores_db_filename) as scores_db:
@@ -156,9 +168,17 @@ def save_scores(scores_db_filename, uid, scores, exception):
         if scores_cursor.fetchone() is None:
             # Update row with calculate scores
             scores_db.execute(
-                'UPDATE scores SET scores=?, exception=?, to_run=? '
+                'UPDATE scores SET '
+                'scores=?, '
+                'extra_values=?, '
+                'exception=?, '
+                'to_run=? '
                 'WHERE `index`=?',
-                (json.dumps(scores), exception, False, uid))
+                (json.dumps(scores),
+                 json.dumps(extra_values),
+                 exception,
+                 False,
+                 uid))
         else:
             raise Exception('save_scores: trying to update scores in row that '
                             'was already executed: %d' % uid)
@@ -194,10 +214,16 @@ def calculate_scores(
     for result in results:
         uid = result['uid']
         scores = result['scores']
+        extra_values = result['extra_values']
         exception = result['exception']
         uids_received += 1
 
-        save_scores(scores_db_filename, uid, scores, exception)
+        save_scores(
+            scores_db_filename,
+            uid,
+            scores,
+            extra_values,
+            exception)
 
         print('Saved scores for uid %s (%d out of %d)' %
               (uid, uids_received, len(arg_list)))
