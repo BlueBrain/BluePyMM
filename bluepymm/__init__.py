@@ -8,3 +8,4 @@ from .calculate_scores import *  # NOQA
 
 from .main import *  # NOQA
 
+from .megate import * #NOQA

@@ -7,7 +7,7 @@ setuptools.setup(
     name="bluepymm",
     version='0.1',
     install_requires=['sh'],
-    packages=['bluepymm'],
+    packages=['bluepymm', 'bluepymm/megate'],
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",
     description="Model Management Python Library (bluepymm)",
@@ -23,5 +23,5 @@ setuptools.setup(
         'Operating System :: POSIX',
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities'],
-    scripts=['bin/bluepymm']
+    scripts=['bin/bluepymm', 'bin/bluepymm-megate']
 )
