@@ -116,7 +116,7 @@ def create_mm_sqlite(
     if fullmtype_morph_map.isnull().sum().sum() > 0:
         raise Exception('There are None values in the fullmtype-morph map !')
 
-    # Contains layer, mtype, etype, morph_name
+    # Contains layer, fullmtype, etype, morph_name
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
 
@@ -124,18 +124,21 @@ def create_mm_sqlite(
         raise Exception(
             'There are None values in the fullmtype-morph-etype map !')
 
-    # Contains layer, etype, emodel, original_emodel
-    emodel_etype_map = bluepymm.convert_emodel_etype_map(
-        original_emodel_etype_map)
+    fullmtypes = morph_fullmtype_etype_map.fullmtype.unique()
+    etypes = morph_fullmtype_etype_map.etype.unique()
 
-    if emodel_etype_map.isnull().sum().sum() > 0:
+    # Contains layer, fullmtype, etype, emodel, original_emodel
+    emodel_fullmtype_etype_map = bluepymm.convert_emodel_etype_map(
+        original_emodel_etype_map, fullmtypes, etypes)
+
+    if emodel_fullmtype_etype_map.isnull().sum().sum() > 0:
         raise Exception(
             'There are None values in the emodel-etype map !')
 
-    # Contains layer, mtype, etype, morph_name, e_model
+    # Contains layer, fullmtype, etype, morph_name, e_model
     full_map = morph_fullmtype_etype_map.merge(
-        emodel_etype_map,
-        on=['layer', 'etype'], how='left')
+        emodel_fullmtype_etype_map,
+        on=['layer', 'etype', 'fullmtype'], how='left')
 
     if full_map.isnull().sum().sum() > 0:
         raise Exception(

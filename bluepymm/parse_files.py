@@ -7,6 +7,7 @@ import json
 import collections
 import pandas
 import sh
+import re
 
 import xml.etree.ElementTree
 
@@ -139,16 +140,37 @@ def extract_emodel_etype_json(json_filename):
                 yield (emodel, etype, layer)
 
 
-def convert_emodel_etype_map(emodel_etype_map):
+def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
 
     return_df = pandas.DataFrame()
     for original_emodel in emodel_etype_map:
         emodel = emodel_etype_map[original_emodel]['mm_recipe']
         layers = emodel_etype_map[original_emodel]['layer']
-        etype = emodel_etype_map[original_emodel]['etype']
-        for layer in layers:
-            return_df = return_df.append(
-                {'emodel': emodel, 'layer': layer, 'etype': etype,
-                 'original_emodel': original_emodel}, ignore_index=True)
 
+        if 'etype' in emodel_etype_map[original_emodel]:
+            etype_regex = re.compile(emodel_etype_map[original_emodel]['etype'])
+        else:
+            etype_regex = re.compile('.*')
+
+        if 'mtype' in emodel_etype_map[original_emodel]:
+            mtype_regex = re.compile(
+                emodel_etype_map[original_emodel]['mtype'][0])
+        else:
+            mtype_regex = re.compile('.*')
+
+        for layer in layers:
+            for fullmtype in fullmtypes:
+                if mtype_regex.match(fullmtype):
+                    for etype in etypes:
+                        if etype_regex.match(etype):
+                            return_df = return_df.append(
+                                {'emodel': emodel,
+                                 'layer': layer,
+                                 'fullmtype': fullmtype,
+                                 'etype': etype,
+                                 'original_emodel':
+                                 original_emodel},
+                                ignore_index=True)
+
+    print return_df
     return return_df
