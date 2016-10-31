@@ -47,19 +47,20 @@ def create_exemplar_rows(
 
         unrep_morph_filename = os.path.join(
             unrep_morph_dir,
-            os.path.basename(original_emodel_dict['morph_path']))
+            '%s.asc' % morph_name)
 
         rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
 
         if not os.path.isfile(unrep_morph_filename):
             raise Exception(
-                'Unrepaired morphology %s doesnt exist in %s' %
-                (morph_name, unrep_morph_dir))
+                'Unrepaired morphology %s doesnt exist at %s' %
+                (morph_name, unrep_morph_filename))
 
         if not os.path.isfile(rep_morph_filename):
             raise Exception(
-                'Repaired morphology %s doesnt exist in %s' %
-                (morph_name, rep_morph_dir))
+                'Repaired morphology %s doesnt exist at %s' %
+                (morph_name, rep_morph_filename))
+
         is_exemplar = True
         to_run = True
         exception = None
