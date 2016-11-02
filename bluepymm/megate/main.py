@@ -79,7 +79,12 @@ def plot_to_skip_features(to_skip_features, pp):
     plt.savefig(pp, format='pdf', bbox_inches='tight')
 
 
-def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
+def process_emodel(
+        emodel,
+        scores,
+        score_values,
+        to_skip_patterns,
+        pp):
     """Process emodel"""
     print 'Processing emodel %s' % emodel
     exemplar_morph = scores[
@@ -114,7 +119,6 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
         (scores.is_original == 0) &
         (scores.morph_name == exemplar_morph)].head(1).copy()
     exemplar_score_values.dropna(axis=1, how='all', inplace=True)
-    exemplar_score_values.dropna(axis=0, how='all', inplace=True)
 
     if len(exemplar_score_values) == 0:
         print('%s: skipping' % emodel)
@@ -128,7 +132,6 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
         (scores.emodel == emodel) & (
             scores.is_exemplar == 0)].copy()
     emodel_score_values.dropna(axis=1, how='all', inplace=True)
-    emodel_score_values.dropna(axis=0, how='all', inplace=True)
 
     mtypes = scores[
         (scores.emodel == emodel) &
@@ -142,6 +145,23 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
         axis=1)
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
+
+    passed_combos = scores.iloc[megate_scores['Passed all'].index]
+    if len(passed_combos[passed_combos['emodel'] != emodel]) != 0:
+        raise Exception('Something went wrong during row indexing in megating')
+
+    emodel_ext_neurondb = passed_combos.ix[
+        :,
+        ('morph_name',
+         'layer',
+         'fullmtype',
+         'etype')].copy()
+
+    emodel_ext_neurondb['layer'] = emodel_ext_neurondb[['layer']].astype(int)
+
+    emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
+        lambda x: '%s_%s_%d_%s' %
+        (x['etype'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
 
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
@@ -172,6 +192,19 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
     plt.close()
     print('Saving %s' % emodel)
 
+    return emodel_ext_neurondb
+
+
+def write_extneurondb(ext_neurondb, extneurondb_filename):
+    """Write extNeuronDB.dat file"""
+
+    ext_neurondb = ext_neurondb.sort_index()
+    ext_neurondb.to_csv(
+        extneurondb_filename,
+        sep=' ',
+        index=False,
+        header=False)
+
 
 def main():
     """Main"""
@@ -196,6 +229,11 @@ def main():
     if not os.path.exists(pdf_dirname):
         os.makedirs(pdf_dirname)
 
+    extneurondb_filename = conf_dict['extneurondb_filename']
+    extneurondb_dirname = os.path.dirname(extneurondb_filename)
+    if not os.path.exists(extneurondb_dirname):
+        os.makedirs(extneurondb_dirname)
+
     # Read skip features
     to_skip_patterns, to_skip_features = read_to_skip_features(conf_dict)
 
@@ -206,6 +244,8 @@ def main():
         raise Exception('Score and score values tables dont have same '
                         'number of elements !')
 
+    ext_neurondb = pandas.DataFrame()
+
     # Write pdf
     with PdfPages(pdf_filename) as pp:
         # Create a table with the skipped features
@@ -215,4 +255,13 @@ def main():
 
         # Process all the emodels
         for emodel in emodels:
-            process_emodel(emodel, scores, score_values, to_skip_patterns, pp)
+            emodel_ext_neurondb_rows = process_emodel(
+                emodel,
+                scores,
+                score_values,
+                to_skip_patterns,
+                pp)
+            ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+
+    # Write extNeuronDB.dat
+    write_extneurondb(ext_neurondb, extneurondb_filename)
