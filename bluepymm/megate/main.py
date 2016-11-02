@@ -111,6 +111,7 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
         (scores.emodel == emodel) &
         (scores.is_exemplar == 1) &
         (scores.is_repaired == 1) &
+        (scores.is_original == 0) &
         (scores.morph_name == exemplar_morph)].head(1).copy()
     exemplar_score_values.dropna(axis=1, how='all', inplace=True)
     exemplar_score_values.dropna(axis=0, how='all', inplace=True)
@@ -130,8 +131,8 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
     emodel_score_values.dropna(axis=0, how='all', inplace=True)
 
     mtypes = scores[
-        (scores.emodel == emodel) & (
-            scores.is_exemplar == 0)].loc[:, 'mtype']
+        (scores.emodel == emodel) &
+        (scores.is_exemplar == 0)].loc[:, 'mtype']
 
     megate_scores = emodel_score_values.apply(
         lambda row: row_transform(
@@ -141,7 +142,6 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
         axis=1)
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
-    # print pandas.concat(mtypes, megate_scores['Passed all'])
 
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
@@ -160,19 +160,15 @@ def process_emodel(emodel, scores, score_values, to_skip_patterns, pp):
     mtypes_sums = pandas.DataFrame()
     for mtype in mtypes.unique():
         megate_scores_mtype = megate_scores[mtypes == mtype]
-        mtype_passed = megate_scores_mtype[
-            megate_scores_mtype['Passed all']]
-        mtypes_sums.ix[
-            mtype, 'passed'] = len(mtype_passed)
-        mtypes_sums.ix[
-            mtype,
-            'failed'] = len(megate_scores_mtype) - len(mtype_passed)
+        mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
+        mtypes_sums.ix[mtype, 'passed'] = len(mtype_passed)
+        mtypes_sums.ix[mtype, 'failed'] = \
+            len(megate_scores_mtype) - len(mtype_passed)
     mtypes_sums.plot(kind='barh', stacked=True, figsize=figsize,
                      color=['g', 'r'])
     plt.title(emodel)
     plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
-    # plt.show()
     plt.close()
     print('Saving %s' % emodel)
 
