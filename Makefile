@@ -1,6 +1,6 @@
 all: install
 install:
-	pip install -q . --upgrade
+	pip install . --upgrade
 test: clean unit functional
 clean:
 unit: install
