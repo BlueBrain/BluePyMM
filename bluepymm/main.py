@@ -1,7 +1,7 @@
 """Python Model Management"""
 
 
-# pylint: disable=C0325, W0223
+# pylint: disable=C0325, W0223, R0914
 import os
 import json
 
@@ -16,14 +16,24 @@ def main():
     print('# Starting BluePyMM #')
     print('#####################\n')
 
+    args = parse_args()
+    run(args)
+
+
+def parse_args(arg_list=None):
+    """Parse the arguments"""
+
     parser = argparse.ArgumentParser(description='Blue Brain Model Management')
     parser.add_argument('conf_filename')
     parser.add_argument('--continu', action='store_true')
     parser.add_argument('--ipyp', action='store_true')
     parser.add_argument('--ipyp_profile')
 
-    args = parser.parse_args()
+    return parser.parse_args(arg_list)
 
+
+def run(args):
+    """Run the program"""
     print('Reading configuration at %s' % args.conf_filename)
 
     # Read configuration

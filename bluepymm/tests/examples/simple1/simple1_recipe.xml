@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE blueColumn [
+  <!ELEMENT blueColumn (column,NeuronTypes,Seeds?,SynapsesProperties,SynapsesClassification,DendriticMorphologyProbabilities,TouchRules,InterBoutonInterval?)>
+  <!ELEMENT column (layer*)>
+  <!ATTLIST column id CDATA #REQUIRED x CDATA #REQUIRED z CDATA #REQUIRED>
+  <!ELEMENT layer (#PCDATA)>
+  <!ATTLIST layer	id CDATA #REQUIRED height CDATA #REQUIRED>
+  <!ELEMENT NeuronTypes (Layer*)>
+  <!ATTLIST NeuronTypes totalNeurons CDATA #REQUIRED miniColumns CDATA #REQUIRED IntExtendedMinicolumnRadious CDATA #REQUIRED>
+  <!ELEMENT Layer (StructuralType*)>
+  <!ATTLIST Layer id CDATA #REQUIRED percentage CDATA #REQUIRED>
+  <!ELEMENT StructuralType (ElectroType*)>
+  <!ATTLIST StructuralType id CDATA #REQUIRED percentage CDATA #REQUIRED sigma CDATA #REQUIRED exclusionRadius CDATA #REQUIRED mClass CDATA #REQUIRED sClass CDATA #REQUIRED spineLength CDATA #REQUIRED>
+  <!ELEMENT ElectroType (#PCDATA)>
+  <!ATTLIST ElectroType id CDATA #REQUIRED percentage CDATA #REQUIRED>
+  <!ELEMENT Seeds (#PCDATA)>
+  <!ATTLIST Seeds recipeSeed CDATA #IMPLIED columnSeed CDATA #IMPLIED synapseSeed CDATA #IMPLIED>
+  <!ELEMENT InterBoutonInterval (#PCDATA)>
+  <!ATTLIST InterBoutonInterval minDistance CDATA #IMPLIED maxDistance CDATA #IMPLIED regionGap CDATA #IMPLIED>
+  <!ELEMENT SynapsesProperties (synapse*)>
+  <!ELEMENT synapse (#PCDATA)>
+  <!ATTLIST synapse id1 CDATA #REQUIRED id2 CDATA #REQUIRED id3 CDATA #REQUIRED id4 CDATA #REQUIRED GAB1 CDATA #REQUIRED GAB2 CDATA #REQUIRED>
+  <!ELEMENT SynapsesClassification (class*)>
+  <!ELEMENT class (#PCDATA)>
+  <!ATTLIST class id CDATA #REQUIRED gsyn CDATA #REQUIRED gsynVar CDATA #REQUIRED nsyn CDATA #REQUIRED nsynVar CDATA #REQUIRED dtc CDATA #REQUIRED dtcVar CDATA #REQUIRED u CDATA #REQUIRED uVar CDATA #REQUIRED d CDATA #REQUIRED dVar CDATA #REQUIRED f CDATA #REQUIRED fVar CDATA #REQUIRED ase CDATA #REQUIRED>
+  <!ELEMENT ConnectionRules (class*)>  
+  <!ELEMENT TouchRules (class*)>
+  <!ENTITY connectivityRecipe SYSTEM "builderConnectivityRecipeAllPathways.xml">
+]>
+
+<blueColumn>
+    <NeuronTypes>
+		<Layer id="1">
+		  <StructuralType id="L1_DAC" percentage="17.7304964539" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-35">
+		    <ElectroType id="bNAC" percentage="33.33"/>
+		    <ElectroType id="cNAC" percentage="66.67"/>
+		  </StructuralType>
+		  <StructuralType id="L1_NGC-DA" percentage="20.5673758865" sigma="25" exclusionRadius="6.0" mClass="INT" sClass="INH" spineLength="2.5" maxHeightRestriction="-15">
+		    <ElectroType id="bNAC" percentage="10.00"/>
+		    <ElectroType id="cNAC" percentage="70.00"/>
+		  </StructuralType>
+        </Layer>
+
+		<Layer id="2" percentage="10.832282">
+			<StructuralType id="L2_TPC:A" percentage="67.7948717949" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100" />
+			</StructuralType>
+
+			<StructuralType id="L2_TPC:B" percentage="2.0" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100" />
+			</StructuralType>
+
+			<StructuralType id="L2_IPC" percentage="2.0" sigma="20" exclusionRadius="6.0" mClass="PYR" sClass="EXC" spineLength="2.5">
+				<ElectroType id="cADpyr" percentage="100" />
+			</StructuralType>
+		</Layer>
+	</NeuronTypes>
+
+</blueColumn>
+
