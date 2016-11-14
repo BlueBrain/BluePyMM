@@ -42,14 +42,18 @@ def read_tables(scores_sqlite_filename):
     return scores, score_values
 
 
-def row_transform(row, exemplar_row, to_skip_patterns):
+def row_transform(row, exemplar_row, to_skip_patterns, megate_thresholds):
     """Transform row based on MEGate rule"""
 
     for column in row.index:
         for pattern in to_skip_patterns:
             if pattern.match(column):
                 row[column] = True
-        if row[column] <= max(5, 5 * exemplar_row[column]):
+
+        for megate_pattern in megate_thresholds:
+            if megate_pattern['features'].match(column):
+                threshold = megate_pattern['megate_threshold']
+        if row[column] <= max(threshold, threshold * exemplar_row[column]):
             row[column] = True
         else:
             row[column] = False
@@ -67,6 +71,26 @@ def read_to_skip_features(conf_dict):
             for feature_str in to_skip_features], to_skip_features
 
 
+def read_megate_thresholds(conf_dict):
+    """Read feature to skip from configuration"""
+
+    megate_thresholds = conf_dict['megate_thresholds'] \
+        if 'to_skip_features' in conf_dict else []
+
+    megate_patterns = []
+    for megate_threshold_dict in megate_thresholds:
+        megate_pattern = {}
+        megate_pattern["megate_threshold"] = megate_threshold_dict[
+            "megate_threshold"]
+        megate_pattern["emodels"] = re.compile(megate_threshold_dict["emodels"])
+        megate_pattern["features"] = re.compile(
+            megate_threshold_dict["features"])
+
+        megate_patterns.append(megate_pattern)
+
+    return megate_patterns, megate_thresholds
+
+
 def plot_to_skip_features(to_skip_features, pp):
     """Make table with skipped features"""
 
@@ -79,38 +103,29 @@ def plot_to_skip_features(to_skip_features, pp):
     plt.savefig(pp, format='pdf', bbox_inches='tight')
 
 
+def plot_megate_thresholds(megate_thresholds, pp):
+    """Make table with skipped features"""
+
+    plt.figure(figsize=figsize)
+    plt.axis('off')
+    plt.table(
+        cellText=[[x] for x in megate_thresholds],
+        loc='center')
+    plt.title('MEGating thresholds')
+    plt.savefig(pp, format='pdf', bbox_inches='tight')
+
+
 def process_emodel(
         emodel,
         scores,
         score_values,
         to_skip_patterns,
+        megate_patterns,
         pp):
     """Process emodel"""
     print 'Processing emodel %s' % emodel
     exemplar_morph = scores[
         scores.emodel == emodel].morph_name.values[0]
-
-    # TODO code below is a hack, remove once we have an
-    # emodel - mtype - etype map in db
-    '''
-    exemplar_emodel = scores[
-        (scores.is_original == 0) &
-        (scores.is_exemplar == 1) &
-        (scores.is_repaired == 0) &
-        (scores.emodel == emodel)]
-    etype = exemplar_emodel.etype.values[0]
-    morph_name = exemplar_emodel.morph_name.values[0]
-
-    legacy_emodel = scores[
-        (scores.is_original == 1) &
-        (scores.is_exemplar == 1) &
-        (scores.is_repaired == 0) &
-        (scores.etype == etype) &
-        (scores.morph_name == morph_name)
-    ].emodel.values[0]
-
-    print legacy_emodel, etype, morph_name
-    '''
 
     exemplar_score_values = score_values[
         (scores.emodel == emodel) &
@@ -137,11 +152,18 @@ def process_emodel(
         (scores.emodel == emodel) &
         (scores.is_exemplar == 0)].loc[:, 'mtype']
 
+    emodel_megate_patterns = []
+    for megate_pattern in megate_patterns:
+        emodel_pattern = megate_pattern['emodels']
+        if emodel_pattern.match(emodel):
+            emodel_megate_patterns.append(megate_pattern)
+
     megate_scores = emodel_score_values.apply(
         lambda row: row_transform(
             row,
             exemplar_score_values.iloc[0],
-            to_skip_patterns),
+            to_skip_patterns,
+            emodel_megate_patterns),
         axis=1)
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
@@ -237,6 +259,9 @@ def main():
     # Read skip features
     to_skip_patterns, to_skip_features = read_to_skip_features(conf_dict)
 
+    # Read skip features
+    megate_patterns, megate_thresholds = read_megate_thresholds(conf_dict)
+
     # Read score tables
     scores, score_values = read_tables(scores_sqlite_filename)
 
@@ -250,6 +275,7 @@ def main():
     with PdfPages(pdf_filename) as pp:
         # Create a table with the skipped features
         plot_to_skip_features(to_skip_features, pp)
+        plot_megate_thresholds(megate_thresholds, pp)
 
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
 
@@ -260,6 +286,7 @@ def main():
                 scores,
                 score_values,
                 to_skip_patterns,
+                megate_patterns,
                 pp)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
