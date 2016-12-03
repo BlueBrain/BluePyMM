@@ -42,21 +42,42 @@ def read_tables(scores_sqlite_filename):
     return scores, score_values
 
 
-def row_transform(row, exemplar_row, to_skip_patterns, megate_thresholds):
+def row_transform(row, exemplar_row, to_skip_patterns):
     """Transform row based on MEGate rule"""
 
-    for column in row.index:
+    for column in row.index[1:]:
         for pattern in to_skip_patterns:
             if pattern.match(column):
                 row[column] = True
 
-        for megate_pattern in megate_thresholds:
-            if megate_pattern['features'].match(column):
-                threshold = megate_pattern['megate_threshold']
-        if row[column] <= max(threshold, threshold * exemplar_row[column]):
+        for megate_feature_threshold in row['megate_feature_threshold']:
+            if megate_feature_threshold['features'].match(column):
+                megate_threshold = megate_feature_threshold['megate_threshold']
+
+        if row[column] <= max(megate_threshold,
+                              megate_threshold * exemplar_row[column]):
             row[column] = True
         else:
             row[column] = False
+
+    return row
+
+
+def row_threshold_transform(row, megate_patterns):
+    """Transform threshold row based on MEGate rule"""
+
+    emodel = row['emodel']
+    fullmtype = row['fullmtype']
+    etype = row['etype']
+
+    for pattern_dict in megate_patterns:
+        if pattern_dict['emodel'].match(emodel):
+            if pattern_dict['fullmtype'].match(fullmtype):
+                if pattern_dict['etype'].match(etype):
+                    if row['megate_feature_threshold'] is None:
+                        row['megate_feature_threshold'] = []
+                    row['megate_feature_threshold'].append(pattern_dict[
+                        'megate_feature_threshold'])
 
     return row
 
@@ -71,20 +92,33 @@ def read_to_skip_features(conf_dict):
             for feature_str in to_skip_features], to_skip_features
 
 
+def join_regex(list_regex):
+    """Create regex that match one of list of regex"""
+    return re.compile(
+        '(' +
+        ')|('.join(
+            list_regex) +
+        ')')
+
+
 def read_megate_thresholds(conf_dict):
     """Read feature to skip from configuration"""
 
     megate_thresholds = conf_dict['megate_thresholds'] \
-        if 'to_skip_features' in conf_dict else []
+        if 'megate_thresholds' in conf_dict else []
 
     megate_patterns = []
     for megate_threshold_dict in megate_thresholds:
         megate_pattern = {}
-        megate_pattern["megate_threshold"] = megate_threshold_dict[
-            "megate_threshold"]
-        megate_pattern["emodels"] = re.compile(megate_threshold_dict["emodels"])
-        megate_pattern["features"] = re.compile(
-            megate_threshold_dict["features"])
+        megate_pattern["megate_feature_threshold"] = {
+            'megate_threshold': megate_threshold_dict["megate_threshold"],
+            'features': join_regex(megate_threshold_dict["features"])
+        }
+        for key in ["emodel", "fullmtype", "etype"]:
+            if key in megate_threshold_dict:
+                megate_pattern[key] = join_regex(megate_threshold_dict[key])
+            else:
+                megate_pattern[key] = re.compile('.*')
 
         megate_patterns.append(megate_pattern)
 
@@ -152,19 +186,34 @@ def process_emodel(
         (scores.emodel == emodel) &
         (scores.is_exemplar == 0)].loc[:, 'mtype']
 
-    emodel_megate_patterns = []
-    for megate_pattern in megate_patterns:
-        emodel_pattern = megate_pattern['emodels']
-        if emodel_pattern.match(emodel):
-            emodel_megate_patterns.append(megate_pattern)
+    emodel_mtype_etypes = scores[
+        (scores.emodel == emodel) & (scores.is_exemplar == 0)].copy()
+    emodel_mtype_etype_thresholds = emodel_mtype_etypes[
+        ['emodel', 'fullmtype', 'etype']]
 
-    megate_scores = emodel_score_values.apply(
-        lambda row: row_transform(
-            row,
-            exemplar_score_values.iloc[0],
-            to_skip_patterns,
-            emodel_megate_patterns),
+    emodel_mtype_etype_thresholds['megate_feature_threshold'] = None
+
+    print emodel_mtype_etype_thresholds
+
+    print megate_patterns
+
+    emodel_mtype_etype_thresholds.apply(
+        lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
+
+    print emodel_mtype_etype_thresholds
+
+    print pandas.concat([emodel_mtype_etype_thresholds['megate_feature_threshold'],
+                        emodel_score_values], axis=1)
+
+    megate_scores = pandas.concat(
+        [emodel_mtype_etype_thresholds['megate_feature_threshold'],
+         emodel_score_values], axis=1).apply(
+        lambda row:
+        row_transform(row, exemplar_score_values.iloc[0], to_skip_patterns),
+        axis=1)
+
+    del megate_scores['megate_feature_threshold']
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
 
