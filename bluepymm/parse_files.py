@@ -154,7 +154,7 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
 
         if 'mtype' in emodel_etype_map[original_emodel]:
             mtype_regex = re.compile(
-                emodel_etype_map[original_emodel]['mtype'][0])
+                emodel_etype_map[original_emodel]['mtype'])
         else:
             mtype_regex = re.compile('.*')
 
