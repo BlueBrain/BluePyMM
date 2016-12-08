@@ -293,7 +293,7 @@ def main():
     conf_dict = json.loads(open(args.conf_filename).read())
 
     mm_run_path = conf_dict['mm_run_path']
-    scores_sqlite_filename = os.path.join(mm_run_path, 'scores.sqlite')
+    scores_sqlite_filename = os.path.join(mm_run_path, 'output/scores.sqlite')
 
     pdf_filename = conf_dict['pdf_filename']
     pdf_dirname = os.path.dirname(pdf_filename)
