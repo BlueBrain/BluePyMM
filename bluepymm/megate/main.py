@@ -29,6 +29,22 @@ def convert_score_values(scores_sqlite_filename, scores):
     return score_values
 
 
+def convert_extra_values(row):
+    """Convert extra values row"""
+
+    extra_values_str = row['extra_values']
+
+    if extra_values_str is not None:
+        extra_values = json.loads(extra_values_str)
+        if extra_values:
+            if 'threshold_current' in extra_values:
+                row['threshold_current'] = extra_values['threshold_current']
+            if 'holding_current' in extra_values:
+                row['holding_current'] = extra_values['holding_current']
+
+    return row
+
+
 def read_tables(scores_sqlite_filename):
     """Read tables from score sqlite"""
 
@@ -193,31 +209,25 @@ def process_emodel(
 
     emodel_mtype_etype_thresholds['megate_feature_threshold'] = None
 
-    print emodel_mtype_etype_thresholds
-
-    print megate_patterns
-
     emodel_mtype_etype_thresholds.apply(
         lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
 
-    print emodel_mtype_etype_thresholds
-
-    print pandas.concat([emodel_mtype_etype_thresholds['megate_feature_threshold'],
-                        emodel_score_values], axis=1)
-
     megate_scores = pandas.concat(
         [emodel_mtype_etype_thresholds['megate_feature_threshold'],
-         emodel_score_values], axis=1).apply(
-        lambda row:
-        row_transform(row, exemplar_score_values.iloc[0], to_skip_patterns),
-        axis=1)
+         emodel_score_values], axis=1).\
+        apply(
+            lambda row:
+            row_transform(row, exemplar_score_values.iloc[0], to_skip_patterns),
+            axis=1)
 
     del megate_scores['megate_feature_threshold']
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
 
-    passed_combos = scores.iloc[megate_scores['Passed all'].index]
+    emodel_scores = scores[(scores.emodel == emodel) &
+                           (scores.is_exemplar == 0)].copy()
+    passed_combos = emodel_scores[megate_scores['Passed all'] == True]
     if len(passed_combos[passed_combos['emodel'] != emodel]) != 0:
         raise Exception('Something went wrong during row indexing in megating')
 
@@ -226,13 +236,23 @@ def process_emodel(
         ('morph_name',
          'layer',
          'fullmtype',
-         'etype')].copy()
+         'etype',
+         'emodel',
+         'extra_values')].copy()
 
     emodel_ext_neurondb['layer'] = emodel_ext_neurondb[['layer']].astype(int)
 
     emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
         lambda x: '%s_%s_%d_%s' %
         (x['etype'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
+
+    emodel_ext_neurondb['threshold_current'] = None
+    emodel_ext_neurondb['holding_current'] = None
+
+    emodel_ext_neurondb = emodel_ext_neurondb.apply(
+        convert_extra_values, axis=1)
+
+    del emodel_ext_neurondb['extra_values']
 
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
@@ -248,6 +268,7 @@ def process_emodel(
     plt.title(emodel)
     plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
+    plt.close()
     mtypes_sums = pandas.DataFrame()
     for mtype in mtypes.unique():
         megate_scores_mtype = megate_scores[mtypes == mtype]
@@ -266,15 +287,27 @@ def process_emodel(
     return emodel_ext_neurondb
 
 
-def write_extneurondb(ext_neurondb, extneurondb_filename):
+def write_extneurondb(
+        ext_neurondb,
+        extneurondb_filename,
+        combo_emodel_filename):
     """Write extNeuronDB.dat file"""
 
     ext_neurondb = ext_neurondb.sort_index()
-    ext_neurondb.to_csv(
+    pure_ext_neurondb = ext_neurondb.copy()
+    del pure_ext_neurondb['threshold_current']
+    del pure_ext_neurondb['holding_current']
+    del pure_ext_neurondb['emodel']
+    pure_ext_neurondb.to_csv(
         extneurondb_filename,
         sep=' ',
         index=False,
         header=False)
+
+    combo_emodel = ext_neurondb.copy()
+    combo_emodel.to_csv(
+        combo_emodel_filename,
+        index=False)
 
 
 def main():
@@ -304,6 +337,11 @@ def main():
     extneurondb_dirname = os.path.dirname(extneurondb_filename)
     if not os.path.exists(extneurondb_dirname):
         os.makedirs(extneurondb_dirname)
+
+    combo_emodel_filename = conf_dict['combo_emodel_filename']
+    combo_emodel_dirname = os.path.dirname(combo_emodel_filename)
+    if not os.path.exists(combo_emodel_dirname):
+        os.makedirs(combo_emodel_dirname)
 
     # Read skip features
     to_skip_patterns, to_skip_features = read_to_skip_features(conf_dict)
@@ -340,4 +378,4 @@ def main():
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
     # Write extNeuronDB.dat
-    write_extneurondb(ext_neurondb, extneurondb_filename)
+    write_extneurondb(ext_neurondb, extneurondb_filename, combo_emodel_filename)
