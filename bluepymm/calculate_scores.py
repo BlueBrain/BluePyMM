@@ -159,29 +159,37 @@ def save_scores(
         exception):
     """Save scores in db"""
 
-    with sqlite3.connect(scores_db_filename) as scores_db:
-
-        # Make sure we don't update a row that was already executed
-        scores_cursor = scores_db.execute(
-            'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
-            (uid, False))
-        if scores_cursor.fetchone() is None:
-            # Update row with calculate scores
-            scores_db.execute(
-                'UPDATE scores SET '
-                'scores=?, '
-                'extra_values=?, '
-                'exception=?, '
-                'to_run=? '
-                'WHERE `index`=?',
-                (json.dumps(scores),
-                 json.dumps(extra_values),
-                 exception,
-                 False,
-                 uid))
-        else:
-            raise Exception('save_scores: trying to update scores in row that '
-                            'was already executed: %d' % uid)
+    while True:
+        try:
+            with sqlite3.connect(scores_db_filename) as scores_db:
+                # Make sure we don't update a row that was already executed
+                scores_cursor = scores_db.execute(
+                    'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
+                    (uid, False))
+                if scores_cursor.fetchone() is None:
+                    # Update row with calculate scores
+                    scores_db.execute(
+                        'UPDATE scores SET '
+                        'scores=?, '
+                        'extra_values=?, '
+                        'exception=?, '
+                        'to_run=? '
+                        'WHERE `index`=?',
+                        (json.dumps(scores),
+                         json.dumps(extra_values),
+                         exception,
+                         False,
+                         uid))
+                    break
+                else:
+                    raise Exception(
+                        'save_scores: trying to update scores in row that '
+                        'was already executed: %d' %
+                        uid)
+                    break
+        except sqlite3.OperationalError:
+            # Keep retrying is something if database is locked
+            pass
 
 
 def calculate_scores(
