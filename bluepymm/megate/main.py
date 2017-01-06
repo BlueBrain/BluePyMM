@@ -204,8 +204,8 @@ def process_emodel(
 
     emodel_mtype_etypes = scores[
         (scores.emodel == emodel) & (scores.is_exemplar == 0)].copy()
-    emodel_mtype_etype_thresholds = emodel_mtype_etypes[
-        ['emodel', 'fullmtype', 'etype']]
+    emodel_mtype_etype_thresholds = emodel_mtype_etypes.loc[
+        :, ['emodel', 'fullmtype', 'etype']]
 
     emodel_mtype_etype_thresholds['megate_feature_threshold'] = None
 
@@ -227,7 +227,7 @@ def process_emodel(
 
     emodel_scores = scores[(scores.emodel == emodel) &
                            (scores.is_exemplar == 0)].copy()
-    passed_combos = emodel_scores[megate_scores['Passed all'] == True]
+    passed_combos = emodel_scores[megate_scores['Passed all']]
     if len(passed_combos[passed_combos['emodel'] != emodel]) != 0:
         raise Exception('Something went wrong during row indexing in megating')
 
