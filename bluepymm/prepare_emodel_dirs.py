@@ -1,7 +1,7 @@
 """Python Model Management"""
 
 
-# pylint: disable=C0325, W0223
+# pylint: disable=C0325, W0223, R0914, E1121, E1123
 
 import sys
 import os
@@ -12,17 +12,16 @@ import multiprocessing
 
 import bluepymm
 
-json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
+json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')  # NOQA
 
 
-def prepare_emodel_dir(
-    (original_emodel,
-     emodel,
-     emodel_dict,
-     emodels_dir,
-     opt_dir,
-     emodels_hoc_dir,
-     continu)):
+def prepare_emodel_dir((original_emodel,
+                        emodel,
+                        emodel_dict,
+                        emodels_dir,
+                        opt_dir,
+                        emodels_hoc_dir,
+                        continu)):
     """Prepare emodel dir"""
 
     try:
@@ -40,7 +39,12 @@ def prepare_emodel_dir(
                     '%s.tar' %
                     emodel))
 
-            with bluepymm.tools.cd(opt_dir):
+            if 'main_path' in emodel_dict:
+                main_path = emodel_dict['main_path']
+            else:
+                main_path = '.'
+
+            with bluepymm.tools.cd(os.path.join(opt_dir, main_path)):
                 sh.git(
                     'archive',
                     '--format=tar',
@@ -90,6 +94,9 @@ def prepare_emodel_dirs(
 
     if not os.path.exists(emodels_dir):
         os.makedirs(emodels_dir)
+
+    if not os.path.exists(emodels_hoc_dir):
+        os.makedirs(emodels_hoc_dir)
 
     emodel_dirs = {}
 

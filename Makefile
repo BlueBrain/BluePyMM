@@ -7,6 +7,8 @@ install_test_requirements:
 	pip install -q $(TEST_REQUIREMENTS) --upgrade	
 test: clean unit functional
 clean:
+	rm -rf bluepymm/tests/examples/simple1/tmp
+	rm -rf bluepymm/tests/examples/simple1/output
 unit: install install_test_requirements
 	cd bluepymm/tests; nosetests -a 'unit' -s -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
