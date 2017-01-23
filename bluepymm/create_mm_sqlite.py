@@ -1,6 +1,10 @@
 """Create sqlite database"""
 
+from __future__ import print_function
+
 """Some Code based on BrainBuilder and morph repair code"""
+
+# pylint: disable=R0914
 
 import os
 
@@ -99,6 +103,32 @@ def create_exemplar_rows(
     return pandas.DataFrame(exemplar_rows)
 
 
+def remove_morph_regex_failures(full_map):
+    """Remove all rows where morph_name doesn't match morp_regex"""
+
+    # Add a new column to store the regex match result
+    full_map.insert(len(full_map.columns), 'morph_regex_matches', None)
+
+    def match_morph_regex(row):
+        """Check if morph matches regex"""
+        row['morph_regex_matches'] = \
+            bool(row['morph_regex'].match(row['morph_name']))
+
+        return row
+
+    # Check if morph_name matches morph_regex
+    full_map = full_map.apply(match_morph_regex, axis=1)
+
+    # Prune all the rows that didn't match
+    full_map = full_map[full_map['morph_regex_matches'] == True]  # NOQA
+
+    # Delete obsolete columns
+    del full_map['morph_regex']
+    del full_map['morph_regex_matches']
+
+    return full_map
+
+
 def create_mm_sqlite(
         output_filename,
         recipe_filename,
@@ -106,6 +136,7 @@ def create_mm_sqlite(
         original_emodel_etype_map,
         final_dict,
         emodel_dirs):
+    """Create SQLite db"""
 
     neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
 
@@ -124,6 +155,7 @@ def create_mm_sqlite(
         raise Exception('There are None values in the fullmtype-morph map !')
 
     # Contains layer, fullmtype, etype, morph_name
+    print('Merging recipe and neuronDB tables')
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
 
@@ -134,7 +166,8 @@ def create_mm_sqlite(
     fullmtypes = morph_fullmtype_etype_map.fullmtype.unique()
     etypes = morph_fullmtype_etype_map.etype.unique()
 
-    # Contains layer, fullmtype, etype, emodel, original_emodel
+    print('Creating emodel etype table')
+    # Contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
     emodel_fullmtype_etype_map = bluepymm.convert_emodel_etype_map(
         original_emodel_etype_map, fullmtypes, etypes)
 
@@ -142,15 +175,21 @@ def create_mm_sqlite(
         raise Exception(
             'There are None values in the emodel-etype map !')
 
-    # Contains layer, fullmtype, etype, morph_name, e_model
+    print('Creating full table by merging subtables')
+    # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
     full_map = morph_fullmtype_etype_map.merge(
         emodel_fullmtype_etype_map,
         on=['layer', 'etype', 'fullmtype'], how='left')
+
+    print('Filtering out morp_names that dont match regex')
+    # Contains layer, fullmtype, etype, morph_name, e_model
+    full_map = remove_morph_regex_failures(full_map)
 
     if full_map.isnull().sum().sum() > 0:
         raise Exception(
             'There are None values in the full map !')
 
+    print('Adding exemplar rows')
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'is_repaired', True)
@@ -160,7 +199,6 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'exception', None)
     full_map.insert(len(full_map.columns), 'to_run', True)
 
-    print('Adding exemplar rows')
     exemplar_rows = create_exemplar_rows(
         full_map,
         final_dict,
@@ -173,6 +211,7 @@ def create_mm_sqlite(
     full_map = pandas.concat(
         [exemplar_rows, full_map], ignore_index=True)
 
+    # Writing full table to sqlite
     with sqlite3.connect(output_filename) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
 

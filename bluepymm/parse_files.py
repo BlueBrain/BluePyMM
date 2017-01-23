@@ -1,5 +1,7 @@
 """Create sqlite database"""
 
+from __future__ import print_function
+
 """Some Code based on BrainBuilder and morph repair code"""
 
 import os
@@ -25,10 +27,14 @@ def get_emodel_dicts(
 
     if not continu:
         print('Cloning emodels repo in %s' % tmp_opt_repo)
-        sh.git('clone', '%s' % emodels_repo, tmp_opt_repo)
+        sh.git(  # pylint: disable=E1121
+            'clone',
+            '%s' %
+            emodels_repo,
+            tmp_opt_repo)
 
         with bluepymm.tools.cd(tmp_opt_repo):
-            sh.git('checkout', '%s' % emodels_githash)
+            sh.git('checkout', '%s' % emodels_githash)  # pylint: disable=E1121
 
     final_dict = json.loads(
         open(
@@ -128,8 +134,7 @@ def read_mtype_morph_map(neurondb_xml_filename):
 
 
 def extract_emodel_etype_json(json_filename):
-
-    import json
+    """Read emodel etype json"""
 
     with open(json_filename) as json_file:
         emodel_etype_dict = json.loads(json_file.read())
@@ -141,8 +146,10 @@ def extract_emodel_etype_json(json_filename):
 
 
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
+    """Resolve regex's in emodel etype map"""
 
     return_df = pandas.DataFrame()
+    morph_name_regexs = {}
     for original_emodel in emodel_etype_map:
         emodel = emodel_etype_map[original_emodel]['mm_recipe']
         layers = emodel_etype_map[original_emodel]['layer']
@@ -158,6 +165,14 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
         else:
             mtype_regex = re.compile('.*')
 
+        if 'morph_name' in emodel_etype_map[original_emodel]:
+            morph_name_regex = emodel_etype_map[original_emodel]['morph_name']
+        else:
+            morph_name_regex = '.*'
+
+        if morph_name_regex not in morph_name_regexs:
+            morph_name_regexs[morph_name_regex] = re.compile(morph_name_regex)
+
         for layer in layers:
             for fullmtype in fullmtypes:
                 if mtype_regex.match(fullmtype):
@@ -168,9 +183,10 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
                                  'layer': layer,
                                  'fullmtype': fullmtype,
                                  'etype': etype,
+                                 'morph_regex':
+                                    morph_name_regexs[morph_name_regex],
                                  'original_emodel':
                                  original_emodel},
                                 ignore_index=True)
 
-    print return_df
     return return_df
