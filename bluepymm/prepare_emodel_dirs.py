@@ -7,12 +7,68 @@ import sys
 import os
 import json
 import sh
+import shutil
 import traceback
 import multiprocessing
+import tarfile
 
 import bluepymm
 
 json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')  # NOQA
+
+
+def get_emodel_dicts(
+        conf_dict,
+        tmp_dir,
+        continu=False):
+    """Get dictionary with final emodels"""
+
+    if 'emodels_repo' in conf_dict and 'emodels_dir' in conf_dict:
+        raise ValueError('Impossible to specify both emodels_repo and '
+                         'emodels_dir')
+    elif 'emodels_repo' in conf_dict:
+        emodels_in_repo = True
+    elif 'emodels_dir' in conf_dict:
+        emodels_in_repo = False
+    else:
+        raise ValueError('Need to specify emodels_dir or emodels_repo in '
+                         'configuration file')
+
+    tmp_opt_repo = os.path.abspath(
+        os.path.join(tmp_dir, 'emodels_repo'))
+
+    if not continu:
+        if emodels_in_repo:
+            print('Cloning emodels repo in %s' % tmp_opt_repo)
+            sh.git(  # pylint: disable=E1121
+                'clone',
+                '%s' %
+                conf_dict['emodels_repo'],
+                tmp_opt_repo)
+
+            with bluepymm.tools.cd(tmp_opt_repo):
+                sh.git(  # pylint: disable=E1121
+                    'checkout',
+                    '%s' %
+                    conf_dict['emodels_githash'])
+        else:
+            shutil.copytree(conf_dict['emodels_dir'], tmp_opt_repo)
+
+    final_dict = json.loads(
+        open(
+            os.path.join(
+                tmp_opt_repo,
+                conf_dict['final_json_path'])).read())
+
+    emodel_etype_map = json.loads(
+        open(
+            os.path.join(
+                tmp_opt_repo,
+                conf_dict['emodel_etype_map_path'])).read())
+
+    opt_dir = os.path.dirname(os.path.join(tmp_opt_repo,
+                                           conf_dict['final_json_path']))
+    return final_dict, emodel_etype_map, opt_dir, emodels_in_repo
 
 
 def prepare_emodel_dir((original_emodel,
@@ -21,6 +77,7 @@ def prepare_emodel_dir((original_emodel,
                         emodels_dir,
                         opt_dir,
                         emodels_hoc_dir,
+                        emodels_in_repo,
                         continu)):
     """Prepare emodel dir"""
 
@@ -44,13 +101,18 @@ def prepare_emodel_dir((original_emodel,
             else:
                 main_path = '.'
 
-            with bluepymm.tools.cd(os.path.join(opt_dir, main_path)):
-                sh.git(
-                    'archive',
-                    '--format=tar',
-                    '--prefix=%s/' % emodel,
-                    'origin/%s' % emodel_dict['branch'],
-                    _out=tar_filename)
+            if emodels_in_repo:
+                with bluepymm.tools.cd(os.path.join(opt_dir, main_path)):
+                    sh.git(
+                        'archive',
+                        '--format=tar',
+                        '--prefix=%s/' % emodel,
+                        'origin/%s' % emodel_dict['branch'],
+                        _out=tar_filename)
+            else:
+                with bluepymm.tools.cd(os.path.join(opt_dir, main_path)):
+                    with tarfile.open(tar_filename, 'w') as tar_file:
+                        tar_file.add('.', arcname=emodel)
 
             with bluepymm.tools.cd(emodels_dir):
                 sh.tar('xf', tar_filename)
@@ -89,6 +151,7 @@ def prepare_emodel_dirs(
         emodels_dir,
         opt_dir,
         emodels_hoc_dir,
+        emodels_in_repo,
         continu=False):
     """Prepare the directories for the emodels"""
 
@@ -111,6 +174,7 @@ def prepare_emodel_dirs(
              emodels_dir,
              opt_dir,
              emodels_hoc_dir,
+             emodels_in_repo,
              continu))
 
     print('Parallelising preparation of emodel dirs')

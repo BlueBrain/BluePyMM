@@ -4,52 +4,14 @@ from __future__ import print_function
 
 """Some Code based on BrainBuilder and morph repair code"""
 
-import os
+# pylint: disable=R0912
+
 import json
 import collections
 import pandas
-import sh
 import re
 
 import xml.etree.ElementTree
-
-import bluepymm
-
-
-def get_emodel_dicts(
-        emodels_repo,
-        emodels_githash,
-        final_json_path,
-        emodel_etype_map_path,
-        tmp_opt_repo,
-        continu=False):
-    """Get dictionary with final emodels"""
-
-    if not continu:
-        print('Cloning emodels repo in %s' % tmp_opt_repo)
-        sh.git(  # pylint: disable=E1121
-            'clone',
-            '%s' %
-            emodels_repo,
-            tmp_opt_repo)
-
-        with bluepymm.tools.cd(tmp_opt_repo):
-            sh.git('checkout', '%s' % emodels_githash)  # pylint: disable=E1121
-
-    final_dict = json.loads(
-        open(
-            os.path.join(
-                tmp_opt_repo,
-                final_json_path)).read())
-
-    emodel_etype_map = json.loads(
-        open(
-            os.path.join(
-                tmp_opt_repo,
-                emodel_etype_map_path)).read())
-
-    opt_dir = os.path.dirname(os.path.join(tmp_opt_repo, final_json_path))
-    return final_dict, emodel_etype_map, opt_dir
 
 
 def _parse_recipe(recipe_filename):
@@ -184,7 +146,7 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
                                  'fullmtype': fullmtype,
                                  'etype': etype,
                                  'morph_regex':
-                                    morph_name_regexs[morph_name_regex],
+                                 morph_name_regexs[morph_name_regex],
                                  'original_emodel':
                                  original_emodel},
                                 ignore_index=True)

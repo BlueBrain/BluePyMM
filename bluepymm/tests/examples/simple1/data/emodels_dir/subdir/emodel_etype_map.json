@@ -1,0 +1,12 @@
+{
+    "emodel1": {
+        "mm_recipe": "emodel1",
+        "etype": "etype1",
+        "layer": [1,2]
+    },
+    "emodel2": {
+        "mm_recipe": "emodel2",
+        "etype": "etype2",
+        "layer": [1,2]
+    }
+}

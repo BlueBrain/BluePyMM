@@ -57,9 +57,10 @@ def create_exemplar_rows(
 
         unrep_morph_filename = os.path.join(
             unrep_morph_dir,
-            '%s.asc' % morph_name)
+            '%s.asc' % (morph_name))
 
-        rep_morph_filename = os.path.join(rep_morph_dir, '%s.asc' % morph_name)
+        rep_morph_filename = os.path.join(
+            rep_morph_dir, '%s.asc' % (morph_name))
 
         if not os.path.isfile(unrep_morph_filename):
             raise Exception(
@@ -160,6 +161,7 @@ def create_mm_sqlite(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
 
     if morph_fullmtype_etype_map.isnull().sum().sum() > 0:
+        print(morph_fullmtype_etype_map)
         raise Exception(
             'There are None values in the fullmtype-morph-etype map !')
 

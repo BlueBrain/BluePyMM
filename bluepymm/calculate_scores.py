@@ -74,6 +74,7 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
     """Run emodel morph combo"""
 
     try:
+        sys.stdout = open('/dev/null', 'w')
         print(
             'Running emodel %s on morph %s in %s' %
             (emodel, morph_path, emodel_dir))
@@ -233,6 +234,7 @@ def calculate_scores(
             extra_values,
             exception)
 
-        print('Saved scores for uid %s (%d out of %d)' %
-              (uid, uids_received, len(arg_list)))
+        print('Saved scores for uid %s (%d out of %d) %s' %
+              (uid, uids_received, len(arg_list),
+               'with exception' if exception else ''))
         sys.stdout.flush()

@@ -1,12 +1,11 @@
 {
     "version": "1.0",
-    "recipe_path": "simple1.xml",
-    "morph_path": "/gpfs/bbp.cscs.ch/project/proj59/morphology_release/output-2016-10-19/06_GraftAxons-ASC",
-    "emodels_repo": "ssh://bbpcode.epfl.ch/project/proj38/singlecell-optimization",
-    "emodels_githash": "0d8d32e",
-    "emodels_hoc_dir": "output/emodels_hoc",
-    "emodel_etype_map_path": "RatSSCx/emodel_etype_map.json",
-    "final_json_path": "RatSSCx/final.json",
+    "recipe_path": "./data/simple1_recipe.xml",
+    "morph_path": "./data/morphs",
+    "emodels_dir": "./data/emodels_dir",
+    "emodels_hoc_dir": "./output/emodels_hoc",
+    "emodel_etype_map_path": "subdir/emodel_etype_map.json",
+    "final_json_path": "subdir/final.json",
     "tmp_dir": "./tmp",
-    "scores_db": "output/scores.sqlite"
+    "scores_db": "./output/scores.sqlite"
 }
