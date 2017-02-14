@@ -2,6 +2,9 @@
 
 from __future__ import print_function
 
+# Copyright BBP/EPFL 2017; All rights reserved.
+# Do not distribute without further notice.
+
 """Some Code based on BrainBuilder and morph repair code"""
 
 # pylint: disable=R0914

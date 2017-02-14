@@ -1,5 +1,7 @@
 """Python Model Management"""
 
+# Copyright BBP/EPFL 2017; All rights reserved.
+# Do not distribute without further notice.
 
 # pylint: disable=C0325, W0223, R0914, E1121, E1123
 

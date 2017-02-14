@@ -1,5 +1,8 @@
 """Analyse scores"""
 
+# Copyright BBP/EPFL 2017; All rights reserved.
+# Do not distribute without further notice.
+
 # pylint: disable=R0914, C0325, W0640
 
 import os

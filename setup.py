@@ -1,5 +1,7 @@
-#!/usr/bin/env python
 """bluepymm  setup """
+
+# Copyright BBP/EPFL 2017; All rights reserved.
+# Do not distribute without further notice.
 
 import setuptools
 
@@ -22,6 +24,7 @@ setuptools.setup(
         'Programming Language :: Python :: 2.7',
         'Operating System :: POSIX',
         'Topic :: Scientific/Engineering',
-        'Topic :: Utilities'],
+        'Topic :: Utilities',
+        'License :: Other/Proprietary License'],
     scripts=['bin/bluepymm', 'bin/bluepymm-megate']
 )
