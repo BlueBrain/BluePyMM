@@ -57,7 +57,7 @@ def read_mm_recipe(recipe_filename):
                                     'in recipe, script cant to '
                                     'handle this case')
 
-                            yield (int(layer.attrib['id']),
+                            yield (layer.attrib['id'],
                                    structural_type.attrib['id'],
                                    electro_type.attrib['id'])
 
@@ -75,7 +75,7 @@ def xmlmorphinfo_from_xml(xml_morph):
     mtype = xml_morph.findtext('mtype')
     msubtype = xml_morph.findtext('msubtype')
     fullmtype = '%s:%s' % (mtype, msubtype) if msubtype != '' else mtype
-    layer = int(xml_morph.findtext('layer'))
+    layer = xml_morph.findtext('layer')
     return (name, fullmtype, mtype, msubtype, layer)
 
 
