@@ -186,6 +186,15 @@ def create_mm_sqlite(
         emodel_fullmtype_etype_map,
         on=['layer', 'etype', 'fullmtype'], how='left')
 
+    null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
+
+    if len(null_emodel_rows) > 0:
+        raise Exception(
+            'No emodels found for the following layer, etype, fullmtype'
+            ' combinations: \n%s' %
+            null_emodel_rows[
+                ['layer', 'etype', 'fullmtype']])
+
     print('Filtering out morp_names that dont match regex')
     # Contains layer, fullmtype, etype, morph_name, e_model
     full_map = remove_morph_regex_failures(full_map)
