@@ -7,7 +7,7 @@ import setuptools
 
 setuptools.setup(
     name="bluepymm",
-    version='0.1',
+    version='0.2',
     install_requires=['sh', 'bluepyopt', 'matplotlib'],
     packages=['bluepymm', 'bluepymm/megate'],
     author="BlueBrain Project, EPFL",
