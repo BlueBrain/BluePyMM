@@ -22,7 +22,8 @@ def create_exemplar_rows(
         fullmtype_morph_map,
         emodel_etype_map,
         emodel_dirs,
-        rep_morph_dir):
+        rep_morph_dir,
+        skip_repaired_exemplar=False):
     """Create exemplar rows"""
 
     exemplar_rows = []
@@ -70,20 +71,26 @@ def create_exemplar_rows(
                 'Unrepaired morphology %s doesnt exist at %s' %
                 (morph_name, unrep_morph_filename))
 
-        if not os.path.isfile(rep_morph_filename):
-            raise Exception(
-                'Repaired morphology %s doesnt exist at %s' %
-                (morph_name, rep_morph_filename))
-
         is_exemplar = True
         to_run = True
         exception = None
 
-        for (stored_emodel, original, repaired) in [
-                (emodel, False, True),
-                (original_emodel, True, True),
-                (emodel, False, False),
-                (original_emodel, True, False)]:
+        if skip_repaired_exemplar:
+            # Don't run repaired version
+            combos = [(emodel, False, False),
+                      (original_emodel, True, False)]
+        else:
+            if not os.path.isfile(rep_morph_filename):
+                raise Exception(
+                    'Repaired morphology %s doesnt exist at %s' %
+                    (morph_name, rep_morph_filename))
+            # Run repaired version
+            combos = [(emodel, False, True),
+                      (original_emodel, True, True),
+                      (emodel, False, False),
+                      (original_emodel, True, False)]
+
+        for (stored_emodel, original, repaired) in combos:
             new_row_dict = {
                 'layer': layer,
                 'fullmtype': fullmtype,
@@ -139,7 +146,8 @@ def create_mm_sqlite(
         morph_dir,
         original_emodel_etype_map,
         final_dict,
-        emodel_dirs):
+        emodel_dirs,
+        skip_repaired_exemplar=False):
     """Create SQLite db"""
 
     neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
@@ -219,7 +227,8 @@ def create_mm_sqlite(
         fullmtype_morph_map,
         original_emodel_etype_map,
         emodel_dirs,
-        morph_dir)
+        morph_dir,
+        skip_repaired_exemplar=skip_repaired_exemplar)
 
     # Prepend exemplar rows to full_map
     full_map = pandas.concat(

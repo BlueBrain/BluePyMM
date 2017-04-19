@@ -47,6 +47,9 @@ def run(args):
     morph_dir = conf_dict['morph_path']
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
 
+    skip_repaired_exemplar = conf_dict['skip_repaired_exemplar'] \
+        if 'skip_repaired_exemplar' in conf_dict else False
+
     # Create temporary directories
     # opt_repo_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels_repo'))
     emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
@@ -79,7 +82,8 @@ def run(args):
             morph_dir,
             emodel_etype_map,
             final_dict,
-            emodel_dirs)
+            emodel_dirs,
+            skip_repaired_exemplar=skip_repaired_exemplar)
 
     print('Calculating scores')
     # Calculate scores for combinations in sqlite3 db
