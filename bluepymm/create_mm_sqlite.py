@@ -37,18 +37,20 @@ def create_exemplar_rows(
         layer = None
         morph_name = os.path.basename(original_emodel_dict['morph_path'])[:-4]
 
-        morph_info_list = fullmtype_morph_map[
-            fullmtype_morph_map['morph_name'] == morph_name].values
-        if len(morph_info_list) == 0:
-            raise Exception(
-                'Morphology %s for %s emodel not found in morphology release' %
-                (morph_name, original_emodel))
+        if skip_repaired_exemplar:
+            fullmtype = None
+            mtype = None
+            msubtype = None
         else:
-            _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
-
-        fullmtype = None
-        mtype = None
-        msubtype = None
+            morph_info_list = fullmtype_morph_map[
+                fullmtype_morph_map['morph_name'] == morph_name].values
+            if len(morph_info_list) == 0:
+                raise Exception(
+                    'Morphology %s for %s emodel not found in morphology '
+                    'release' %
+                    (morph_name, original_emodel))
+            else:
+                _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
 
         scores = None
 
