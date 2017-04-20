@@ -429,8 +429,14 @@ def main():
                 skip_repaired_exemplar)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
+    print('Wrote pdf to %s' % pdf_filename)
+
     # Write extNeuronDB.dat
     write_extneurondb(
         ext_neurondb,
         extneurondb_filename,
         combo_emodel_filename)
+
+    print('Wrote extneurondb to %s' % extneurondb_filename)
+    print('Wrote combo_model to %s' % combo_emodel_filename)
+
