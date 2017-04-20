@@ -61,7 +61,7 @@ def read_tables(scores_sqlite_filename):
     return scores, score_values
 
 
-def row_transform(row, exemplar_row, to_skip_patterns):
+def row_transform(row, exemplar_row, to_skip_patterns, skip_repaired_exemplar):
     """Transform row based on MEGate rule"""
 
     for column in row.index[1:]:
@@ -73,11 +73,17 @@ def row_transform(row, exemplar_row, to_skip_patterns):
             if megate_feature_threshold['features'].match(column):
                 megate_threshold = megate_feature_threshold['megate_threshold']
 
-        if row[column] <= max(megate_threshold,
-                              megate_threshold * exemplar_row[column]):
-            row[column] = True
+        if not skip_repaired_exemplar:
+            if row[column] <= max(megate_threshold,
+                                  megate_threshold * exemplar_row[column]):
+                row[column] = True
+            else:
+                row[column] = False
         else:
-            row[column] = False
+            if row[column] <= megate_threshold:
+                row[column] = True
+            else:
+                row[column] = False
 
     return row
 
@@ -149,9 +155,10 @@ def plot_to_skip_features(to_skip_features, pp):
 
     plt.figure(figsize=figsize)
     plt.axis('off')
-    plt.table(
-        cellText=[[x] for x in to_skip_features],
-        loc='center')
+    if to_skip_features:
+        plt.table(
+            cellText=[[x] for x in to_skip_features],
+            loc='center')
     plt.title('Ignored feature patterns')
     plt.savefig(pp, format='pdf', bbox_inches='tight')
 
@@ -161,9 +168,10 @@ def plot_megate_thresholds(megate_thresholds, pp):
 
     plt.figure(figsize=figsize)
     plt.axis('off')
-    plt.table(
-        cellText=[[x] for x in megate_thresholds],
-        loc='center')
+    if megate_thresholds:
+        plt.table(
+            cellText=[[x] for x in megate_thresholds],
+            loc='center')
     plt.title('MEGating thresholds')
     plt.savefig(pp, format='pdf', bbox_inches='tight')
 
@@ -174,7 +182,8 @@ def process_emodel(
         score_values,
         to_skip_patterns,
         megate_patterns,
-        pp):
+        pp,
+        skip_repaired_exemplar):
     """Process emodel"""
     print 'Processing emodel %s' % emodel
     exemplar_morph = scores[
@@ -188,10 +197,12 @@ def process_emodel(
         (scores.morph_name == exemplar_morph)].head(1).copy()
     exemplar_score_values.dropna(axis=1, how='all', inplace=True)
 
-    if len(exemplar_score_values) == 0:
-        print('%s: skipping' % emodel)
-        return
-    elif len(exemplar_score_values) != 1:
+    if not skip_repaired_exemplar:
+        if len(exemplar_score_values) == 0:
+            print('%s: skipping' % emodel)
+            return
+
+    if len(exemplar_score_values) > 1:
         raise Exception(
             'Too many exemplars found for %s: %s' %
             (emodel, exemplar_score_values))
@@ -207,6 +218,11 @@ def process_emodel(
 
     emodel_mtype_etypes = scores[
         (scores.emodel == emodel) & (scores.is_exemplar == 0)].copy()
+
+    if len(emodel_mtype_etypes) == 0:
+        print('%s: skipping, was not run on any release morph' % emodel)
+        return
+
     emodel_mtype_etype_thresholds = emodel_mtype_etypes.loc[
         :, ['emodel', 'fullmtype', 'etype']]
 
@@ -216,15 +232,36 @@ def process_emodel(
         lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
 
-    megate_scores = pandas.concat(
-        [emodel_mtype_etype_thresholds['megate_feature_threshold'],
-         emodel_score_values], axis=1).\
-        apply(
-            lambda row:
-            row_transform(row, exemplar_score_values.iloc[0], to_skip_patterns),
+    megate_scores = emodel_score_values
+
+    if not skip_repaired_exemplar:
+        megate_scores = pandas.concat(
+            [
+                emodel_mtype_etype_thresholds['megate_feature_threshold'],
+                emodel_score_values],
+            axis=1). apply(
+            lambda row: row_transform(
+                row,
+                exemplar_score_values.iloc[0],
+                to_skip_patterns,
+                skip_repaired_exemplar),
             axis=1)
 
-    del megate_scores['megate_feature_threshold']
+        del megate_scores['megate_feature_threshold']
+    else:
+        megate_scores = pandas.concat(
+            [
+                emodel_mtype_etype_thresholds['megate_feature_threshold'],
+                emodel_score_values],
+            axis=1). apply(
+            lambda row: row_transform(
+                row,
+                None,
+                to_skip_patterns,
+                skip_repaired_exemplar),
+            axis=1)
+
+        del megate_scores['megate_feature_threshold']
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
 
@@ -243,19 +280,18 @@ def process_emodel(
          'emodel',
          'extra_values')].copy()
 
-    emodel_ext_neurondb['layer'] = emodel_ext_neurondb[['layer']].astype(int)
+    if len(emodel_ext_neurondb) > 0:
+        emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
+            lambda x: '%s_%s_%s_%s' %
+            (x['etype'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
 
-    emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
-        lambda x: '%s_%s_%d_%s' %
-        (x['etype'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
+        emodel_ext_neurondb['threshold_current'] = None
+        emodel_ext_neurondb['holding_current'] = None
 
-    emodel_ext_neurondb['threshold_current'] = None
-    emodel_ext_neurondb['holding_current'] = None
+        emodel_ext_neurondb = emodel_ext_neurondb.apply(
+            convert_extra_values, axis=1)
 
-    emodel_ext_neurondb = emodel_ext_neurondb.apply(
-        convert_extra_values, axis=1)
-
-    del emodel_ext_neurondb['extra_values']
+        del emodel_ext_neurondb['extra_values']
 
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
@@ -268,6 +304,7 @@ def process_emodel(
         color=[
             'g',
             'r'])
+    plt.xlabel('# morphs')
     plt.title(emodel)
     plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
@@ -279,8 +316,11 @@ def process_emodel(
         mtypes_sums.ix[mtype, 'passed'] = len(mtype_passed)
         mtypes_sums.ix[mtype, 'failed'] = \
             len(megate_scores_mtype) - len(mtype_passed)
-    mtypes_sums.plot(kind='barh', stacked=True, figsize=figsize,
-                     color=['g', 'r'])
+
+    if len(mtypes_sums) > 0:
+        mtypes_sums.plot(kind='barh', stacked=True, figsize=figsize,
+                         color=['g', 'r'])
+    plt.xlabel('# morphs')
     plt.title(emodel)
     plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
@@ -298,9 +338,12 @@ def write_extneurondb(
 
     ext_neurondb = ext_neurondb.sort_index()
     pure_ext_neurondb = ext_neurondb.copy()
-    del pure_ext_neurondb['threshold_current']
-    del pure_ext_neurondb['holding_current']
-    del pure_ext_neurondb['emodel']
+    if 'threshold_current' in pure_ext_neurondb:
+        del pure_ext_neurondb['threshold_current']
+    if 'holding_current' in pure_ext_neurondb:
+        del pure_ext_neurondb['holding_current']
+    if 'emodel' in pure_ext_neurondb:
+        del pure_ext_neurondb['emodel']
     pure_ext_neurondb.to_csv(
         extneurondb_filename,
         sep=' ',
@@ -327,6 +370,11 @@ def main():
 
     # Read configuration file
     conf_dict = json.loads(open(args.conf_filename).read())
+
+    if 'skip_repaired_exemplar' in conf_dict:
+        skip_repaired_exemplar = conf_dict['skip_repaired_exemplar']
+    else:
+        skip_repaired_exemplar = False
 
     mm_run_path = conf_dict['mm_run_path']
     scores_sqlite_filename = os.path.join(mm_run_path, 'output/scores.sqlite')
@@ -377,8 +425,12 @@ def main():
                 score_values,
                 to_skip_patterns,
                 megate_patterns,
-                pp)
+                pp,
+                skip_repaired_exemplar)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
     # Write extNeuronDB.dat
-    write_extneurondb(ext_neurondb, extneurondb_filename, combo_emodel_filename)
+    write_extneurondb(
+        ext_neurondb,
+        extneurondb_filename,
+        combo_emodel_filename)
