@@ -12,6 +12,9 @@ import pandas
 import sqlite3
 import json
 
+import matplotlib
+matplotlib.use('Agg')
+
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
