@@ -363,10 +363,20 @@ def main():
     print('# Starting BluePyMM MEGating #')
     print('##############################\n')
 
-    # Read commandline arguments
+    args = parse_args()
+    run(args)
+
+
+def parse_args(arg_list=None):
+    """Parse the arguments"""
+
     parser = argparse.ArgumentParser(description='Blue Brain Model MEGating')
     parser.add_argument('conf_filename')
-    args = parser.parse_args()
+    return parser.parse_args(arg_list)
+
+
+def run(args):
+    """Main"""
 
     # Read configuration file
     conf_dict = json.loads(open(args.conf_filename).read())

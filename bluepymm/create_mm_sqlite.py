@@ -10,6 +10,7 @@ from __future__ import print_function
 # pylint: disable=R0914
 
 import os
+import json
 
 import bluepymm
 import pandas
@@ -53,6 +54,7 @@ def create_exemplar_rows(
                 _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
 
         scores = None
+        opt_scores = original_emodel_dict['fitness']
 
         etype = emodel_etype_map[original_emodel]['etype']
 
@@ -104,6 +106,7 @@ def create_exemplar_rows(
                 'original_emodel': original_emodel,
                 'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
                 'scores': scores,
+                'opt_scores': json.dumps(opt_scores) if not repaired else None,
                 'exception': exception,
                 'to_run': to_run,
                 'is_exemplar': is_exemplar,
@@ -113,7 +116,9 @@ def create_exemplar_rows(
             exemplar_rows.append(
                 new_row_dict)
 
-    return pandas.DataFrame(exemplar_rows)
+    exemplar_rows_df = pandas.DataFrame(exemplar_rows)
+
+    return exemplar_rows_df
 
 
 def remove_morph_regex_failures(full_map):
@@ -219,6 +224,7 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'is_repaired', True)
     full_map.insert(len(full_map.columns), 'is_original', False)
     full_map.insert(len(full_map.columns), 'scores', None)
+    full_map.insert(len(full_map.columns), 'opt_scores', None)
     full_map.insert(len(full_map.columns), 'extra_values', None)
     full_map.insert(len(full_map.columns), 'exception', None)
     full_map.insert(len(full_map.columns), 'to_run', True)

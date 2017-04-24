@@ -1,0 +1,11 @@
+{                                                                                
+   "version": "1.0",                                                            
+   "mm_run_path": ".",
+   "to_skip_features": [],                                                      
+   "pdf_filename": "output_megate/megating.pdf",                                
+   "megate_thresholds": [                                                      
+       {"emodel": [".*"], "fullmtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
+   ],                                                                          
+   "extneurondb_filename": "output_megate/extNeuronDB.dat",                    
+   "combo_emodel_filename": "output_megate/combo_model.csv" 
+}
