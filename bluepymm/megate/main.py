@@ -176,6 +176,33 @@ def plot_megate_thresholds(megate_thresholds, pp):
     plt.savefig(pp, format='pdf', bbox_inches='tight')
 
 
+def check_opt_scores(emodel, scores):
+    """Check if opt_scores match with unrepaired exemplar runs"""
+
+    test_rows = scores[
+        (scores.emodel == emodel) & (
+            scores.is_exemplar == 1) & (
+            scores.is_repaired == 0)]
+
+    for _, row in test_rows.iterrows():
+        opt_score = json.loads(row['opt_scores'])
+        bluepymm_score = json.loads(row['scores'])
+
+        if opt_score.keys() != bluepymm_score.keys():
+            raise Exception(
+                'Difference detected in score keys between optimisation'
+                'score and score calculated by bluepymm for emodel %s !:'
+                '\n%s\n%s' %
+                (emodel, opt_score, bluepymm_score))
+
+        for feature in opt_score:
+            if opt_score[feature] != bluepymm_score[feature]:
+                raise Exception(
+                    'Difference detected in optimisation score and score '
+                    'calculated by bluepymm for emodel %s !:\n%s\n%s' %
+                    (emodel, opt_score, bluepymm_score))
+
+
 def process_emodel(
         emodel,
         scores,
@@ -188,6 +215,8 @@ def process_emodel(
     print 'Processing emodel %s' % emodel
     exemplar_morph = scores[
         scores.emodel == emodel].morph_name.values[0]
+
+    check_opt_scores(emodel, scores)
 
     exemplar_score_values = score_values[
         (scores.emodel == emodel) &
