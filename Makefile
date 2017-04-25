@@ -4,9 +4,13 @@ all: install
 install:
 	pip install . --upgrade
 install_test_requirements:
-	pip install -q $(TEST_REQUIREMENTS) --upgrade	
-test: clean unit functional
+	pip install -q $(TEST_REQUIREMENTS) --upgrade
+virtualenv:
+	virtualenv pyenv
+	. ./pyenv/bin/activate
+test: clean virtualenv unit functional
 clean:
+	rm -rf pyenv
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
 	rm -rf bluepymm/tests/examples/simple1/output
