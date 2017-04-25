@@ -191,19 +191,20 @@ def check_opt_scores(emodel, scores):
         opt_score = json.loads(row['opt_scores'])
         bluepymm_score = json.loads(row['scores'])
 
-        if sorted(opt_score.keys()) != sorted(bluepymm_score.keys()):
-            raise Exception(
-                'Difference detected in score keys between optimisation'
-                'score and score calculated by bluepymm for emodel %s !:'
-                '\n%s\n%s' %
-                (emodel, opt_score, bluepymm_score))
-
-        for feature in opt_score:
-            if opt_score[feature] != bluepymm_score[feature]:
+        if bluepymm_score is not None:
+            if sorted(opt_score.keys()) != sorted(bluepymm_score.keys()):
                 raise Exception(
-                    'Difference detected in optimisation score and score '
-                    'calculated by bluepymm for emodel %s !:\n%s\n%s' %
+                    'Difference detected in score keys between optimisation'
+                    'score and score calculated by bluepymm for emodel %s !:'
+                    '\n%s\n%s' %
                     (emodel, opt_score, bluepymm_score))
+
+            for feature in opt_score:
+                if opt_score[feature] != bluepymm_score[feature]:
+                    raise Exception(
+                        'Difference detected in optimisation score and score '
+                        'calculated by bluepymm for emodel %s !:\n%s\n%s' %
+                        (emodel, opt_score, bluepymm_score))
 
 
 def process_emodel(
