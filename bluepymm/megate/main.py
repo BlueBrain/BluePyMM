@@ -191,7 +191,7 @@ def check_opt_scores(emodel, scores):
         opt_score = json.loads(row['opt_scores'])
         bluepymm_score = json.loads(row['scores'])
 
-        if opt_score.keys() != bluepymm_score.keys():
+        if sorted(opt_score.keys()) != sorted(bluepymm_score.keys()):
             raise Exception(
                 'Difference detected in score keys between optimisation'
                 'score and score calculated by bluepymm for emodel %s !:'
