@@ -11,6 +11,7 @@ import argparse
 import pandas
 import sqlite3
 import json
+import math
 
 import matplotlib
 matplotlib.use('Agg')
@@ -19,7 +20,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-figsize = (15, 10)
+FIGSIZE = (15, 10)
 
 
 def convert_score_values(scores_sqlite_filename, scores):
@@ -156,7 +157,7 @@ def read_megate_thresholds(conf_dict):
 def plot_to_skip_features(to_skip_features, pp):
     """Make table with skipped features"""
 
-    plt.figure(figsize=figsize)
+    plt.figure(figsize=FIGSIZE)
     plt.axis('off')
     if to_skip_features:
         plt.table(
@@ -169,7 +170,7 @@ def plot_to_skip_features(to_skip_features, pp):
 def plot_megate_thresholds(megate_thresholds, pp):
     """Make table with skipped features"""
 
-    plt.figure(figsize=figsize)
+    plt.figure(figsize=FIGSIZE)
     plt.axis('off')
     if megate_thresholds:
         plt.table(
@@ -177,6 +178,52 @@ def plot_megate_thresholds(megate_thresholds, pp):
             loc='center')
     plt.title('MEGating thresholds')
     plt.savefig(pp, format='pdf', bbox_inches='tight')
+
+
+def plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
+        emodel_score_values, pp):
+    """Make table that displays the number of passed and failed matches
+    per feature, for a given emodel"""
+
+    sums = pandas.DataFrame()
+    sums['passed'] = megate_scores.sum(axis=0)
+    sums['failed'] = len(emodel_score_values) - sums['passed']
+
+    ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
+            color=['g', 'r'])
+    # x-ticks should be integers
+    ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
+
+    plt.xlabel('# morphologies')
+    plt.title(emodel)
+    plt.tight_layout()
+    plt.savefig(pp, format='pdf', bbox_inches='tight')
+    plt.close()
+
+
+def plot_number_of_emodel_matches_per_mtype(emodel, mtypes, megate_scores, pp):
+    """Make table that displays the number of passed and failed matches per
+    m-type for a given emodel"""
+
+    sums = pandas.DataFrame()
+    for mtype in mtypes.unique():
+        megate_scores_mtype = megate_scores[mtypes == mtype]
+        mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
+        sums.ix[mtype, 'passed'] = len(mtype_passed)
+        sums.ix[mtype, 'failed'] = (len(megate_scores_mtype)
+                                    - sums.ix[mtype, 'passed'])
+
+    if len(sums) > 0:
+        ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
+                color=['g', 'r'])
+        # x-ticks should be integers
+        ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
+
+    plt.xlabel('# morphs')
+    plt.title(emodel)
+    plt.tight_layout()
+    plt.savefig(pp, format='pdf', bbox_inches='tight')
+    plt.close()
 
 
 def check_opt_scores(emodel, scores):
@@ -326,39 +373,9 @@ def process_emodel(
 
         del emodel_ext_neurondb['extra_values']
 
-    sums = pandas.DataFrame()
-    sums['passed'] = megate_scores.sum(axis=0)
-    sums['failed'] = len(
-        emodel_score_values) - megate_scores.sum(axis=0)
-    sums.plot(
-        kind='barh',
-        figsize=figsize,
-        stacked=True,
-        color=[
-            'g',
-            'r'])
-    plt.xlabel('# morphs')
-    plt.title(emodel)
-    plt.tight_layout()
-    plt.savefig(pp, format='pdf', bbox_inches='tight')
-    plt.close()
-    mtypes_sums = pandas.DataFrame()
-    for mtype in mtypes.unique():
-        megate_scores_mtype = megate_scores[mtypes == mtype]
-        mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
-        mtypes_sums.ix[mtype, 'passed'] = len(mtype_passed)
-        mtypes_sums.ix[mtype, 'failed'] = \
-            len(megate_scores_mtype) - len(mtype_passed)
-
-    if len(mtypes_sums) > 0:
-        mtypes_sums.plot(kind='barh', stacked=True, figsize=figsize,
-                         color=['g', 'r'])
-    plt.xlabel('# morphs')
-    plt.title(emodel)
-    plt.tight_layout()
-    plt.savefig(pp, format='pdf', bbox_inches='tight')
-    plt.close()
-    print('Saving %s' % emodel)
+    plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
+            emodel_score_values, pp)
+    plot_number_of_emodel_matches_per_mtype(emodel, mtypes, megate_scores, pp)
 
     return emodel_ext_neurondb
 
