@@ -180,10 +180,9 @@ def plot_megate_thresholds(megate_thresholds, pp):
     plt.savefig(pp, format='pdf', bbox_inches='tight')
 
 
-def plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
-                                              emodel_score_values, pp):
-    """Make table that displays the number of passed and failed matches
-    per feature, for a given emodel"""
+def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
+                                       emodel_score_values, pp):
+    """Display number of morphs matches per feature for a given emodel"""
 
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
@@ -201,9 +200,8 @@ def plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
     plt.close()
 
 
-def plot_number_of_emodel_matches_per_mtype(emodel, mtypes, megate_scores, pp):
-    """Make table that displays the number of passed and failed matches per
-    m-type for a given emodel"""
+def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
+    """Display number of morphs matches per mtype for a given emodel"""
 
     sums = pandas.DataFrame()
     for mtype in mtypes.unique():
@@ -375,9 +373,9 @@ def process_emodel(
 
         del emodel_ext_neurondb['extra_values']
 
-    plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
-                                              emodel_score_values, pp)
-    plot_number_of_emodel_matches_per_mtype(emodel, mtypes, megate_scores, pp)
+    plot_morphs_per_feature_for_emodel(emodel, megate_scores,
+                                       emodel_score_values, pp)
+    plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp)
 
     return emodel_ext_neurondb
 
