@@ -5,9 +5,12 @@
 
 import setuptools
 
+import versioneer
+
 setuptools.setup(
     name="bluepymm",
-    version='0.2',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     install_requires=['sh', 'bluepyopt', 'matplotlib'],
     packages=['bluepymm', 'bluepymm/megate'],
     author="BlueBrain Project, EPFL",
