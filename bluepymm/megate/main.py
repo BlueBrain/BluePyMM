@@ -181,7 +181,7 @@ def plot_megate_thresholds(megate_thresholds, pp):
 
 
 def plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
-        emodel_score_values, pp):
+                                              emodel_score_values, pp):
     """Make table that displays the number of passed and failed matches
     per feature, for a given emodel"""
 
@@ -190,7 +190,7 @@ def plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
     sums['failed'] = len(emodel_score_values) - sums['passed']
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-            color=['g', 'r'])
+                   color=['g', 'r'])
     # x-ticks should be integers
     ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -215,7 +215,7 @@ def plot_number_of_emodel_matches_per_mtype(emodel, mtypes, megate_scores, pp):
 
     if len(sums) > 0:
         ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                color=['g', 'r'])
+                       color=['g', 'r'])
         # x-ticks should be integers
         ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -374,7 +374,7 @@ def process_emodel(
         del emodel_ext_neurondb['extra_values']
 
     plot_number_of_emodel_matches_per_feature(emodel, megate_scores,
-            emodel_score_values, pp)
+                                              emodel_score_values, pp)
     plot_number_of_emodel_matches_per_mtype(emodel, mtypes, megate_scores, pp)
 
     return emodel_ext_neurondb
