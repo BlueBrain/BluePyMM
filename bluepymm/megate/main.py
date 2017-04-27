@@ -262,13 +262,13 @@ def process_emodel(
         megate_patterns,
         pp,
         skip_repaired_exemplar,
-        disable_check_opt_scores):
+        enable_check_opt_scores):
     """Process emodel"""
     print 'Processing emodel %s' % emodel
     exemplar_morph = scores[
         scores.emodel == emodel].morph_name.values[0]
 
-    if not disable_check_opt_scores:
+    if enable_check_opt_scores:
         check_opt_scores(emodel, scores)
 
     exemplar_score_values = score_values[
@@ -438,10 +438,10 @@ def run(args):
     else:
         skip_repaired_exemplar = False
 
-    if 'disable_check_opt_scores' in conf_dict:
-        disable_check_opt_scores = conf_dict['disable_check_opt_scores']
+    if 'check_opt_scores' in conf_dict:
+        enable_check_opt_scores = conf_dict['check_opt_scores']
     else:
-        disable_check_opt_scores = False
+        enable_check_opt_scores = True
 
     mm_run_path = conf_dict['mm_run_path']
     scores_sqlite_filename = os.path.join(mm_run_path, 'output/scores.sqlite')
@@ -494,7 +494,7 @@ def run(args):
                 megate_patterns,
                 pp,
                 skip_repaired_exemplar,
-                disable_check_opt_scores)
+                enable_check_opt_scores)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
     print('Wrote pdf to %s' % pdf_filename)

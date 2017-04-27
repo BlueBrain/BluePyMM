@@ -7,5 +7,6 @@
        {"emodel": [".*"], "fullmtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
    ],                                                                          
    "extneurondb_filename": "output_megate/extNeuronDB.dat",                    
-   "combo_emodel_filename": "output_megate/combo_model.csv" 
+   "combo_emodel_filename": "output_megate/combo_model.csv",
+   "check_opt_scores": true 
 }
