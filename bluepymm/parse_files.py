@@ -120,7 +120,8 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
         layers = emodel_etype_map[original_emodel]['layer']
 
         if 'etype' in emodel_etype_map[original_emodel]:
-            etype_regex = re.compile(emodel_etype_map[original_emodel]['etype'])
+            etype_regex = re.compile(
+                emodel_etype_map[original_emodel]['etype'])
         else:
             etype_regex = re.compile('.*')
 

@@ -212,7 +212,8 @@ def calculate_scores(
         # use ipyparallel
         client = ipyparallel.Client(profile=ipyp_profile)
         lview = client.load_balanced_view()
-        results = lview.imap(run_emodel_morph_isolated, arg_list, ordered=False)
+        results = lview.imap(run_emodel_morph_isolated,
+                             arg_list, ordered=False)
     else:
         # use multiprocessing
         pool = NestedPool()

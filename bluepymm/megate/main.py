@@ -505,4 +505,3 @@ def run(args):
 
     print('Wrote extneurondb to %s' % extneurondb_filename)
     print('Wrote combo_model to %s' % combo_emodel_filename)
-

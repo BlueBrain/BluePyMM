@@ -96,5 +96,6 @@ def run(args):
 
     print('BluePyMM finished\n')
 
+
 if __name__ == '__main__':
     main()

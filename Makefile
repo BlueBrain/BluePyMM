@@ -20,3 +20,8 @@ unit: install install_test_requirements
 functional: install install_test_requirements
 	cd bluepymm/tests; nosetests -a '!unit' -s -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
+
+autopep8: clean virtualenv
+	pip install autopep8
+	autopep8 -i bluepymm/*.py
+	autopep8 -i bluepymm/megate/*.py
