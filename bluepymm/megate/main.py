@@ -189,7 +189,7 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
     sums['failed'] = len(emodel_score_values) - sums['passed']
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                   color=['g', 'r'])
+                   color=['b', 'r'])
     # x-ticks should be integers
     ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -213,7 +213,7 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
 
     if len(sums) > 0:
         ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                       color=['g', 'r'])
+                       color=['b', 'r'])
         # x-ticks should be integers
         ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -240,7 +240,7 @@ def plot_emodels_per_morphology(data, final_db, pp):
         sums.ix[morph_name, 'failed'] = nb_combos - nb_matches - nb_errors
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                   color=['g', 'orange', 'r'])
+                   color=['b', 'orange', 'r'])
     # x-ticks should be integers
     ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
