@@ -11,7 +11,6 @@ import argparse
 import pandas
 import sqlite3
 import json
-import math
 
 import matplotlib
 matplotlib.use('Agg')
@@ -19,8 +18,6 @@ matplotlib.use('Agg')
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
-
-from pylab import MaxNLocator
 
 BLUE = 'C1'
 RED = 'C0'
@@ -196,7 +193,7 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=[BLUE, RED])
-    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
+    ax.get_xaxis().set_major_locator(plt.MaxNLocator(integer=True))
 
     plt.xlabel('# morphologies')
     plt.title(emodel)
@@ -219,7 +216,7 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
     if len(sums) > 0:
         ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                        color=[BLUE, RED])
-        ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
+        ax.get_xaxis().set_major_locator(plt.MaxNLocator(integer=True))
 
     plt.xlabel('# morphs')
     plt.title(emodel)
@@ -248,7 +245,7 @@ def plot_emodels_per_morphology(data, final_db, pp):
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=[BLUE, YELLOW, RED])
-    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
+    ax.get_xaxis().set_major_locator(plt.MaxNLocator(integer=True))
 
     plt.xlabel('# tested e-models')
     plt.ylabel('Morphology name')
@@ -265,11 +262,13 @@ def plot_emodels_per_metype(data, final_db, pp):
     non_exemplars = data[data['is_exemplar'] == 0].copy()
 
     non_exemplars['metype'] = non_exemplars.apply(
-            lambda x: '%s_%s' % (x['etype'], x['fullmtype']), axis=1)
+        lambda x: '%s_%s' % (x['etype'], x['fullmtype']), axis=1)
     for metype in non_exemplars['metype'].unique():
         nb_matches = len(final_db[final_db['combo_name'].str.contains(metype)])
-        nb_errors = len(non_exemplars[(non_exemplars['metype'] == metype)
-                                      & (non_exemplars['exception'].notnull())])
+        nb_errors = len(
+            non_exemplars[
+                (non_exemplars['metype'] == metype) & (
+                    non_exemplars['exception'].notnull())])
         nb_combos = len(non_exemplars[non_exemplars['metype'] == metype])
         sums.ix[metype, 'passed'] = nb_matches
         sums.ix[metype, 'error'] = nb_errors
@@ -277,7 +276,7 @@ def plot_emodels_per_metype(data, final_db, pp):
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=[BLUE, YELLOW, RED])
-    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
+    ax.get_xaxis().set_major_locator(plt.MaxNLocator(integer=True))
 
     plt.xlabel('# tested (e-model, morphology) combinations')
     plt.ylabel('me-type')
