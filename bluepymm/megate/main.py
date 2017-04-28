@@ -208,10 +208,11 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
     plot_stacked_bars(sums,
                       '# morphologies',
                       '',
-                      '{}: number of tested morphologies per feature'.format(emodel),
+                      '{}: number of tested morphologies per feature'.format(
+                          emodel),
                       [BLUE, RED],
                       pp,
-                     )
+                      )
 
 
 def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
@@ -228,10 +229,11 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
     plot_stacked_bars(sums,
                       '# morphologies',
                       '',
-                      '{}: number of tested morphologies per m-type'.format(emodel),
+                      '{}: number of tested morphologies per m-type'.format(
+                          emodel),
                       [BLUE, RED],
                       pp,
-                     )
+                      )
 
 
 def create_morphology_label(data_frame):
@@ -265,14 +267,14 @@ def plot_emodels_per_morphology(data, final_db, pp):
                       'Number of tested e-models for each morphology',
                       [BLUE, YELLOW, RED],
                       pp,
-                     )
+                      )
 
 
 def plot_emodels_per_metype(data, final_db, pp):
     """Display result of tested e-model / morphology combinations per me-type"""
 
     data['metype'] = data.apply(
-            lambda x: '%s_%s' % (x['etype'], x['fullmtype']), axis=1)
+        lambda x: '%s_%s' % (x['etype'], x['fullmtype']), axis=1)
 
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
@@ -291,10 +293,10 @@ def plot_emodels_per_metype(data, final_db, pp):
                       '# tested (e-model, morphology) combinations',
                       'me-type',
                       'Number of tested (e-model, morphology) combinations per'
-                         ' me-type',
+                      ' me-type',
                       [BLUE, YELLOW, RED],
                       pp,
-                     )
+                      )
 
 
 def check_opt_scores(emodel, scores):
