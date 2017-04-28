@@ -186,7 +186,8 @@ def plot_megate_thresholds(megate_thresholds, pp):
 def plot_stacked_bars(data, xlabel, ylabel, title, color_map, pp):
     ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=color_map)
-    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
+    ax.get_xaxis().set_major_locator(
+        matplotlib.ticker.MaxNLocator(integer=True))
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
