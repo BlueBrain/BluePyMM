@@ -20,6 +20,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
+from pylab import MaxNLocator
+
 BLUE = 'C1'
 RED = 'C0'
 YELLOW = 'C4'
@@ -194,8 +196,7 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=[BLUE, RED])
-    # x-ticks should be integers
-    ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
+    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
 
     plt.xlabel('# morphologies')
     plt.title(emodel)
@@ -218,8 +219,7 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
     if len(sums) > 0:
         ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                        color=[BLUE, RED])
-        # x-ticks should be integers
-        ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
+        ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
 
     plt.xlabel('# morphs')
     plt.title(emodel)
@@ -233,8 +233,7 @@ def plot_emodels_per_morphology(data, final_db, pp):
 
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
-    morph_names = non_exemplars['morph_name'].unique()
-    for morph_name in morph_names:
+    for morph_name in non_exemplars['morph_name'].unique():
         nb_matches = len(final_db[final_db['morph_name'] == morph_name])
         nb_errors = len(
             non_exemplars[
@@ -249,12 +248,40 @@ def plot_emodels_per_morphology(data, final_db, pp):
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=[BLUE, YELLOW, RED])
-    # x-ticks should be integers
-    ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
+    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
 
     plt.xlabel('# tested e-models')
     plt.ylabel('Morphology name')
     plt.title('Number of tested e-models for each morphology')
+    plt.tight_layout()
+    plt.savefig(pp, format='pdf', bbox_inches='tight')
+    plt.close()
+
+
+def plot_emodels_per_metype(data, final_db, pp):
+    """Display result of tested e-model / morphology combinations per me-type"""
+
+    sums = pandas.DataFrame()
+    non_exemplars = data[data['is_exemplar'] == 0].copy()
+
+    non_exemplars['metype'] = non_exemplars.apply(
+            lambda x: '%s_%s' % (x['etype'], x['fullmtype']), axis=1)
+    for metype in non_exemplars['metype'].unique():
+        nb_matches = len(final_db[final_db['combo_name'].str.contains(metype)])
+        nb_errors = len(non_exemplars[(non_exemplars['metype'] == metype)
+                                      & (non_exemplars['exception'].notnull())])
+        nb_combos = len(non_exemplars[non_exemplars['metype'] == metype])
+        sums.ix[metype, 'passed'] = nb_matches
+        sums.ix[metype, 'error'] = nb_errors
+        sums.ix[metype, 'failed'] = nb_combos - nb_matches - nb_errors
+
+    ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
+                   color=[BLUE, YELLOW, RED])
+    ax.get_xaxis().set_major_locator(MaxNLocator(integer=True))
+
+    plt.xlabel('# tested (e-model, morphology) combinations')
+    plt.ylabel('me-type')
+    plt.title('Number of tested (e-model, morphology) combinations per me-type')
     plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
     plt.close()
@@ -535,6 +562,7 @@ def run(args):
                 and conf_dict['plot_emodels_per_morphology']):
             # Plot information per morphology
             plot_emodels_per_morphology(scores, ext_neurondb, pp)
+        plot_emodels_per_metype(scores, ext_neurondb, pp)
 
     print('Wrote pdf to %s' % pdf_filename)
 
