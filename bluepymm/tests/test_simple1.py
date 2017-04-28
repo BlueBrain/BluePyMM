@@ -33,6 +33,10 @@ def test_simple1():
         with sqlite3.connect(exp_scores_sqlite_filename) as conn:
             exp_scores = pandas.read_sql('SELECT * FROM scores', conn)
 
+        if not scores.equals(exp_scores):
+            print "Resulting scores db: ", scores
+            print "Expected scored db:", exp_scores
+
         nt.assert_true(scores.equals(exp_scores))
 
         # Run megate
