@@ -239,7 +239,8 @@ def plot_emodels_per_morphology(data, final_db, pp):
         sums.ix[morph_name, 'error'] = nb_errors
         sums.ix[morph_name, 'failed'] = nb_combos - nb_matches - nb_errors
 
-    ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=['g', 'orange', 'r'])
+    ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
+                   color=['g', 'orange', 'r'])
     # x-ticks should be integers
     ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -522,8 +523,10 @@ def run(args):
                 enable_check_opt_scores)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
-        # Plot information per morphology
-        plot_emodels_per_morphology(scores, ext_neurondb, pp)
+        if ('plot_emodels_per_morphology' in conf_dict
+            and conf_dict['plot_emodels_per_morphology']):
+            # Plot information per morphology
+            plot_emodels_per_morphology(scores, ext_neurondb, pp)
 
     print('Wrote pdf to %s' % pdf_filename)
 
