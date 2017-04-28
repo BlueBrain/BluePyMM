@@ -20,6 +20,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
+BLUE = 'C1'
+RED = 'C0'
+YELLOW = 'C4'
+
 FIGSIZE = (15, 10)
 
 
@@ -189,7 +193,7 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
     sums['failed'] = len(emodel_score_values) - sums['passed']
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                   color=['b', 'r'])
+                   color=[BLUE, RED])
     # x-ticks should be integers
     ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -213,7 +217,7 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
 
     if len(sums) > 0:
         ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                       color=['b', 'r'])
+                       color=[BLUE, RED])
         # x-ticks should be integers
         ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -232,15 +236,19 @@ def plot_emodels_per_morphology(data, final_db, pp):
     morph_names = non_exemplars['morph_name'].unique()
     for morph_name in morph_names:
         nb_matches = len(final_db[final_db['morph_name'] == morph_name])
-        nb_errors = len(non_exemplars[(non_exemplars['morph_name'] == morph_name)
-                                      & (non_exemplars['exception'].notnull())])
-        nb_combos = len(non_exemplars[non_exemplars['morph_name'] == morph_name])
+        nb_errors = len(
+            non_exemplars[
+                (non_exemplars['morph_name'] == morph_name) & (
+                    non_exemplars['exception'].notnull())])
+        nb_combos = len(
+            non_exemplars[
+                non_exemplars['morph_name'] == morph_name])
         sums.ix[morph_name, 'passed'] = nb_matches
         sums.ix[morph_name, 'error'] = nb_errors
         sums.ix[morph_name, 'failed'] = nb_combos - nb_matches - nb_errors
 
     ax = sums.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                   color=['b', 'orange', 'r'])
+                   color=[BLUE, YELLOW, RED])
     # x-ticks should be integers
     ax.xaxis.set_ticks(range(int(math.ceil(ax.get_xlim()[1]))))
 
@@ -524,7 +532,7 @@ def run(args):
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
         if ('plot_emodels_per_morphology' in conf_dict
-            and conf_dict['plot_emodels_per_morphology']):
+                and conf_dict['plot_emodels_per_morphology']):
             # Plot information per morphology
             plot_emodels_per_morphology(scores, ext_neurondb, pp)
 
