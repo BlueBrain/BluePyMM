@@ -167,7 +167,9 @@ def plot_to_skip_features(to_skip_features, pp):
             cellText=[[x] for x in to_skip_features],
             loc='center')
     plt.title('Ignored feature patterns')
+    plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
+    plt.close()
 
 
 def plot_megate_thresholds(megate_thresholds, pp):
@@ -180,7 +182,9 @@ def plot_megate_thresholds(megate_thresholds, pp):
             cellText=[[x] for x in megate_thresholds],
             loc='center')
     plt.title('MEGating thresholds')
+    plt.tight_layout()
     plt.savefig(pp, format='pdf', bbox_inches='tight')
+    plt.close()
 
 
 def plot_stacked_bars(data, xlabel, ylabel, title, color_map, pp):
