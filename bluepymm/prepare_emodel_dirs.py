@@ -74,7 +74,7 @@ def get_emodel_dicts(
 
 
 def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
-                              template):
+                              template, morph_path=None):
     """Create .hoc file for emodel based on code from <setup_dir>, given
     emodel_params and template, and write out to file <hoc_dir>/<emodel>.hoc.
 
@@ -86,6 +86,8 @@ def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
                  out.
         emodel_params: E-model parameters
         template: Template file use for creation of .hoc files
+        morph_path: Path to morphology file, used to overwrite the original
+                    morphology of an e-model. Default is None.
     """
     # load python module
     sys.path.append(setup_dir)
@@ -95,6 +97,8 @@ def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
         old_stdout = sys.stdout
         sys.stdout = devnull
         evaluator = setup.evaluator.create(emodel)
+        if morph_path is not None:
+            evaluator.cell_model.morphology.morphology_path = morph_path
         sys.stdout = old_stdout
 
     # create hoc code
