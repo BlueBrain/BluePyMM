@@ -73,6 +73,39 @@ def get_emodel_dicts(
     return final_dict, emodel_etype_map, opt_dir, emodels_in_repo
 
 
+def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
+                              template):
+    """Create .hoc file for emodel based on code from <setup_dir>, given
+    emodel_params and template, and write out to file <hoc_dir>/<emodel>.hoc.
+
+    Args:
+        emodel: A string representing the cell model name.
+        setup_dir: The directory containing a python package called setup,
+                   which contains an evaluator module.
+        hoc_dir: The directory to which the resulting .hoc file will be written
+                 out.
+        emodel_params: E-model parameters
+        template: Template file use for creation of .hoc files
+    """
+    # load python module
+    sys.path.append(setup_dir)
+    import setup
+
+    with open(os.devnull, 'w') as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        evaluator = setup.evaluator.create(emodel)
+        sys.stdout = old_stdout
+
+    # create hoc code
+    hoc = evaluator.cell_model.create_hoc(emodel_params, template=template)
+
+    # write out result
+    emodel_hoc_path = os.path.join(hoc_dir, '{}.hoc'.format(emodel))
+    with open(emodel_hoc_path, 'w') as emodel_hoc_file:
+        emodel_hoc_file.write(hoc)
+
+
 def prepare_emodel_dir((original_emodel,
                         emodel,
                         emodel_dict,
@@ -123,22 +156,9 @@ def prepare_emodel_dir((original_emodel,
                 print('Compiling mechanisms ...')
                 sh.nrnivmodl('mechanisms')
 
-                sys.path.append(emodel_dir)
-                import setup
-                with open(os.devnull, 'w') as devnull:
-                    old_stdout = sys.stdout
-                    sys.stdout = devnull
-                    evaluator = setup.evaluator.create(etype='%s' % emodel)
-                    sys.stdout = old_stdout
-
-                emodel_hoc_code = evaluator.cell_model.create_hoc(
-                    emodel_dict['params'])
-                emodel_hoc_path = os.path.join(
-                    emodels_hoc_dir,
-                    '%s.hoc' %
-                    emodel)
-                with open(emodel_hoc_path, 'w') as emodel_hoc_file:
-                    emodel_hoc_file.write(emodel_hoc_code)
+                create_and_write_hoc_file(emodel, emodel_dir, emodels_hoc_dir,
+                                          emodel_dict['params'],
+                                          'cell_template.jinja2')
 
     except:
         raise Exception(
