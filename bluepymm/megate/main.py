@@ -283,7 +283,10 @@ def plot_emodels_per_metype(data, final_db, pp):
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
     for metype in non_exemplars['metype'].unique():
-        mtype, etype = metype.split("_")
+        split_data = metype.split("_")
+        # etype is bAC, cAC, cACpyr, or cNAC. TODO: no assumptions!!
+        etype = split_data[0]
+        mtype = "_".join(split_data[1:])
         nb_matches = len(final_db[(final_db['fullmtype'] == mtype) & (
             final_db['etype'] == etype)])
         nb_errors = len(

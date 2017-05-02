@@ -1,5 +1,6 @@
 import os
 import argparse
+import multiprocessing
 
 import utils
 
@@ -58,6 +59,28 @@ def extract_mm_parameters(mm_config_file):
     return emodels_dir, final_dict, mm_config_full_paths["morph_path"]
 
 
+def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
+                                   template, template_dir, morph_path,
+                                   model_name)):
+    """Run create_and_write_hoc_file in isolated environment.
+
+    Args:
+        See create_and_write_hoc_file
+    """
+    pool = multiprocessing.pool.Pool(1, maxtasksperchild=1)
+    pool.apply(create_and_write_hoc_file, (emodel,
+                                           setup_dir,
+                                           hoc_dir,
+                                           emodel_params,
+                                           template,
+                                           template_dir,
+                                           morph_path,
+                                           model_name))
+    pool.terminate()
+    pool.join()
+    del pool
+
+
 def create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_dir,
                      template, hoc_dir):
     """Create a .hoc file for every combination in a given database.
@@ -75,17 +98,17 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_dir,
         print "Working on combination {}".format(combination)
         emodel = comb_data["emodel"]
         setup_dir = os.path.join(emodels_dir, emodel)
-        morphology = os.path.join(morph_dir, comb_data["morph_name"])
+        morph_path = os.path.join(morph_dir, comb_data["morph_name"])
         emodel_params = final_dict[emodel]["params"]
 
-        create_and_write_hoc_file(emodel,
-                                  setup_dir,
-                                  hoc_dir,
-                                  emodel_params,
-                                  os.path.basename(template),
-                                  os.path.dirname(template),
-                                  morphology,
-                                  combination)
+        run_create_and_write_hoc_file((emodel,
+                                       setup_dir,
+                                       hoc_dir,
+                                       emodel_params,
+                                       os.path.basename(template),
+                                       os.path.dirname(template),
+                                       morph_path,
+                                       combination))
 
 
 def main():
@@ -95,6 +118,9 @@ def main():
     config_dir = os.path.abspath(os.path.dirname(args.config_filename))
     config = add_full_paths(config, config_dir)
     combinations_dict = load_combinations_dict(config["megate_config"])
+    from pprint import pprint
+    pprint(combinations_dict)
+    return
     emodels_dir, final_dict, morph_path = extract_mm_parameters(
         config["mm_config"])
 
