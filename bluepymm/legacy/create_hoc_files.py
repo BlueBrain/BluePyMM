@@ -20,9 +20,10 @@ def add_full_paths(config, directory):
         config: Dictionary
     """
     for k, v in config.iteritems():
-        test_path = os.path.join(directory, v)
-        if os.path.isdir(test_path) or os.path.isfile(test_path):
-            config[k] = test_path
+        if isinstance(v, basestring):
+            test_path = os.path.join(directory, v)
+            if os.path.isdir(test_path) or os.path.isfile(test_path):
+                config[k] = test_path
     return config
 
 
@@ -42,12 +43,16 @@ def extract_mm_parameters(mm_config_file):
         mm_config_file: Path to .json file
     """
     mm_config = utils.load_json(mm_config_file)
-    mm_config_dir = os.path.dirname(mm_config_file)
+    mm_config_dir = os.path.abspath(os.path.dirname(mm_config_file))
     mm_config_full_paths = add_full_paths(mm_config, mm_config_dir)
 
+    if "emodels_dir" in mm_config:
+        emodels_path = mm_config_full_paths["emodels_dir"]
+    else:
+        emodels_path = mm_config_full_paths["emodels_repo"]
     final_dict = utils.load_json(
         os.path.join(mm_config_dir,
-                     mm_config_full_paths["emodels_dir"],
+                     emodels_path,
                      mm_config_full_paths["final_json_path"]))
     emodels_dir = os.path.join(mm_config_full_paths["tmp_dir"], "emodels")
     return emodels_dir, final_dict, mm_config_full_paths["morph_path"]
@@ -67,6 +72,7 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_dir,
         hoc_dir: Directory where all create .hoc files will be written.
     """
     for combination, comb_data in combinations_dict.iteritems():
+        print "Working on combination {}".format(combination)
         emodel = comb_data["emodel"]
         setup_dir = os.path.join(emodels_dir, emodel)
         morphology = os.path.join(morph_dir, comb_data["morph_name"])
@@ -86,7 +92,7 @@ def main():
     # Parse and process arguments
     args = parse_arguments()
     config = utils.load_json(args.config_filename)
-    config_dir = os.path.dirname(args.config_filename)
+    config_dir = os.path.abspath(os.path.dirname(args.config_filename))
     config = add_full_paths(config, config_dir)
     combinations_dict = load_combinations_dict(config["megate_config"])
     emodels_dir, final_dict, morph_path = extract_mm_parameters(
