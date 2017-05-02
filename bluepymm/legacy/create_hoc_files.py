@@ -65,7 +65,7 @@ def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
     """Run create_and_write_hoc_file in isolated environment.
 
     Args:
-        See create_and_write_hoc_file
+        See create_and_write_hoc_file.
     """
     pool = multiprocessing.pool.Pool(1, maxtasksperchild=1)
     pool.apply(create_and_write_hoc_file, (emodel,
@@ -118,9 +118,6 @@ def main():
     config_dir = os.path.abspath(os.path.dirname(args.config_filename))
     config = add_full_paths(config, config_dir)
     combinations_dict = load_combinations_dict(config["megate_config"])
-    from pprint import pprint
-    pprint(combinations_dict)
-    return
     emodels_dir, final_dict, morph_path = extract_mm_parameters(
         config["mm_config"])
 
