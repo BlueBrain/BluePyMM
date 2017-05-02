@@ -74,7 +74,8 @@ def get_emodel_dicts(
 
 
 def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
-                              template, morph_path=None, model_name=None):
+                              template, template_dir=None, morph_path=None,
+                              model_name=None):
     """Create .hoc file for emodel based on code from <setup_dir>, given
     emodel_params and template, and write out to file <hoc_dir>/<emodel>.hoc.
 
@@ -86,6 +87,8 @@ def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
                  out.
         emodel_params: E-model parameters
         template: Template file use for creation of .hoc files
+        template_dir: Directory that contains the template. If None, a template
+                      provided by the bluepyopt is used. Default is None.
         morph_path: Path to morphology file, used to overwrite the original
                     morphology of an e-model. Default is None.
         model_name: String used to name hoc-file. If None, the name of the
@@ -104,7 +107,8 @@ def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
         sys.stdout = old_stdout
 
     # create hoc code
-    hoc = evaluator.cell_model.create_hoc(emodel_params, template=template)
+    hoc = evaluator.cell_model.create_hoc(emodel_params, template=template,
+                                          template_dir=template_dir)
 
     # write out result
     hoc_file_name = '{}.hoc'.format(model_name if not None else emodel)
