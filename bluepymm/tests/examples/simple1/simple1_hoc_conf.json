@@ -1,0 +1,6 @@
+{
+  "mm_config": "/gpfs/bbp.cscs.ch/home/vanherpe/BluePyMM/bluepymm/tests/examples/simple1/simple1_conf.json",
+  "megate_config": "/gpfs/bbp.cscs.ch/home/vanherpe/BluePyMM/bluepymm/tests/examples/simple1/simple1_megate_conf.json",
+  "template": "./data/cell_template.jinja2",
+  "hoc_output_dir": "./hoc"
+}

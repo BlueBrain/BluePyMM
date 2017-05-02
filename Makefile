@@ -25,3 +25,4 @@ autopep8: clean virtualenv
 	pip install autopep8
 	autopep8 -i bluepymm/*.py
 	autopep8 -i bluepymm/megate/*.py
+	autopep8 -i bluepymm/legacy/*.py
