@@ -283,7 +283,9 @@ def plot_emodels_per_metype(data, final_db, pp):
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
     for metype in non_exemplars['metype'].unique():
-        nb_matches = len(final_db[final_db['combo_name'].str.contains(metype)])
+        mtype, etype = metype.split("_")
+        nb_matches = len(final_db[(final_db['fullmtype'] == mtype) & (
+            final_db['etype'] == etype)])
         nb_errors = len(
             non_exemplars[
                 (non_exemplars['metype'] == metype) & (
@@ -442,7 +444,7 @@ def process_emodel(
     if len(emodel_ext_neurondb) > 0:
         emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
             lambda x: '%s_%s_%s_%s' %
-            (x['etype'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
+            (x['emodel'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
 
         emodel_ext_neurondb['threshold_current'] = None
         emodel_ext_neurondb['holding_current'] = None
