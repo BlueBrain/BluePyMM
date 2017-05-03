@@ -275,20 +275,18 @@ def plot_emodels_per_morphology(data, final_db, pp):
 
 
 def plot_emodels_per_metype(data, final_db, pp):
-    """Display result of tested e-model / morphology combinations per me-type"""
+    """Display result of tested e-model / morphology combinations per me-type.
+    """
 
-    data['metype'] = data.apply(
-        lambda x: '%s_%s' % (x['etype'], x['fullmtype']), axis=1)
+    # Add helper column 'metype'
+    lambda_metype = lambda x: '%s_%s' % (x['etype'], x['fullmtype'])
+    data['metype'] = data.apply(lambda_metype, axis=1)
+    final_db['metype'] = final_db.apply(lambda_metype, axis=1)
 
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
     for metype in non_exemplars['metype'].unique():
-        split_data = metype.split("_")
-        # etype is bAC, cAC, cACpyr, or cNAC. TODO: no assumptions!!
-        etype = split_data[0]
-        mtype = "_".join(split_data[1:])
-        nb_matches = len(final_db[(final_db['fullmtype'] == mtype) & (
-            final_db['etype'] == etype)])
+        nb_matches = len(final_db[(final_db['metype'] == metype)])
         nb_errors = len(
             non_exemplars[
                 (non_exemplars['metype'] == metype) & (
@@ -297,6 +295,10 @@ def plot_emodels_per_metype(data, final_db, pp):
         sums.ix[metype, 'passed'] = nb_matches
         sums.ix[metype, 'error'] = nb_errors
         sums.ix[metype, 'failed'] = nb_combos - nb_matches - nb_errors
+
+    # Remove helper column 'metype'
+    del data['metype']
+    del final_db['metype']
 
     plot_stacked_bars(sums,
                       '# tested (e-model, morphology) combinations',
