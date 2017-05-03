@@ -1,6 +1,6 @@
-/* 
+/*
 {%- if banner %}
-{{banner}} 
+{{banner}}
 {%- endif %}
 */
 {load_file("stdrun.hoc")}
@@ -58,7 +58,7 @@ proc setCCell(){
 //-----------------------------------------------------------------------------------------------
 
 /*!
- * When clearing the model, the circular reference between Cells and CCells must be broken so the 
+ * When clearing the model, the circular reference between Cells and CCells must be broken so the
  * entity watching reference counts can work.
  */
 proc clear() { localobj nil
@@ -98,9 +98,8 @@ proc init(/* args: morphology_dir, morphology_name */) {
     load_morphology($s2, $s3)
   } else {
   {%- if morphology %}
-    //print $1, $s2, " {{morphology}} ", " {{template_name}} " , " static ", " {acceptable} ######\n" 
-    //load_morphology($s2, "{{morphology}}")
-    load_morphology($s2, "{morphology_name}.asc")
+    //print $1, $s2, " {{morphology}} ", " {{template_name}} " , " static ", " {acceptable} ######\n"
+    load_morphology($s2, "{{morphology}}")
   {%- else %}
     execerror("Template {{template_name}} requires morphology name to instantiate")
   {%- endif %}
@@ -118,13 +117,13 @@ proc init(/* args: morphology_dir, morphology_name */) {
 }
 
 /*!
- * Assign section indices to the section voltage value.  This will be useful later for serializing 
+ * Assign section indices to the section voltage value.  This will be useful later for serializing
  * the sections into an array.  Note, that once the simulation begins, the voltage values will revert to actual data again.
  *
  * @param $o1 Import3d_GUI object
  */
-proc indexSections() { local index 
-    index = 0 
+proc indexSections() { local index
+    index = 0
     forsec all {
         v(0.0001) = index
         index = index +1
@@ -146,10 +145,10 @@ proc load_morphology(/* morphology_dir, morphology_name */) {localobj morph, imp
   if(strcmp(extension.s, ".ASC") == 0 ){
     extension.s = ".asc"
     sf.left(morph_path, sf.len(morph_path)-3)
-    sprint(morph_path,"%s%s",morph_path,"asc") 
+    sprint(morph_path,"%s%s",morph_path,"asc")
     print "USING LOWERCASE EXTENSION", morph_path
-  } 
-  
+  }
+
 
   if( strcmp(extension.s, ".asc") == 0 ) {
     morph = new Import3d_Neurolucida3()
