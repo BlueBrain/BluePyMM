@@ -19,6 +19,9 @@ def cd(dir_name):
 def main():
     """Main"""
 
+    os.environ['GIT_AUTHOR_NAME'] = 'dummy'
+    os.environ['GIT_AUTHOR_EMAIL'] = 'dummy@dummy.com'
+
     tmp_git_dir = 'tmp_git'
     git_subdir = 'subdir'
     orig_dir = '../../data/emodels_dir'
