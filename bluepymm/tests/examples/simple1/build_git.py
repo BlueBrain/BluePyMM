@@ -68,28 +68,5 @@ def main():
                     sh.git.add(filename)
                 sh.git.commit('-m', 'emodel%s' % emodel_n)
 
-    """
-
-
-
-    git commit -m "main"
-
-
-    git checkout -b "emodel1"
-    for emodel in "1" "2"
-    do
-        model_files=("morphologies/morph${emodel}.asc" "setup/evaluator.py")
-        for filename in ${model_files[@]}
-        do
-            echo ${filename}
-            rsync -Rv ../../data/emodels_dir/subdir/${filename} .
-            # cp -r ../../data/emodels_dir/subdir/${filename} .
-            git add ${filename}
-        done
-        git checkout -b "emodel${emodel}"
-        git commit -m "emodel${emodel}"
-    done
-    """
-
 if __name__ == '__main__':
     main()
