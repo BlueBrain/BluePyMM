@@ -19,9 +19,6 @@ def cd(dir_name):
 def main():
     """Main"""
 
-    os.environ['GIT_AUTHOR_NAME'] = 'dummy'
-    os.environ['GIT_AUTHOR_EMAIL'] = 'dummy@dummy.com'
-
     tmp_git_dir = 'tmp_git'
     git_subdir = 'subdir'
     orig_dir = '../../data/emodels_dir'
@@ -33,6 +30,9 @@ def main():
 
     with cd(tmp_git_dir):
         sh.git('init')
+
+        sh.git.config('user.name', 'dummy')
+        sh.git.config('user.email', 'dummy@dummy.com')
 
         main_files = ['final.json', 'emodel_etype_map.json']
 
