@@ -1,0 +1,18 @@
+language: python
+python:
+  - '2.7'
+install: pip install pip --upgrade
+script: make test
+cache:
+    directories:
+      - $HOME/.cache/pip
+      - $HOME/local
+      - $HOME/src
+git:
+  depth: 2147483647
+before_script:
+      - SRC_DIR=$HOME/local/src
+      - NRN_INSTALL_DIR=$HOME/local/nrn
+      - ./.travis_install_neuron.sh ${SRC_DIR} ${NRN_INSTALL_DIR}
+      - export PATH=$PATH:${NRN_INSTALL_DIR}/x86_64/bin
+      - export PYTHONPATH=$PYTHONPATH:${NRN_INSTALL_DIR}/lib/python
