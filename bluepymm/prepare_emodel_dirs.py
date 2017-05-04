@@ -73,7 +73,7 @@ def get_emodel_dicts(
     return final_dict, emodel_etype_map, opt_dir, emodels_in_repo
 
 
-def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
+def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                               template, template_dir=None, morph_path=None,
                               model_name=None):
     """Create .hoc file for emodel based on code from <setup_dir>, given
@@ -81,8 +81,7 @@ def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
 
     Args:
         emodel: A string representing the cell model name.
-        setup_dir: The directory containing a python package called setup,
-                   which contains an evaluator module.
+        emodel_dir: The directory containing the code for a specific emodel
         hoc_dir: The directory to which the resulting .hoc file will be written
                  out.
         emodel_params: E-model parameters
@@ -95,7 +94,7 @@ def create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
                     e-model is used.
     """
     # load python module
-    sys.path.append(setup_dir)
+    sys.path.append(emodel_dir)
     import setup
 
     with open(os.devnull, 'w') as devnull:
@@ -163,13 +162,14 @@ def prepare_emodel_dir((original_emodel,
             with bluepymm.tools.cd(emodels_dir):
                 sh.tar('xf', tar_filename)
 
-                os.chdir(emodel)
-                print('Compiling mechanisms ...')
-                sh.nrnivmodl('mechanisms')
+                with bluepymm.tools.cd(emodel):
+                    print('Compiling mechanisms ...')
+                    sh.nrnivmodl('mechanisms')
 
-                create_and_write_hoc_file(emodel, emodel_dir, emodels_hoc_dir,
-                                          emodel_dict['params'],
-                                          'cell_template.jinja2')
+                    create_and_write_hoc_file(
+                        emodel, emodel_dir, emodels_hoc_dir,
+                        emodel_dict['params'],
+                        'cell_template.jinja2')
 
     except:
         raise Exception(
