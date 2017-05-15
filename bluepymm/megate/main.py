@@ -279,7 +279,7 @@ def plot_emodels_per_metype(data, final_db, pp):
     """
 
     # Add helper column 'metype'
-    lambda_metype = lambda x: '%s_%s' % (x['etype'], x['fullmtype'])
+    def lambda_metype(x): return '%s_%s' % (x['etype'], x['fullmtype'])
     data['metype'] = data.apply(lambda_metype, axis=1)
     final_db['metype'] = final_db.apply(lambda_metype, axis=1)
 
@@ -470,8 +470,17 @@ def write_extneurondb(
         ext_neurondb,
         extneurondb_filename,
         combo_emodel_filename):
-    """Write extNeuronDB.dat file"""
+    """Writes results of megating to two files:
+    - a 'pure' database: the columns of this file are ordered as
+    'morphology name', 'layer', 'm-type', 'e-type', 'combination name'. Values
+    are separated by a space.
+    - complete results: values are separated by a comma.
 
+    Args:
+        ext_neurondb (str): pandas dataframe with result of me-gating
+        extneurondb_filename (str): filename of 'pure' database
+        combo_emodel_filename (str): filename of 'full' database
+    """
     ext_neurondb = ext_neurondb.sort_index()
     pure_ext_neurondb = ext_neurondb.copy()
     if 'threshold_current' in pure_ext_neurondb:
@@ -480,6 +489,9 @@ def write_extneurondb(
         del pure_ext_neurondb['holding_current']
     if 'emodel' in pure_ext_neurondb:
         del pure_ext_neurondb['emodel']
+
+    pure_ext_neurondb = pure_ext_neurondb[["morph_name", "layer", "fullmtype",
+                                           "etype", "combo_name"]]
     pure_ext_neurondb.to_csv(
         extneurondb_filename,
         sep=' ',
