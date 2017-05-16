@@ -8,7 +8,8 @@
 import os
 import argparse
 import pandas
-import json
+
+from bluepymm import tools
 
 from . import sqlite_io, reporting, table_processing
 from . import process_megate_config as proc_config
@@ -75,7 +76,7 @@ def run(args):
     """Main"""
 
     # Read configuration file
-    conf_dict = json.loads(open(args.conf_filename).read())
+    conf_dict = tools.load_json(args.conf_filename)
 
     if 'skip_repaired_exemplar' in conf_dict:
         skip_repaired_exemplar = conf_dict['skip_repaired_exemplar']

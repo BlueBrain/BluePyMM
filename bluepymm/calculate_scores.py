@@ -14,9 +14,7 @@ import ipyparallel
 import sqlite3
 import traceback
 
-import bluepymm
-
-json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')
+from bluepymm import tools
 
 
 def run_emodel_morph_isolated(
@@ -86,7 +84,7 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
         print("Changing path to %s" % emodel_dir)
 
-        with bluepymm.tools.cd(emodel_dir):
+        with tools.cd(emodel_dir):
             evaluator = setup.evaluator.create(etype='%s' % emodel)
             evaluator.cell_model.morphology.morphology_path = morph_path
 
@@ -159,8 +157,11 @@ def save_scores(
         uid,
         scores,
         extra_values,
-        exception):
+        exception,
+        float_representation='.17g'):
     """Save scores in db"""
+
+    json.encoder.FLOAT_REPR = lambda x: format(x, float_representation)
 
     while True:
         try:
