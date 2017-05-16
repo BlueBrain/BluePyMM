@@ -27,7 +27,8 @@ def parse_args(arg_list=None):
 
     parser = argparse.ArgumentParser(description='Blue Brain Model Management')
     parser.add_argument('conf_filename')
-    parser.add_argument('--continu', action='store_true')
+    parser.add_argument('--continu', action='store_true',
+                        help='continue from previous run')
     parser.add_argument('--ipyp', action='store_true')
     parser.add_argument('--ipyp_profile')
 
