@@ -14,9 +14,7 @@ import traceback
 import multiprocessing
 import tarfile
 
-import bluepymm
-
-json.encoder.FLOAT_REPR = lambda x: format(x, '.17g')  # NOQA
+from bluepymm import tools
 
 
 def get_emodel_dicts(
@@ -48,7 +46,7 @@ def get_emodel_dicts(
                 conf_dict['emodels_repo'],
                 tmp_opt_repo)
 
-            with bluepymm.tools.cd(tmp_opt_repo):
+            with tools.cd(tmp_opt_repo):
                 sh.git(  # pylint: disable=E1121
                     'checkout',
                     '%s' %
@@ -56,17 +54,14 @@ def get_emodel_dicts(
         else:
             shutil.copytree(conf_dict['emodels_dir'], tmp_opt_repo)
 
-    final_dict = json.loads(
-        open(
-            os.path.join(
-                tmp_opt_repo,
-                conf_dict['final_json_path'])).read())
+    final_dict = tools.load_json(os.path.join(
+        tmp_opt_repo,
+        conf_dict['final_json_path']))
 
-    emodel_etype_map = json.loads(
-        open(
-            os.path.join(
-                tmp_opt_repo,
-                conf_dict['emodel_etype_map_path'])).read())
+    emodel_etype_map = tools.load_json(
+        os.path.join(
+            tmp_opt_repo,
+            conf_dict['emodel_etype_map_path']))
 
     opt_dir = os.path.dirname(os.path.join(tmp_opt_repo,
                                            conf_dict['final_json_path']))
@@ -147,7 +142,7 @@ def prepare_emodel_dir((original_emodel,
                 main_path = '.'
 
             if emodels_in_repo:
-                with bluepymm.tools.cd(os.path.join(opt_dir, main_path)):
+                with tools.cd(os.path.join(opt_dir, main_path)):
                     sh.git(
                         'archive',
                         '--format=tar',
@@ -155,14 +150,14 @@ def prepare_emodel_dir((original_emodel,
                         'origin/%s' % emodel_dict['branch'],
                         _out=tar_filename)
             else:
-                with bluepymm.tools.cd(os.path.join(opt_dir, main_path)):
+                with tools.cd(os.path.join(opt_dir, main_path)):
                     with tarfile.open(tar_filename, 'w') as tar_file:
                         tar_file.add('.', arcname=emodel)
 
-            with bluepymm.tools.cd(emodels_dir):
+            with tools.cd(emodels_dir):
                 sh.tar('xf', tar_filename)
 
-                with bluepymm.tools.cd(emodel):
+                with tools.cd(emodel):
                     print('Compiling mechanisms ...')
                     sh.nrnivmodl('mechanisms')
 

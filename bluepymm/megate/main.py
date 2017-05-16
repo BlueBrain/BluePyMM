@@ -8,48 +8,11 @@
 import os
 import argparse
 import pandas
-import json
 
-from . import sqlite_io, reporting, table_processing
+from bluepymm import tools
+
+from . import sqlite_io, reporting, table_processing, megate_output
 from . import process_megate_config as proc_config
-
-
-def write_extneurondb(
-        ext_neurondb,
-        extneurondb_filename,
-        combo_emodel_filename):
-    """Writes results of megating to two files:
-    - a 'pure' database: the columns of this file are ordered as
-    'morphology name', 'layer', 'm-type', 'e-type', 'combination name'. Values
-    are separated by a space.
-    - complete results: values are separated by a comma.
-
-    Args:
-        ext_neurondb (str): pandas dataframe with result of me-gating
-        extneurondb_filename (str): filename of 'pure' database
-        combo_emodel_filename (str): filename of 'full' database
-    """
-    ext_neurondb = ext_neurondb.sort_index()
-    pure_ext_neurondb = ext_neurondb.copy()
-    if 'threshold_current' in pure_ext_neurondb:
-        del pure_ext_neurondb['threshold_current']
-    if 'holding_current' in pure_ext_neurondb:
-        del pure_ext_neurondb['holding_current']
-    if 'emodel' in pure_ext_neurondb:
-        del pure_ext_neurondb['emodel']
-
-    pure_ext_neurondb = pure_ext_neurondb[["morph_name", "layer", "fullmtype",
-                                           "etype", "combo_name"]]
-    pure_ext_neurondb.to_csv(
-        extneurondb_filename,
-        sep=' ',
-        index=False,
-        header=False)
-
-    combo_emodel = ext_neurondb.copy()
-    combo_emodel.to_csv(
-        combo_emodel_filename,
-        index=False)
 
 
 def main():
@@ -75,7 +38,7 @@ def run(args):
     """Main"""
 
     # Read configuration file
-    conf_dict = json.loads(open(args.conf_filename).read())
+    conf_dict = tools.load_json(args.conf_filename)
 
     if 'skip_repaired_exemplar' in conf_dict:
         skip_repaired_exemplar = conf_dict['skip_repaired_exemplar']
@@ -153,7 +116,7 @@ def run(args):
     print('Wrote pdf to %s' % pdf_filename)
 
     # Write extNeuronDB.dat
-    write_extneurondb(
+    megate_output.save_megate_results(
         ext_neurondb,
         extneurondb_filename,
         combo_emodel_filename)

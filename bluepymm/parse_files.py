@@ -9,12 +9,13 @@ from __future__ import print_function
 
 # pylint: disable=R0912
 
-import json
 import collections
 import pandas
 import re
 
 import xml.etree.ElementTree
+
+from bluepymm import tools
 
 
 def _parse_recipe(recipe_filename):
@@ -101,8 +102,7 @@ def read_mtype_morph_map(neurondb_xml_filename):
 def extract_emodel_etype_json(json_filename):
     """Read emodel etype json"""
 
-    with open(json_filename) as json_file:
-        emodel_etype_dict = json.loads(json_file.read())
+    emodel_etype_dict = tools.load_json(json_filename)
 
     for emodel, etype_dict in emodel_etype_dict.items():
         for etype, layers in etype_dict.items():
