@@ -9,52 +9,9 @@ import os
 import argparse
 import pandas
 import json
-import re
 
 from . import sqlite_io, reporting, table_processing
-
-
-def read_to_skip_features(conf_dict):
-    """Read feature to skip from configuration"""
-
-    to_skip_features = conf_dict['to_skip_features'] \
-        if 'to_skip_features' in conf_dict else []
-
-    return [re.compile(feature_str)
-            for feature_str in to_skip_features], to_skip_features
-
-
-def join_regex(list_regex):
-    """Create regex that match one of list of regex"""
-    return re.compile(
-        '(' +
-        ')|('.join(
-            list_regex) +
-        ')')
-
-
-def read_megate_thresholds(conf_dict):
-    """Read feature to skip from configuration"""
-
-    megate_thresholds = conf_dict['megate_thresholds'] \
-        if 'megate_thresholds' in conf_dict else []
-
-    megate_patterns = []
-    for megate_threshold_dict in megate_thresholds:
-        megate_pattern = {}
-        megate_pattern["megate_feature_threshold"] = {
-            'megate_threshold': megate_threshold_dict["megate_threshold"],
-            'features': join_regex(megate_threshold_dict["features"])
-        }
-        for key in ["emodel", "fullmtype", "etype"]:
-            if key in megate_threshold_dict:
-                megate_pattern[key] = join_regex(megate_threshold_dict[key])
-            else:
-                megate_pattern[key] = re.compile('.*')
-
-        megate_patterns.append(megate_pattern)
-
-    return megate_patterns, megate_thresholds
+from . import process_megate_config as proc_config
 
 
 def write_extneurondb(
@@ -149,10 +106,12 @@ def run(args):
         os.makedirs(combo_emodel_dirname)
 
     # Read skip features
-    to_skip_patterns, to_skip_features = read_to_skip_features(conf_dict)
+    to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
+        conf_dict)
 
     # Read skip features
-    megate_patterns, megate_thresholds = read_megate_thresholds(conf_dict)
+    megate_patterns, megate_thresholds = proc_config.read_megate_thresholds(
+        conf_dict)
 
     # Read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
