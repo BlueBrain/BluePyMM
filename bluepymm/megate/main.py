@@ -9,7 +9,6 @@ import os
 import re
 import argparse
 import pandas
-import sqlite3
 import json
 
 import matplotlib
@@ -19,24 +18,13 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
+from . import sqlite_io
+
 BLUE = 'C1'
 RED = 'C0'
 YELLOW = 'C4'
 
 FIGSIZE = (15, 10)
-
-
-def convert_score_values(scores_sqlite_filename, scores):
-    """Convert score json to score values table"""
-
-    score_values = scores['scores'].apply(
-        lambda json_str: pandas.Series
-        (json.loads(json_str)) if json_str else pandas.Series())
-
-    with sqlite3.connect(scores_sqlite_filename) as conn:
-        score_values.to_sql('score_values', conn, if_exists='replace')
-
-    return score_values
 
 
 def convert_extra_values(row):
@@ -53,19 +41,6 @@ def convert_extra_values(row):
                 row['holding_current'] = extra_values['holding_current']
 
     return row
-
-
-def read_tables(scores_sqlite_filename):
-    """Read tables from score sqlite"""
-
-    print("Reading score table")
-    with sqlite3.connect(scores_sqlite_filename) as conn:
-        scores = pandas.read_sql('SELECT * FROM scores', conn)
-
-    print("Converting score json strings")
-    score_values = convert_score_values(scores_sqlite_filename, scores)
-
-    return scores, score_values
 
 
 def row_transform(row, exemplar_row, to_skip_patterns, skip_repaired_exemplar):
@@ -564,7 +539,8 @@ def run(args):
     megate_patterns, megate_thresholds = read_megate_thresholds(conf_dict)
 
     # Read score tables
-    scores, score_values = read_tables(scores_sqlite_filename)
+    scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
+        scores_sqlite_filename)
 
     if len(score_values.index) != len(scores.index):
         raise Exception('Score and score values tables dont have same '
