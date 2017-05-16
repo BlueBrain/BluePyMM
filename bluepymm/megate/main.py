@@ -202,8 +202,13 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
         megate_scores_mtype = megate_scores[mtypes == mtype]
         mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
         sums.ix[mtype, 'passed'] = len(mtype_passed)
-        sums.ix[mtype, 'failed'] = (len(megate_scores_mtype)
-                                    - sums.ix[mtype, 'passed'])
+        sums.ix[
+            mtype,
+            'failed'] = (
+            len(megate_scores_mtype) -
+            sums.ix[
+                mtype,
+                'passed'])
 
     plot_stacked_bars(sums,
                       '# morphologies',
@@ -254,7 +259,9 @@ def plot_emodels_per_metype(data, final_db, pp):
     """
 
     # Add helper column 'metype'
-    def lambda_metype(x): return '%s_%s' % (x['etype'], x['fullmtype'])
+    def lambda_metype(x):
+        return '%s_%s' % (x['etype'], x['fullmtype'])
+
     data['metype'] = data.apply(lambda_metype, axis=1)
     final_db['metype'] = final_db.apply(lambda_metype, axis=1)
 
@@ -569,8 +576,8 @@ def run(args):
                 enable_check_opt_scores)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
-        if ('plot_emodels_per_morphology' in conf_dict
-                and conf_dict['plot_emodels_per_morphology']):
+        if ('plot_emodels_per_morphology' in conf_dict and conf_dict[
+                'plot_emodels_per_morphology']):
             # Plot information per morphology
             plot_emodels_per_morphology(scores, ext_neurondb, pp)
         plot_emodels_per_metype(scores, ext_neurondb, pp)
