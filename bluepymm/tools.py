@@ -5,6 +5,7 @@
 
 import contextlib
 import os
+import json
 
 
 @contextlib.contextmanager
@@ -16,3 +17,8 @@ def cd(dir_name):
         yield
     finally:
         os.chdir(old_cwd)
+
+
+def load_json(filename):
+    with open(filename) as f:
+        return json.load(f)

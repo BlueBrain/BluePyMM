@@ -5,7 +5,6 @@
 
 # pylint: disable=C0325, W0223, R0914
 import os
-import json
 
 import bluepymm
 import argparse
@@ -40,7 +39,7 @@ def run(args):
     print('Reading configuration at %s' % args.conf_filename)
 
     # Read configuration
-    conf_dict = json.loads(open(args.conf_filename).read())
+    conf_dict = bluepymm.tools.load_json(args.conf_filename)
 
     tmp_dir = conf_dict['tmp_dir']
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
@@ -52,7 +51,6 @@ def run(args):
         if 'skip_repaired_exemplar' in conf_dict else False
 
     # Create temporary directories
-    # opt_repo_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels_repo'))
     emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
 
     # Get information from emodels repo
