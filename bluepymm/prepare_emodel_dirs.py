@@ -183,11 +183,8 @@ def prepare_emodel_dirs(
         continu=False):
     """Prepare the directories for the emodels"""
 
-    if not os.path.exists(emodels_dir):
-        os.makedirs(emodels_dir)
-
-    if not os.path.exists(emodels_hoc_dir):
-        os.makedirs(emodels_hoc_dir)
+    tools.makedirs(emodels_dir)
+    tools.makedirs(emodels_hoc_dir)
 
     emodel_dirs = {}
 
