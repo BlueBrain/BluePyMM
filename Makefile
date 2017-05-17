@@ -1,8 +1,9 @@
 TEST_REQUIREMENTS=nose coverage pep8
 
 all: install
-install:
-	pip install . --upgrade
+install: clean
+	python setup.py sdist
+	pip install `ls dist/bluepymm-*.tar.gz`[neo] --upgrade	
 install_test_requirements:
 	pip install -q $(TEST_REQUIREMENTS) --upgrade
 virtualenv:
@@ -10,6 +11,8 @@ virtualenv:
 	. ./pyenv/bin/activate
 test: clean virtualenv codingstyle unit functional
 clean:
+	rm -rf bluepymm.egg-info
+	rm -rf dist
 	rm -rf pyenv
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
