@@ -3,7 +3,7 @@ TEST_REQUIREMENTS=nose coverage pep8
 all: install
 install: clean
 	python setup.py sdist
-	pip install `ls dist/bluepymm-*.tar.gz`[neo] --upgrade	
+	pip install `ls dist/bluepymm-*.tar.gz` --upgrade	
 install_test_requirements:
 	pip install -q $(TEST_REQUIREMENTS) --upgrade
 virtualenv:
