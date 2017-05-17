@@ -54,25 +54,19 @@ def run(args):
     scores_sqlite_filename = os.path.join(mm_run_path, 'output/scores.sqlite')
 
     pdf_filename = conf_dict['pdf_filename']
-    pdf_dirname = os.path.dirname(pdf_filename)
-    if not os.path.exists(pdf_dirname):
-        os.makedirs(pdf_dirname)
+    tools.makedirs(os.path.dirname(pdf_filename))
 
     extneurondb_filename = conf_dict['extneurondb_filename']
-    extneurondb_dirname = os.path.dirname(extneurondb_filename)
-    if not os.path.exists(extneurondb_dirname):
-        os.makedirs(extneurondb_dirname)
+    tools.makedirs(os.path.dirname(extneurondb_filename))
 
     combo_emodel_filename = conf_dict['combo_emodel_filename']
-    combo_emodel_dirname = os.path.dirname(combo_emodel_filename)
-    if not os.path.exists(combo_emodel_dirname):
-        os.makedirs(combo_emodel_dirname)
+    tools.makedirs(os.path.dirname(combo_emodel_filename))
 
     # Read skip features
     to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
         conf_dict)
 
-    # Read skip features
+    # Read megate thresholds
     megate_patterns, megate_thresholds = proc_config.read_megate_thresholds(
         conf_dict)
 
