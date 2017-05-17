@@ -6,6 +6,7 @@
 import contextlib
 import os
 import json
+import errno
 
 
 @contextlib.contextmanager
@@ -22,3 +23,13 @@ def cd(dir_name):
 def load_json(filename):
     with open(filename) as f:
         return json.load(f)
+
+
+def makedirs(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+        pass
+    return path

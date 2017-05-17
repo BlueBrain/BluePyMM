@@ -56,7 +56,7 @@ def extract_mm_parameters(mm_config_file):
                      emodels_path,
                      mm_config_full_paths["final_json_path"]))
     emodels_dir = os.path.join(mm_config_full_paths["tmp_dir"], "emodels")
-    return emodels_dir, final_dict, mm_config_full_paths["morph_path"]
+    return emodels_dir, final_dict
 
 
 def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
@@ -81,8 +81,8 @@ def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
     del pool
 
 
-def create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_dir,
-                     template, hoc_dir):
+def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
+                     hoc_dir):
     """Create a .hoc file for every combination in a given database.
 
     Args:
@@ -90,7 +90,6 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_dir,
         emodels_dir: Directory containing all emodel data as used by the
                      application 'bluepymm'.
         final_dict: Dictionary with emodel parameters.
-        morph_dir: Directory containing all morphologies.
         template: Template to be used to create .hoc files.
         hoc_dir: Directory where all create .hoc files will be written.
     """
@@ -98,7 +97,7 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_dir,
         print "Working on combination {}".format(combination)
         emodel = comb_data["emodel"]
         setup_dir = os.path.join(emodels_dir, emodel)
-        morph_path = os.path.join(morph_dir, comb_data["morph_name"])
+        morph_path = "{}.asc".format(comb_data["morph_name"])
         emodel_params = final_dict[emodel]["params"]
 
         run_create_and_write_hoc_file((emodel,
@@ -118,14 +117,13 @@ def main():
     config_dir = os.path.abspath(os.path.dirname(args.config_filename))
     config = add_full_paths(config, config_dir)
     combinations_dict = load_combinations_dict(config["megate_config"])
-    emodels_dir, final_dict, morph_path = extract_mm_parameters(
-        config["mm_config"])
+    emodels_dir, final_dict = extract_mm_parameters(config["mm_config"])
 
     # Create output directory for .hoc files
     utils.makedirs(config["hoc_output_dir"])
 
     # Create hoc files
-    create_hoc_files(combinations_dict, emodels_dir, final_dict, morph_path,
+    create_hoc_files(combinations_dict, emodels_dir, final_dict,
                      config["template"], config["hoc_output_dir"])
 
 
