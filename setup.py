@@ -12,7 +12,7 @@ setuptools.setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     install_requires=['sh', 'bluepyopt', 'matplotlib'],
-    packages=['bluepymm', 'bluepymm/megate'],
+    packages=setuptools.find_packages(exclude=('pyenv',)),
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",
     description="Model Management Python Library (bluepymm)",

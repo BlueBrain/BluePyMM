@@ -3,7 +3,7 @@ TEST_REQUIREMENTS=nose coverage pep8
 all: install
 install: clean
 	python setup.py sdist
-	pip install `ls dist/bluepymm-*.tar.gz` --upgrade	
+	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_test_requirements:
 	pip install -q $(TEST_REQUIREMENTS) --upgrade
 virtualenv:
@@ -29,6 +29,4 @@ simple1_git:
 	cd bluepymm/tests/examples/simple1; python build_git.py
 autopep8: clean virtualenv
 	pip install autopep8
-	autopep8 -i bluepymm/*.py
-	autopep8 -i bluepymm/megate/*.py
-	autopep8 -i bluepymm/legacy/*.py
+	find bluepymm -name '*.py' -exec autopep8 -i '{}' \;
