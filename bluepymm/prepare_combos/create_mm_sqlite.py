@@ -12,9 +12,10 @@ from __future__ import print_function
 import os
 import json
 
-import bluepymm
 import pandas
 import sqlite3
+
+from . import parse_files
 
 
 def create_exemplar_rows(
@@ -161,14 +162,14 @@ def create_mm_sqlite(
 
     # Contains layer, fullmtype, etype
     print('Reading recipe at %s' % recipe_filename)
-    fullmtype_etype_map = bluepymm.read_mm_recipe(recipe_filename)
+    fullmtype_etype_map = parse_files.read_mm_recipe(recipe_filename)
 
     if fullmtype_etype_map.isnull().sum().sum() > 0:
         raise Exception('There are None values in the fullmtype-etype map !')
 
     # Contains layer, fullmtype, mtype, submtype, morph_name
     print('Reading neuronDB at %s' % neurondb_filename)
-    fullmtype_morph_map = bluepymm.read_mtype_morph_map(neurondb_filename)
+    fullmtype_morph_map = parse_files.read_mtype_morph_map(neurondb_filename)
 
     if fullmtype_morph_map.isnull().sum().sum() > 0:
         raise Exception('There are None values in the fullmtype-morph map !')
@@ -188,7 +189,7 @@ def create_mm_sqlite(
 
     print('Creating emodel etype table')
     # Contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
-    emodel_fullmtype_etype_map = bluepymm.convert_emodel_etype_map(
+    emodel_fullmtype_etype_map = parse_files.convert_emodel_etype_map(
         original_emodel_etype_map, fullmtypes, etypes)
 
     if emodel_fullmtype_etype_map.isnull().sum().sum() > 0:

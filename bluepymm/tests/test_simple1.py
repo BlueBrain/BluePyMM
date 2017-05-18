@@ -10,7 +10,8 @@ import filecmp
 import nose.tools as nt
 
 import bluepymm as pymm
-import bluepymm.megate as megate
+import bluepymm.prepare_combos as prepare
+import bluepymm.select_combos as megate
 
 
 def test_simple1_git():

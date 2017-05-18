@@ -5,9 +5,9 @@
 
 # pylint: disable=C0325, W0223, R0914
 import os
-
-import bluepymm
 import argparse
+
+from bluepymm import tools, prepare_combos, run_combos
 
 
 def main():
@@ -39,7 +39,7 @@ def run(args):
     print('Reading configuration at %s' % args.conf_filename)
 
     # Read configuration
-    conf_dict = bluepymm.tools.load_json(args.conf_filename)
+    conf_dict = tools.load_json(args.conf_filename)
 
     tmp_dir = conf_dict['tmp_dir']
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
@@ -56,14 +56,14 @@ def run(args):
     # Get information from emodels repo
     print('Getting final emodels dict')
     final_dict, emodel_etype_map, opt_dir, emodels_in_repo = \
-        bluepymm.get_emodel_dicts(
+        prepare_combos.get_emodel_dicts(
             conf_dict,
             tmp_dir,
             continu=args.continu)
 
     print('Preparing emodels at %s' % emodels_dir)
     # Clone the emodels repo and prepare the dirs for all the emodels
-    emodel_dirs = bluepymm.prepare_emodel_dirs(
+    emodel_dirs = prepare_combos.prepare_emodel_dirs(
         final_dict,
         emodel_etype_map,
         emodels_dir,
@@ -75,7 +75,7 @@ def run(args):
     print('Creating sqlite db at %s' % scores_db_path)
     if not args.continu:
         # Create a sqlite3 db with all the combos
-        bluepymm.create_mm_sqlite(
+        prepare_combos.create_mm_sqlite(
             scores_db_path,
             recipe_filename,
             morph_dir,
@@ -86,7 +86,7 @@ def run(args):
 
     print('Calculating scores')
     # Calculate scores for combinations in sqlite3 db
-    bluepymm.calculate_scores(
+    run_combos.calculate_scores(
         final_dict,
         emodel_dirs,
         scores_db_path,
