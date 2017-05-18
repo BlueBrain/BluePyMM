@@ -17,6 +17,8 @@ clean:
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
 	rm -rf bluepymm/tests/examples/simple1/output
+	rm -rf bluepymm/tests/.coverage
+	rm -rf bluepymm/tests/coverage.xml
 codingstyle: install_test_requirements
 	pep8 --ignore=E402 bluepymm
 unit: install install_test_requirements
