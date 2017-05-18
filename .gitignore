@@ -1,5 +1,6 @@
 /tmp
 *.pyc
-pyenv
+/pyenv
 /bluepymm.egg-info
 /dist/
+/pyenv3

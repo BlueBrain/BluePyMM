@@ -7,7 +7,6 @@
 
 import sys
 import os
-import json
 import sh
 import shutil
 import traceback
@@ -111,15 +110,11 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         emodel_hoc_file.write(hoc)
 
 
-def prepare_emodel_dir((original_emodel,
-                        emodel,
-                        emodel_dict,
-                        emodels_dir,
-                        opt_dir,
-                        emodels_hoc_dir,
-                        emodels_in_repo,
-                        continu)):
+def prepare_emodel_dir(input):
     """Prepare emodel dir"""
+
+    original_emodel, emodel, emodel_dict, emodels_dir, \
+        opt_dir, emodels_hoc_dir, emodels_in_repo, continu = input
 
     try:
         emodel_dirs = {}
@@ -205,7 +200,7 @@ def prepare_emodel_dirs(
     print('Parallelising preparation of emodel dirs')
     pool = multiprocessing.Pool(maxtasksperchild=1)
     for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list, chunksize=1):
-        for emodel, emodel_dir in emodel_dir_dict.iteritems():
+        for emodel, emodel_dir in emodel_dir_dict.items():
             emodel_dirs[emodel] = emodel_dir
 
     return emodel_dirs

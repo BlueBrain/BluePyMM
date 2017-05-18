@@ -9,7 +9,11 @@ install_test_requirements:
 virtualenv:
 	virtualenv pyenv
 	. ./pyenv/bin/activate
+virtualenv3:
+	python3 -m venv pyenv3
+	. ./pyenv3/bin/activate
 test: clean virtualenv codingstyle unit functional
+test3: clean virtualenv3 codingstyle unit functional
 clean:
 	rm -rf bluepymm.egg-info
 	rm -rf dist

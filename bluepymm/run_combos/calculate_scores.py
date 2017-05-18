@@ -17,13 +17,10 @@ import traceback
 from bluepymm import tools
 
 
-def run_emodel_morph_isolated(
-    (uid,
-     emodel,
-     emodel_dir,
-     emodel_params,
-     morph_path)):
+def run_emodel_morph_isolated(input):
     """Run emodel in isolated environment"""
+
+    uid, emodel, emodel_dir, emodel_params, morph_path = input
 
     return_dict = {}
     return_dict['uid'] = uid
