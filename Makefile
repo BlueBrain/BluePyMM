@@ -4,8 +4,10 @@ VENV=. ./venv/bin/activate;
 all: install
 venv:
 	virtualenv --system-site-packages venv
+	$(VENV) pip install pip --upgrade
 venv3:
 	python3 -m venv venv
+	$(VENV) pip install pip --upgrade
 install: clean
 	python setup.py sdist
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
