@@ -37,6 +37,6 @@ functional: install_in_venv install_test_requirements simple1_git
 		--cover-package bluepymm
 simple1_git:
 	$(VENV) cd bluepymm/tests/examples/simple1; python build_git.py
-autopep8: clean
+autopep8: clean venv
 	$(VENV) pip install autopep8
 	$(VENV) find bluepymm -name '*.py' -exec autopep8 -i '{}' \;
