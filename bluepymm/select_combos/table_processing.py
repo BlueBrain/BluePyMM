@@ -114,7 +114,7 @@ def process_emodel(
         skip_repaired_exemplar,
         enable_check_opt_scores):
     """Process emodel"""
-    print 'Processing emodel %s' % emodel
+    print('Processing emodel %s' % emodel)
     exemplar_morph = scores[
         scores.emodel == emodel].morph_name.values[0]
 

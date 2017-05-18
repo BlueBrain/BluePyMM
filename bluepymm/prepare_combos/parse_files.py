@@ -9,7 +9,6 @@ from __future__ import print_function
 
 # pylint: disable=R0912
 
-import collections
 import pandas
 import re
 
@@ -22,7 +21,8 @@ def _parse_recipe(recipe_filename):
     """parse a BBP recipe and return the corresponding etree"""
 
     parser = xml.etree.ElementTree.XMLParser()
-    parser.entity = collections.defaultdict(lambda: '')
+    # Disabling, this is not standardized, and python 3 incompatible
+    # parser.entity = collections.defaultdict(lambda: '')
     return xml.etree.ElementTree.parse(recipe_filename, parser=parser)
 
 
