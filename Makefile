@@ -29,8 +29,4 @@ simple1_git:
 	cd bluepymm/tests/examples/simple1; python build_git.py
 autopep8: clean virtualenv
 	pip install autopep8
-	autopep8 -i bluepymm/*.py
-	autopep8 -i bluepymm/prepare_combos/*.py
-	autopep8 -i bluepymm/run_combos/*.py
-	autopep8 -i bluepymm/select_combos/*.py
-	autopep8 -i bluepymm/legacy/*.py
+	find bluepymm -name '*.py' -exec autopep8 -i '{}' \;
