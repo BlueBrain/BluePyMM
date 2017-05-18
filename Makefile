@@ -1,5 +1,5 @@
 TEST_REQUIREMENTS=nose coverage pep8
-VENV=source ./venv/bin/activate;
+VENV=. ./venv/bin/activate;
 
 all: install
 venv:
