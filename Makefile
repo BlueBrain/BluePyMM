@@ -6,14 +6,7 @@ install: clean
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_test_requirements:
 	pip install -q $(TEST_REQUIREMENTS) --upgrade
-virtualenv:
-	virtualenv pyenv
-	. ./pyenv/bin/activate
-virtualenv3:
-	python3 -m venv pyenv3
-	. ./pyenv3/bin/activate
-test: clean virtualenv codingstyle unit functional
-test3: clean virtualenv3 codingstyle unit functional
+test: clean codingstyle unit functional
 clean:
 	rm -rf bluepymm.egg-info
 	rm -rf dist
@@ -33,6 +26,6 @@ functional: install install_test_requirements simple1_git
 		--cover-package bluepymm
 simple1_git:
 	cd bluepymm/tests/examples/simple1; python build_git.py
-autopep8: clean virtualenv
+autopep8: clean
 	pip install autopep8
 	find bluepymm -name '*.py' -exec autopep8 -i '{}' \;
