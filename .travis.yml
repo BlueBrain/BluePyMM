@@ -5,8 +5,8 @@ python:
 install: pip install pip --upgrade
 script: make test
 cache:
+    pip: true 
     directories:
-      - $HOME/.cache/pip
       - $HOME/local
       - $HOME/src
 git:
