@@ -15,14 +15,14 @@ from . import sqlite_io, reporting, table_processing, megate_output
 from . import process_megate_config as proc_config
 
 
-def main():
+def main(arg_list=None):
     """Main"""
 
     print('\n##############################')
     print('# Starting BluePyMM MEGating #')
     print('##############################\n')
 
-    args = parse_args()
+    args = parse_args(arg_list)
     run(args)
 
 
