@@ -11,12 +11,6 @@ from bluepymm import tools, prepare_combos, run_combos
 
 
 def main(arg_list=None):
-    """Main"""
-
-    print('\n#####################')
-    print('# Starting BluePyMM #')
-    print('#####################\n')
-
     args = parse_args(arg_list)
     run(args)
 

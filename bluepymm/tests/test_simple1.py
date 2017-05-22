@@ -14,7 +14,13 @@ from bluepymm import prepare_and_run_combos as mm
 from bluepymm import select_combos as megate
 
 
-def _test_megate_output():
+def _clear_output():
+    for unwanted in ['tmp', 'output']:
+        if os.path.exists(unwanted):
+            shutil.rmtree(unwanted)
+
+
+def _verify_select_combos_output():
     matches = filecmp.cmpfiles(
         'output_megate_expected', 'output_megate',
         ['combo_model.csv', 'extNeuronDB.dat'])
@@ -29,9 +35,8 @@ def test_simple1_git():
     """simple1: test with git repo"""
 
     with tools.cd('examples/simple1'):
-
-        if os.path.exists('tmp'):
-            shutil.rmtree('tmp')
+        # Make sure the output directories are clean
+        _clear_output()
 
         # Run mm
         args_list = ['simple1_conf_git.json']
@@ -65,15 +70,15 @@ def test_simple1_git():
         megate.run(args)
 
         # Test megate output
-        _test_megate_output()
+        _verify_select_combos_output()
 
 
 def test_simple1():
     """simple1: test"""
 
     with tools.cd('examples/simple1'):
-        if os.path.exists('tmp'):
-            shutil.rmtree('tmp')
+        # Make sure the output directories are clean
+        _clear_output()
 
         # Run mm
         args_list = ['simple1_conf.json']
@@ -101,31 +106,32 @@ def test_simple1():
         nt.assert_true(scores.equals(exp_scores))
         """
 
+        # TODO: first remove output from previous tests!
         # Run megate
         args_list = ['simple1_megate_conf.json']
         args = megate.parse_args(args_list)
         megate.run(args)
 
         # Test megate output
-        _test_megate_output()
+        _verify_select_combos_output()
 
 
 def test_simple1_from_main():
     """Test example simple1 from bluepymm/main.py interface.
     """
     with tools.cd('examples/simple1'):
-        if os.path.exists('tmp'):
-            shutil.rmtree('tmp')
+        # Make sure the output directories are clean
+        _clear_output()
 
         # Run mm
-        args_list = ['mm', 'simple1_conf.json']
+        args_list = ['prepare', 'simple1_conf.json']
         main(args_list)
 
-        # TODO: test output db
-
-        # Run megate
-        args_list = ['megate', 'simple1_megate_conf.json']
-        main(args_list)
-
-        # Test megate output
-        _test_megate_output()
+#        # TODO: test output db
+#
+#        # Run megate
+#        args_list = ['select', 'simple1_megate_conf.json']
+#        main(args_list)
+#
+#        # Test megate output
+#        _verify_select_combos_output()

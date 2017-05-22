@@ -104,7 +104,7 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                                           template_dir=template_dir)
 
     # write out result
-    hoc_file_name = '{}.hoc'.format(model_name if not None else emodel)
+    hoc_file_name = '{}.hoc'.format(model_name or emodel)
     emodel_hoc_path = os.path.join(hoc_dir, hoc_file_name)
     with open(emodel_hoc_path, 'w') as emodel_hoc_file:
         emodel_hoc_file.write(hoc)

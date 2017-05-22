@@ -1,9 +1,20 @@
 """ Create database of possible me-combinations."""
 
 import os
+import argparse
 
+from bluepymm import tools
 from . import prepare_emodel_dirs
 from . import create_mm_sqlite
+
+
+def parse_args(arg_list=None):
+    parser = argparse.ArgumentParser(description='Prepare BluePyMM database'
+                                                 'of combinations')
+    parser.add_argument('conf_filename')
+    parser.add_argument('--continu', action='store_true',
+                        help='continue from previous run')
+    return parser.parse_args(arg_list)
 
 
 def run(conf_dict, continu, scores_db_path):
@@ -46,3 +57,13 @@ def run(conf_dict, continu, scores_db_path):
             skip_repaired_exemplar=skip_repaired_exemplar)
 
     return final_dict, emodel_dirs
+
+
+def main(arg_list=None):
+    args = parse_args(arg_list)
+
+    print('Reading configuration at %s' % args.conf_filename)
+    conf_dict = tools.load_json(args.conf_filename)
+    scores_db_path = os.path.abspath(conf_dict['scores_db'])
+
+    run(conf_dict, args.continu, scores_db_path)

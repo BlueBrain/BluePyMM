@@ -1,24 +1,20 @@
-"""Test bluepymm/main"""
-
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""Test bluepymm/prepare_combos"""
 
 import os
 import shutil
 
-from nose.plugins.attrib import attr
 import nose.tools as nt
 
-from bluepymm import main, tools
+from bluepymm import tools, prepare_combos
 
 
-def _clear_prepare_combos_output():
+def _clear_main_output():
     for unwanted in ['tmp', 'output']:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
 
-def _verify_prepare_combos_output(scores_db, emodels_hoc_dir):
+def _verify_main_output(scores_db, emodels_hoc_dir):
     # TODO: test database contents
     nt.assert_true(os.path.isfile(scores_db))
 
@@ -29,26 +25,18 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir):
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
 
-# TODO: how to test message to standard output?
-@attr('unit')
-def test_main_unknown_command():
-    args_list = ['anything']
-    main(args_list)
-
-
-def test_prepare_combos():
+def test_main():
     test_dir = 'examples/simple1'
     test_config = 'simple1_conf.json'
 
     with tools.cd(test_dir):
         # Make sure the output directories are clean
-        _clear_prepare_combos_output()
+        _clear_main_output()
 
         # Run combination preparation
-        args_list = ['prepare', test_config]
-        main(args_list)
+        args_list = [test_config]
+        prepare_combos.main(args_list)
 
         # Test output
         config = tools.load_json(test_config)
-        _verify_prepare_combos_output(config["scores_db"],
-                                      config["emodels_hoc_dir"])
+        _verify_main_output(config["scores_db"], config["emodels_hoc_dir"])
