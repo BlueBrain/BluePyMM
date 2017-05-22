@@ -114,24 +114,3 @@ def test_simple1():
 
         # Test megate output
         _verify_select_combos_output()
-
-
-def test_simple1_from_main():
-    """Test example simple1 from bluepymm/main.py interface.
-    """
-    with tools.cd('examples/simple1'):
-        # Make sure the output directories are clean
-        _clear_output()
-
-        # Run mm
-        args_list = ['prepare', 'simple1_conf.json']
-        main(args_list)
-
-#        # TODO: test output db
-#
-#        # Run megate
-#        args_list = ['select', 'simple1_megate_conf.json']
-#        main(args_list)
-#
-#        # Test megate output
-#        _verify_select_combos_output()

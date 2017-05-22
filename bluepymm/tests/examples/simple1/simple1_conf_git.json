@@ -8,5 +8,6 @@
     "emodel_etype_map_path": "subdir/emodel_etype_map.json",
     "final_json_path": "subdir/final.json",
     "tmp_dir": "./tmp",
-    "scores_db": "./output/scores.sqlite"
+    "scores_db": "./output/scores.sqlite",
+    "output_dir": "./output/"
 }

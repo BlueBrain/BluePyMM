@@ -25,6 +25,13 @@ def load_json(filename):
         return json.load(f)
 
 
+def write_json(output_dir, output_name, config):
+    path = os.path.join(output_dir, output_name)
+    with open(path, 'w') as fd:
+        fd.write(json.dumps(config, indent=2, sort_keys=True))
+    return path
+
+
 def makedirs(path):
     try:
         os.makedirs(path)

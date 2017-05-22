@@ -12,24 +12,37 @@ import nose.tools as nt
 from bluepymm import main, tools
 
 
-def _clear_prepare_combos_output():
-    for unwanted in ['tmp', 'output']:
+def _clear_prepare_combos_output(tmp_dir, output_dir):
+    for unwanted in [tmp_dir, output_dir]:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
 
-def _verify_prepare_combos_output(scores_db, emodels_hoc_dir):
+def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
+                                  nb_emodels):
     # TODO: test database contents
     nt.assert_true(os.path.isfile(scores_db))
 
     nt.assert_true(os.path.isdir(emodels_hoc_dir))
     hoc_files = os.listdir(emodels_hoc_dir)
-    nt.assert_equal(len(hoc_files), 2)
+    nt.assert_equal(len(hoc_files), nb_emodels)
     for hoc_file in hoc_files:
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
+    def _verify_emodel_json(filename):
+        data_json = os.path.join(output_dir, filename)
+        nt.assert_true(os.path.isfile(data_json))
+        data = tools.load_json(data_json)
+        nt.assert_equal(len(data), nb_emodels)
+        return data
 
-# TODO: how to test message to standard output?
+    _verify_emodel_json('final_dict.json')
+    emodel_dirs = _verify_emodel_json('emodel_dirs.json')
+    for emodel in emodel_dirs:
+        nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
+
+
+# TODO: how to test what is printed to standard output?
 @attr('unit')
 def test_main_unknown_command():
     args_list = ['anything']
@@ -38,17 +51,21 @@ def test_main_unknown_command():
 
 def test_prepare_combos():
     test_dir = 'examples/simple1'
-    test_config = 'simple1_conf.json'
+    test_config = 'simple1_conf_prepare.json'
+    nb_emodels = 2
 
     with tools.cd(test_dir):
+        config = tools.load_json(test_config)
+
         # Make sure the output directories are clean
-        _clear_prepare_combos_output()
+        _clear_prepare_combos_output(config["tmp_dir"],
+                                     config["output_dir"])
 
         # Run combination preparation
         args_list = ['prepare', test_config]
         main(args_list)
 
         # Test output
-        config = tools.load_json(test_config)
         _verify_prepare_combos_output(config["scores_db"],
-                                      config["emodels_hoc_dir"])
+                                      config["emodels_hoc_dir"],
+                                      config["output_dir"], nb_emodels)

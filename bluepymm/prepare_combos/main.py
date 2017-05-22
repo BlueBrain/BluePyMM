@@ -66,4 +66,12 @@ def main(arg_list=None):
     conf_dict = tools.load_json(args.conf_filename)
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
-    run(conf_dict, args.continu, scores_db_path)
+    # Prepare combinations
+    final_dict, emodel_dirs = run(conf_dict, args.continu, scores_db_path)
+
+    # Save output
+    # TODO: gather all output business here?
+    output_dir = conf_dict['output_dir']
+    tools.makedirs(output_dir)
+    tools.write_json(output_dir, 'final_dict.json', final_dict)
+    tools.write_json(output_dir, 'emodel_dirs.json', emodel_dirs)
