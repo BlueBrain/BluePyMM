@@ -34,18 +34,6 @@ def parse_args(arg_list=None):
     return parser.parse_args(arg_list)
 
 
-def run_combinations(final_dict, emodel_dirs, scores_db_path, use_ipyp,
-                     ipyp_profile):
-    print('Calculating scores')
-    # Calculate scores for combinations in sqlite3 db
-    run_combos.calculate_scores(
-        final_dict,
-        emodel_dirs,
-        scores_db_path,
-        use_ipyp=use_ipyp,
-        ipyp_profile=ipyp_profile)
-
-
 def run(args):
     """Run the program"""
     print('Reading configuration at %s' % args.conf_filename)
@@ -54,8 +42,8 @@ def run(args):
 
     final_dict, emodel_dirs = prepare_combos.run(conf_dict, args.continu,
                                                  scores_db_path)
-    run_combinations(final_dict, emodel_dirs, scores_db_path, args.ipyp,
-                     args.ipyp_profile)
+    run_combos.run(final_dict, emodel_dirs, scores_db_path, args.ipyp,
+                   args.ipyp_profile)
 
     print('BluePyMM finished\n')
 
