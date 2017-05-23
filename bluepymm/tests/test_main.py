@@ -42,6 +42,11 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
         nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
 
 
+def _verify_run_combos_output(scores_db):
+    # TODO: test database contents
+    nt.assert_true(os.path.isfile(scores_db))
+
+
 # TODO: how to test what is printed to standard output?
 @attr('unit')
 def test_main_unknown_command():
@@ -69,3 +74,18 @@ def test_prepare_combos():
         _verify_prepare_combos_output(config["scores_db"],
                                       config["emodels_hoc_dir"],
                                       config["output_dir"], nb_emodels)
+
+
+def test_run_combos():
+    test_dir = 'examples/simple1'
+    test_config = 'simple1_conf_run.json'
+
+    with tools.cd(test_dir):
+        config = tools.load_json(test_config)
+
+        # Run combination preparation
+        args_list = ['run', test_config]
+        main(args_list)
+
+        # Test output
+        _verify_run_combos_output(config["scores_db"])

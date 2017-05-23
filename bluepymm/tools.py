@@ -20,8 +20,8 @@ def cd(dir_name):
         os.chdir(old_cwd)
 
 
-def load_json(filename):
-    with open(filename) as f:
+def load_json(path):
+    with open(path) as f:
         return json.load(f)
 
 

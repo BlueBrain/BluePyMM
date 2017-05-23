@@ -15,7 +15,7 @@ from . import sqlite_io, reporting, table_processing, megate_output
 from . import process_megate_config as proc_config
 
 
-def main(arg_list=None):
+def main(arg_list):
     """Main"""
 
     print('\n##############################')
@@ -26,7 +26,7 @@ def main(arg_list=None):
     run(args)
 
 
-def parse_args(arg_list=None):
+def parse_args(arg_list):
     """Parse the arguments"""
 
     parser = argparse.ArgumentParser(description='Blue Brain Model MEGating')

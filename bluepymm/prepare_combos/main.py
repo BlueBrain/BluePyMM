@@ -8,7 +8,7 @@ from . import prepare_emodel_dirs
 from . import create_mm_sqlite
 
 
-def parse_args(arg_list=None):
+def parse_args(arg_list):
     parser = argparse.ArgumentParser(description='Prepare BluePyMM database'
                                                  'of combinations')
     parser.add_argument('conf_filename')
@@ -59,7 +59,7 @@ def run(conf_dict, continu, scores_db_path):
     return final_dict, emodel_dirs
 
 
-def main(arg_list=None):
+def main(arg_list):
     args = parse_args(arg_list)
 
     print('Reading configuration at %s' % args.conf_filename)
