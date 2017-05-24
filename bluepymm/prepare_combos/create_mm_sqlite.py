@@ -15,6 +15,7 @@ import json
 import pandas
 import sqlite3
 
+from bluepymm import tools
 from . import parse_files
 
 
@@ -163,26 +164,21 @@ def create_mm_sqlite(
     # Contains layer, fullmtype, etype
     print('Reading recipe at %s' % recipe_filename)
     fullmtype_etype_map = parse_files.read_mm_recipe(recipe_filename)
-
-    if fullmtype_etype_map.isnull().sum().sum() > 0:
-        raise Exception('There are None values in the fullmtype-etype map !')
+    tools.check_no_null_nan_values(fullmtype_etype_map,
+                                   "the full m-type e-type map")
 
     # Contains layer, fullmtype, mtype, submtype, morph_name
     print('Reading neuronDB at %s' % neurondb_filename)
     fullmtype_morph_map = parse_files.read_mtype_morph_map(neurondb_filename)
-
-    if fullmtype_morph_map.isnull().sum().sum() > 0:
-        raise Exception('There are None values in the fullmtype-morph map !')
+    tools.check_no_null_nan_values(fullmtype_morph_map,
+                                   "the full m-type morphology map")
 
     # Contains layer, fullmtype, etype, morph_name
     print('Merging recipe and neuronDB tables')
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
-
-    if morph_fullmtype_etype_map.isnull().sum().sum() > 0:
-        print(morph_fullmtype_etype_map)
-        raise Exception(
-            'There are None values in the fullmtype-morph-etype map !')
+    tools.check_no_null_nan_values(morph_fullmtype_etype_map,
+                                   "morph_fullmtype_etype_map")
 
     fullmtypes = morph_fullmtype_etype_map.fullmtype.unique()
     etypes = morph_fullmtype_etype_map.etype.unique()
@@ -191,10 +187,8 @@ def create_mm_sqlite(
     # Contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
     emodel_fullmtype_etype_map = parse_files.convert_emodel_etype_map(
         original_emodel_etype_map, fullmtypes, etypes)
-
-    if emodel_fullmtype_etype_map.isnull().sum().sum() > 0:
-        raise Exception(
-            'There are None values in the emodel-etype map !')
+    tools.check_no_null_nan_values(emodel_fullmtype_etype_map,
+                                   "e-model e-type map")
 
     print('Creating full table by merging subtables')
     # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
@@ -214,10 +208,7 @@ def create_mm_sqlite(
     print('Filtering out morp_names that dont match regex')
     # Contains layer, fullmtype, etype, morph_name, e_model
     full_map = remove_morph_regex_failures(full_map)
-
-    if full_map.isnull().sum().sum() > 0:
-        raise Exception(
-            'There are None values in the full map !')
+    tools.check_no_null_nan_values(full_map, "the full map")
 
     print('Adding exemplar rows')
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
