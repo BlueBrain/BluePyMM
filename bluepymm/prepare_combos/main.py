@@ -8,16 +8,19 @@ from . import prepare_emodel_dirs
 from . import create_mm_sqlite
 
 
-def parse_args(arg_list):
-    parser = argparse.ArgumentParser(description='Prepare BluePyMM database'
-                                                 'of combinations')
+def _create_parser():
+    parser = argparse.ArgumentParser(description='Create and prepare database'
+                                                 ' of possible'
+                                                 ' me-combinations',
+                                     usage='bluepymm prepare [-h] [--continu]'
+                                           ' conf_filename')
     parser.add_argument('conf_filename')
     parser.add_argument('--continu', action='store_true',
                         help='continue from previous run')
-    return parser.parse_args(arg_list)
+    return parser
 
 
-def run(conf_dict, continu, scores_db_path):
+def _run(conf_dict, continu, scores_db_path):
     tmp_dir = conf_dict['tmp_dir']
     emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
 
@@ -59,15 +62,19 @@ def run(conf_dict, continu, scores_db_path):
     return final_dict, emodel_dirs
 
 
+def print_help():
+    _create_parser().print_help()
+
+
 def main(arg_list):
-    args = parse_args(arg_list)
+    args = _create_parser().parse_args(arg_list)
 
     print('Reading configuration at %s' % args.conf_filename)
     conf_dict = tools.load_json(args.conf_filename)
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
     # Prepare combinations
-    final_dict, emodel_dirs = run(conf_dict, args.continu, scores_db_path)
+    final_dict, emodel_dirs = _run(conf_dict, args.continu, scores_db_path)
 
     # Save output
     # TODO: gather all output business here?

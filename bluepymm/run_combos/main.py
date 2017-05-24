@@ -7,17 +7,19 @@ from bluepymm import tools
 from . import calculate_scores
 
 
-def parse_args(arg_list=None):
-    """Parse the arguments"""
+def _create_parser():
     parser = argparse.ArgumentParser(description='Calculate scores of possible'
-                                                 'combinations')
+                                                 ' me-combinations',
+                                     usage='bluepymm run [-h] [--ipyp]'
+                                           ' [--ipyp_profile IPYP_PROFILE]'
+                                           ' conf_filename')
     parser.add_argument('conf_filename')
     parser.add_argument('--ipyp', action='store_true')
     parser.add_argument('--ipyp_profile')
-    return parser.parse_args(arg_list)
+    return parser
 
 
-def run(final_dict, emodel_dirs, scores_db_path, use_ipyp, ipyp_profile):
+def _run(final_dict, emodel_dirs, scores_db_path, use_ipyp, ipyp_profile):
     print('Calculating scores')
     # Calculate scores for combinations in sqlite3 db
     calculate_scores.calculate_scores(
@@ -28,8 +30,12 @@ def run(final_dict, emodel_dirs, scores_db_path, use_ipyp, ipyp_profile):
         ipyp_profile=ipyp_profile)
 
 
-def main(arg_list=None):
-    args = parse_args(arg_list)
+def print_help():
+    _create_parser().print_help()
+
+
+def main(arg_list):
+    args = _create_parser().parse_args(arg_list)
 
     print('Reading configuration at %s' % args.conf_filename)
     conf_dict = tools.load_json(args.conf_filename)
@@ -39,4 +45,4 @@ def main(arg_list=None):
     emodel_dirs = tools.load_json(os.path.join(output_dir, 'emodel_dirs.json'))
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
-    run(final_dict, emodel_dirs, scores_db_path, args.ipyp, args.ipyp_profile)
+    _run(final_dict, emodel_dirs, scores_db_path, args.ipyp, args.ipyp_profile)

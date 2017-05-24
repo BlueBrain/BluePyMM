@@ -15,26 +15,16 @@ from . import sqlite_io, reporting, table_processing, megate_output
 from . import process_megate_config as proc_config
 
 
-def main(arg_list):
-    """Main"""
-
-    print('\n##############################')
-    print('# Starting BluePyMM MEGating #')
-    print('##############################\n')
-
-    args = parse_args(arg_list)
-    run(args)
-
-
-def parse_args(arg_list):
-    """Parse the arguments"""
-
-    parser = argparse.ArgumentParser(description='Blue Brain Model MEGating')
+def _create_parser():
+    parser = argparse.ArgumentParser(description='Select feasible'
+                                                 ' me-combinations',
+                                     usage='bluepymm select [-h]'
+                                           ' conf_filename')
     parser.add_argument('conf_filename')
-    return parser.parse_args(arg_list)
+    return parser
 
 
-def run(args):
+def _run(args):
     """Main"""
 
     # Read configuration file
@@ -117,3 +107,12 @@ def run(args):
 
     print('Wrote extneurondb to %s' % extneurondb_filename)
     print('Wrote combo_model to %s' % combo_emodel_filename)
+
+
+def print_help():
+    _create_parser().print_help()
+
+
+def main(arg_list):
+    args = _create_parser().parse_args(arg_list)
+    _run(args)
