@@ -95,8 +95,12 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         old_stdout = sys.stdout
         sys.stdout = devnull
         evaluator = setup.evaluator.create(emodel)
+        # set some template variables
         if morph_path is not None:
             evaluator.cell_model.morphology.morphology_path = morph_path
+        if model_name is not None:
+            evaluator.cell_model.name = model_name.replace("-", "_")
+            evaluator.cell_model.check_name()
         sys.stdout = old_stdout
 
     # create hoc code
