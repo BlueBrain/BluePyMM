@@ -5,6 +5,7 @@
 
 import os
 import shutil
+import filecmp
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
@@ -12,8 +13,8 @@ import nose.tools as nt
 from bluepymm import main, tools
 
 
-def _clear_prepare_combos_output(tmp_dir, output_dir):
-    for unwanted in [tmp_dir, output_dir]:
+def _clear_output_directories(directories):
+    for unwanted in directories:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
@@ -47,9 +48,27 @@ def _verify_run_combos_output(scores_db):
     nt.assert_true(os.path.isfile(scores_db))
 
 
+def _verify_select_combos_output(benchmark_dir, output_dir):
+    files = ['combo_model.csv', 'extNeuronDB.dat']
+    matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
+
+    if len(matches[0]) != len(files):
+        print('Mismatch in files: {}'.format(matches[1]))
+    nt.assert_equal(len(matches[0]), len(files))
+
+
 # TODO: how to test what is printed to standard output?
 def test_main_unknown_command():
     args_list = ['anything']
+    main(args_list)
+
+
+# TODO: how to test what is printed to standard output?
+def test_main_help():
+    args_list = ['help']
+    main(args_list)
+
+    args_list = ['--help']
     main(args_list)
 
 
@@ -68,8 +87,7 @@ def test_prepare_combos():
         config = tools.load_json(test_config)
 
         # Make sure the output directories are clean
-        _clear_prepare_combos_output(config["tmp_dir"],
-                                     config["output_dir"])
+        _clear_output_directories([config["tmp_dir"], config["output_dir"]])
 
         # Run combination preparation
         args_list = ['prepare', test_config]
@@ -94,3 +112,23 @@ def test_run_combos():
 
         # Test output
         _verify_run_combos_output(config["scores_db"])
+
+
+def test_select_combos():
+    test_dir = 'examples/simple1'
+    test_config = 'simple1_conf_select.json'
+    benchmark_dir = "output_megate_expected"
+    # TODO: add field "output_dir" to conf.json and remove too specific fields,
+    # e.g. extneurondb_filename
+    output_dir = "output_megate"
+
+    with tools.cd(test_dir):
+        # Make sure the output directory is clean
+        _clear_output_directories([output_dir])
+
+        # Run combination selection
+        args_list = ['select', test_config]
+        main(args_list)
+
+        # Test output
+        _verify_select_combos_output(benchmark_dir, output_dir)

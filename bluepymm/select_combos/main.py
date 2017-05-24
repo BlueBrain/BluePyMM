@@ -24,12 +24,7 @@ def _create_parser():
     return parser
 
 
-def _run(args):
-    """Main"""
-
-    # Read configuration file
-    conf_dict = tools.load_json(args.conf_filename)
-
+def _run(conf_dict):
     if 'skip_repaired_exemplar' in conf_dict:
         skip_repaired_exemplar = conf_dict['skip_repaired_exemplar']
     else:
@@ -63,10 +58,6 @@ def _run(args):
     # Read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_sqlite_filename)
-
-    if len(score_values.index) != len(scores.index):
-        raise Exception('Score and score values tables dont have same '
-                        'number of elements !')
 
     ext_neurondb = pandas.DataFrame()
 
@@ -115,4 +106,8 @@ def print_help():
 
 def main(arg_list):
     args = _create_parser().parse_args(arg_list)
-    _run(args)
+
+    # Read configuration file
+    conf_dict = tools.load_json(args.conf_filename)
+
+    _run(conf_dict)

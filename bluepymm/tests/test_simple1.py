@@ -106,7 +106,7 @@ def _test_simple1(test_dir, prepare_config_json, run_config_json,
         args_list = ['select', select_config_json]
         main(args_list)
 
-        # Test megate output
+        # Test selection output
         _verify_select_combos_output()
 
 
@@ -115,7 +115,7 @@ def test_simple1_from_dir():
     test_dir = 'examples/simple1'
     prepare_config_json = 'simple1_conf_prepare.json'
     run_config_json = 'simple1_conf_run.json'
-    select_config_json = 'simple1_megate_conf.json'
+    select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
 
     _test_simple1(test_dir, prepare_config_json, run_config_json,
@@ -127,7 +127,7 @@ def test_simple1_from_git_repo():
     test_dir = 'examples/simple1'
     prepare_config_json = 'simple1_conf_prepare_git.json'
     run_config_json = 'simple1_conf_run.json'
-    select_config_json = 'simple1_megate_conf.json'
+    select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
 
     _test_simple1(test_dir, prepare_config_json, run_config_json,
