@@ -4,7 +4,9 @@ import multiprocessing
 
 import utils
 
-from bluepymm.prepare_emodel_dirs import create_and_write_hoc_file
+from bluepymm.prepare_combos.prepare_emodel_dirs import (
+    create_and_write_hoc_file
+)
 
 
 def parse_arguments():
