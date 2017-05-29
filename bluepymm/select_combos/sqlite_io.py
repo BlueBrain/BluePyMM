@@ -38,4 +38,8 @@ def read_and_process_sqlite_score_tables(scores_sqlite_filename):
     score_values = _convert_score_json_to_values(
         scores_sqlite_filename, scores)
 
+    if len(score_values.index) != len(scores.index):
+        raise Exception("Score and score values tables don't have same "
+                        "number of elements !")
+
     return scores, score_values

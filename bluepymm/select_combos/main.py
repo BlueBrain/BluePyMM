@@ -15,31 +15,16 @@ from . import sqlite_io, reporting, table_processing, megate_output
 from . import process_megate_config as proc_config
 
 
-def main():
-    """Main"""
-
-    print('\n##############################')
-    print('# Starting BluePyMM MEGating #')
-    print('##############################\n')
-
-    args = parse_args()
-    run(args)
-
-
-def parse_args(arg_list=None):
-    """Parse the arguments"""
-
-    parser = argparse.ArgumentParser(description='Blue Brain Model MEGating')
+def _create_parser():
+    parser = argparse.ArgumentParser(description='Select feasible'
+                                                 ' me-combinations',
+                                     usage='bluepymm select [-h]'
+                                           ' conf_filename')
     parser.add_argument('conf_filename')
-    return parser.parse_args(arg_list)
+    return parser
 
 
-def run(args):
-    """Main"""
-
-    # Read configuration file
-    conf_dict = tools.load_json(args.conf_filename)
-
+def _run(conf_dict):
     if 'skip_repaired_exemplar' in conf_dict:
         skip_repaired_exemplar = conf_dict['skip_repaired_exemplar']
     else:
@@ -73,10 +58,6 @@ def run(args):
     # Read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_sqlite_filename)
-
-    if len(score_values.index) != len(scores.index):
-        raise Exception('Score and score values tables dont have same '
-                        'number of elements !')
 
     ext_neurondb = pandas.DataFrame()
 
@@ -117,3 +98,16 @@ def run(args):
 
     print('Wrote extneurondb to %s' % extneurondb_filename)
     print('Wrote combo_model to %s' % combo_emodel_filename)
+
+
+def print_help():
+    _create_parser().print_help()
+
+
+def main(arg_list):
+    args = _create_parser().parse_args(arg_list)
+
+    # Read configuration file
+    conf_dict = tools.load_json(args.conf_filename)
+
+    _run(conf_dict)

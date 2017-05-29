@@ -20,9 +20,16 @@ def cd(dir_name):
         os.chdir(old_cwd)
 
 
-def load_json(filename):
-    with open(filename) as f:
+def load_json(path):
+    with open(path) as f:
         return json.load(f)
+
+
+def write_json(output_dir, output_name, config):
+    path = os.path.join(output_dir, output_name)
+    with open(path, 'w') as fd:
+        fd.write(json.dumps(config, indent=2, sort_keys=True))
+    return path
 
 
 def makedirs(path):
