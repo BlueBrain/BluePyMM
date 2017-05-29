@@ -26,12 +26,13 @@ def _parse_recipe(recipe_filename):
     return xml.etree.ElementTree.parse(recipe_filename, parser=parser)
 
 
-def verify_no_zero_percentage(data):
-    """Verify that value of parameter 'percentage' is not zero.
+def verify_no_zero_percentage(tree_element_list):
+    """Verify that none of the elements of a given list have a zero value for
+    the field 'percentage'.
 
     Args:
-        data(list of xml.etree.ElementTree): list of tree elements with
-                                             'percentage' field
+        tree_element_list(list of xml.etree.ElementTree): list of tree elements
+            with 'percentage' field
 
     Returns:
         True if no percentage of zero is found.
@@ -39,11 +40,11 @@ def verify_no_zero_percentage(data):
     Raises:
         ValueError: if a percentage of zero is found.
     """
-    for d in data:
-        if float(d.attrib['percentage']) == 0.0:
+    for element in tree_element_list:
+        if float(element.attrib['percentage']) == 0.0:
             raise ValueError('Found a percentage of 0.0 in recipe, script'
                              ' cannot handle this case: tag'
-                             ' {}'.format(d.tag))
+                             ' {}'.format(element.tag))
     return True
 
 
