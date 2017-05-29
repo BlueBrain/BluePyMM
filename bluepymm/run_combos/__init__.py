@@ -1,1 +1,1 @@
-from .calculate_scores import *
+from .main import main, print_help

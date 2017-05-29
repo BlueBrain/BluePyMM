@@ -1,100 +1,54 @@
-"""Python Model Management"""
-
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
-
-# pylint: disable=C0325, W0223, R0914
-import os
-import argparse
-
-from bluepymm import tools, prepare_combos, run_combos
+from bluepymm import prepare_combos, run_combos, select_combos
 
 
-def main():
+def print_help(help_mode=None):
+    """Print help"""
+
+    if help_mode == "prepare":
+        prepare_combos.print_help()
+    elif help_mode == "run":
+        run_combos.print_help()
+    elif help_mode == "select":
+        select_combos.print_help()
+    else:
+        print("""Usage:
+
+  bluepymm <command>
+
+Commands:
+  prepare   Prepare combos
+  run       Run combos
+  select    Select combos
+  help      Show help for commands
+""")
+        if help_mode is not None:
+            print("ERROR: Unknown command: %s" % help_mode)
+
+
+def main(arg_list):
     """Main"""
 
-    print('\n#####################')
-    print('# Starting BluePyMM #')
-    print('#####################\n')
+    print('\n######################################')
+    print('# Blue Brain Python Model Management #')
+    print('######################################\n')
 
-    args = parse_args()
-    run(args)
+    if arg_list:
+        mode = arg_list[0]
 
-
-def parse_args(arg_list=None):
-    """Parse the arguments"""
-
-    parser = argparse.ArgumentParser(description='Blue Brain Model Management')
-    parser.add_argument('conf_filename')
-    parser.add_argument('--continu', action='store_true',
-                        help='continue from previous run')
-    parser.add_argument('--ipyp', action='store_true')
-    parser.add_argument('--ipyp_profile')
-
-    return parser.parse_args(arg_list)
-
-
-def run(args):
-    """Run the program"""
-    print('Reading configuration at %s' % args.conf_filename)
-
-    # Read configuration
-    conf_dict = tools.load_json(args.conf_filename)
-
-    tmp_dir = conf_dict['tmp_dir']
-    scores_db_path = os.path.abspath(conf_dict['scores_db'])
-    recipe_filename = conf_dict['recipe_path']
-    morph_dir = conf_dict['morph_path']
-    emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
-
-    skip_repaired_exemplar = conf_dict['skip_repaired_exemplar'] \
-        if 'skip_repaired_exemplar' in conf_dict else False
-
-    # Create temporary directories
-    emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
-
-    # Get information from emodels repo
-    print('Getting final emodels dict')
-    final_dict, emodel_etype_map, opt_dir, emodels_in_repo = \
-        prepare_combos.get_emodel_dicts(
-            conf_dict,
-            tmp_dir,
-            continu=args.continu)
-
-    print('Preparing emodels at %s' % emodels_dir)
-    # Clone the emodels repo and prepare the dirs for all the emodels
-    emodel_dirs = prepare_combos.prepare_emodel_dirs(
-        final_dict,
-        emodel_etype_map,
-        emodels_dir,
-        opt_dir,
-        emodels_hoc_dir,
-        emodels_in_repo,
-        continu=args.continu)
-
-    print('Creating sqlite db at %s' % scores_db_path)
-    if not args.continu:
-        # Create a sqlite3 db with all the combos
-        prepare_combos.create_mm_sqlite(
-            scores_db_path,
-            recipe_filename,
-            morph_dir,
-            emodel_etype_map,
-            final_dict,
-            emodel_dirs,
-            skip_repaired_exemplar=skip_repaired_exemplar)
-
-    print('Calculating scores')
-    # Calculate scores for combinations in sqlite3 db
-    run_combos.calculate_scores(
-        final_dict,
-        emodel_dirs,
-        scores_db_path,
-        use_ipyp=args.ipyp,
-        ipyp_profile=args.ipyp_profile)
-
-    print('BluePyMM finished\n')
-
-
-if __name__ == '__main__':
-    main()
+        if mode == "prepare":
+            prepare_combos.main(arg_list[1:])
+        elif mode == "run":
+            run_combos.main(arg_list[1:])
+        elif mode == "select":
+            select_combos.main(arg_list[1:])
+        elif mode == "help":
+            try:
+                help_mode = arg_list[1]
+            except IndexError:
+                help_mode = None
+            print_help(help_mode=help_mode)
+        else:
+            print_help()
+            print("ERROR: Unknown command: %s" % mode)
+    else:
+        print_help()

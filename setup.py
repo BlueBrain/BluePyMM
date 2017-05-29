@@ -29,5 +29,5 @@ setuptools.setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities',
         'License :: Other/Proprietary License'],
-    scripts=['bin/bluepymm', 'bin/bluepymm-megate']
+    scripts=['bin/bluepymm']
 )
