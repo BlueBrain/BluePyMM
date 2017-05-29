@@ -8,6 +8,9 @@ import nose.tools as nt
 
 from bluepymm import tools, select_combos
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+
 
 def _clear_main_output(output_dir):
     if os.path.exists(output_dir):
@@ -37,22 +40,20 @@ def _test_main(test_dir, test_config, benchmark_dir, output_dir):
 
 
 def test_main():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_select.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
     output_dir = "output_megate"
 
-    _test_main(test_dir, test_config, benchmark_dir, output_dir)
+    _test_main(TEST_DIR, test_config, benchmark_dir, output_dir)
 
 
 def test_main_2():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_select_2.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
     output_dir = "output_megate"
 
-    _test_main(test_dir, test_config, benchmark_dir, output_dir)
+    _test_main(TEST_DIR, test_config, benchmark_dir, output_dir)

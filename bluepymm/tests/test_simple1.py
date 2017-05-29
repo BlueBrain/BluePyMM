@@ -12,6 +12,10 @@ import nose.tools as nt
 from bluepymm import tools, main
 
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+
+
 def _clear_output():
     for unwanted in ['tmp', 'output']:
         if os.path.exists(unwanted):
@@ -112,23 +116,21 @@ def _test_simple1(test_dir, prepare_config_json, run_config_json,
 
 def test_simple1_from_dir():
     """Complete BluePyMM workflow on simple1: test with input directories"""
-    test_dir = 'examples/simple1'
     prepare_config_json = 'simple1_conf_prepare.json'
     run_config_json = 'simple1_conf_run.json'
     select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
 
-    _test_simple1(test_dir, prepare_config_json, run_config_json,
+    _test_simple1(TEST_DIR, prepare_config_json, run_config_json,
                   select_config_json, nb_emodels)
 
 
 def test_simple1_from_git_repo():
     """Complete BluePyMM workflow on simple1: test with input git repo"""
-    test_dir = 'examples/simple1'
     prepare_config_json = 'simple1_conf_prepare_git.json'
     run_config_json = 'simple1_conf_run.json'
     select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
 
-    _test_simple1(test_dir, prepare_config_json, run_config_json,
+    _test_simple1(TEST_DIR, prepare_config_json, run_config_json,
                   select_config_json, nb_emodels)

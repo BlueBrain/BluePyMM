@@ -7,6 +7,9 @@ import nose.tools as nt
 
 from bluepymm import tools, prepare_combos
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+
 
 def _clear_main_output(tmp_dir, output_dir):
     for unwanted in [tmp_dir, output_dir]:
@@ -55,16 +58,14 @@ def _test_main(test_dir, test_config, nb_emodels):
 
 
 def test_main_from_dir():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_prepare.json'
     nb_emodels = 2
 
-    _test_main(test_dir, test_config, nb_emodels)
+    _test_main(TEST_DIR, test_config, nb_emodels)
 
 
 def test_main_from_git_repo():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_prepare_git.json'
     nb_emodels = 2
 
-    _test_main(test_dir, test_config, nb_emodels)
+    _test_main(TEST_DIR, test_config, nb_emodels)
