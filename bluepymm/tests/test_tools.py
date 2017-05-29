@@ -21,7 +21,7 @@ def test_cd():
     """bluepymm.tools: test cd"""
 
     old_cwd = os.getcwd()
-    with bluepymm.tools.cd(EXAMPLES):
+    with tools.cd(EXAMPLES):
         nt.assert_equal(os.getcwd(), EXAMPLES)
 
     nt.assert_equal(old_cwd, os.getcwd())
