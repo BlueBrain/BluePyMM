@@ -26,6 +26,27 @@ def _parse_recipe(recipe_filename):
     return xml.etree.ElementTree.parse(recipe_filename, parser=parser)
 
 
+def verify_no_zero_percentage(data):
+    """Verify that value of parameter 'percentage' is not zero.
+
+    Args:
+        data(list of xml.etree.ElementTree): list of tree elements with
+                                             'percentage' field
+
+    Returns:
+        True if no percentage of zero is found.
+
+    Raises:
+        ValueError: if a percentage of zero is found.
+    """
+    for d in data:
+        if float(d.attrib['percentage']) == 0.0:
+            raise ValueError('Found a percentage of 0.0 in recipe, script'
+                             ' cannot handle this case: tag'
+                             ' {}'.format(d.tag))
+    return True
+
+
 def read_mm_recipe(recipe_filename):
     """Take a BBP builder recipe and return possible me combinations"""
     recipe_tree = _parse_recipe(recipe_filename)
@@ -40,24 +61,9 @@ def read_mm_recipe(recipe_filename):
 
                     for electro_type in structural_type.getchildren():
                         if electro_type.tag == 'ElectroType':
-
-                            percentage = (
-                                float(
-                                    structural_type.attrib['percentage']) /
-                                100 *
-                                float(
-                                    electro_type.attrib['percentage']) /
-                                100 *
-                                float(
-                                    layer.attrib['percentage']) /
-                                100)
-
-                            if percentage == 0.0:
-                                raise Exception(
-                                    'Found a percentage of 0.0 '
-                                    'in recipe, script cant to '
-                                    'handle this case')
-
+                            verify_no_zero_percentage([structural_type,
+                                                       electro_type,
+                                                       layer])
                             yield (layer.attrib['id'],
                                    structural_type.attrib['id'],
                                    electro_type.attrib['id'])
