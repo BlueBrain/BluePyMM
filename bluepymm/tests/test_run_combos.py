@@ -14,11 +14,11 @@ def test_main():
     test_config = 'simple1_conf_run.json'
 
     with tools.cd(TEST_DIR):
-        config = tools.load_json(test_config)
-
         # Run combination preparation
-        args_list = [test_config]
-        run_combos.main(args_list)
+        run_combos.run_combos(conf_filename=test_config,
+                              ipyp=False,
+                              ipyp_profile=None)
 
         # TODO: test database contents
+        config = tools.load_json(test_config)
         nt.assert_true(os.path.isfile(config["scores_db"]))

@@ -49,8 +49,8 @@ def _test_main(test_dir, test_config, nb_emodels):
                            config["output_dir"])
 
         # Run combination preparation
-        args_list = [test_config]
-        prepare_combos.main(args_list)
+        prepare_combos.main.prepare_combos(conf_filename=test_config,
+                                           continu=False)
 
         # Test output
         _verify_main_output(config["scores_db"], config["emodels_hoc_dir"],

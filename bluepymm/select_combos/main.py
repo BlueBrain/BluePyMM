@@ -6,7 +6,6 @@
 # pylint: disable=R0914, C0325, W0640
 
 import os
-import argparse
 import pandas
 
 from bluepymm import tools
@@ -15,16 +14,9 @@ from . import sqlite_io, reporting, table_processing, megate_output
 from . import process_megate_config as proc_config
 
 
-def _create_parser():
-    parser = argparse.ArgumentParser(description='Select feasible'
-                                                 ' me-combinations',
-                                     usage='bluepymm select [-h]'
-                                           ' conf_filename')
-    parser.add_argument('conf_filename')
-    return parser
+def select_combos(conf_filename):
+    conf_dict = tools.load_json(conf_filename)
 
-
-def _run(conf_dict):
     if 'skip_repaired_exemplar' in conf_dict:
         skip_repaired_exemplar = conf_dict['skip_repaired_exemplar']
     else:
@@ -100,14 +92,7 @@ def _run(conf_dict):
     print('Wrote combo_model to %s' % combo_emodel_filename)
 
 
-def print_help():
-    _create_parser().print_help()
-
-
-def main(arg_list):
-    args = _create_parser().parse_args(arg_list)
-
-    # Read configuration file
-    conf_dict = tools.load_json(args.conf_filename)
-
-    _run(conf_dict)
+def add_parser(action):
+    parser = action.add_parser('select',
+                               help='Select feasible me-combinations')
+    parser.add_argument('conf_filename')

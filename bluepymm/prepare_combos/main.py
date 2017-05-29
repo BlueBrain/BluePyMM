@@ -1,26 +1,13 @@
 """ Create database of possible me-combinations."""
 
 import os
-import argparse
 
 from bluepymm import tools
 from . import prepare_emodel_dirs
 from . import create_mm_sqlite
 
 
-def _create_parser():
-    parser = argparse.ArgumentParser(description='Create and prepare database'
-                                                 ' of possible'
-                                                 ' me-combinations',
-                                     usage='bluepymm prepare [-h] [--continu]'
-                                           ' conf_filename')
-    parser.add_argument('conf_filename')
-    parser.add_argument('--continu', action='store_true',
-                        help='continue from previous run')
-    return parser
-
-
-def _run(conf_dict, continu, scores_db_path):
+def prepare_emodels(conf_dict, continu, scores_db_path):
     tmp_dir = conf_dict['tmp_dir']
     emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
 
@@ -30,7 +17,7 @@ def _run(conf_dict, continu, scores_db_path):
         prepare_emodel_dirs.get_emodel_dicts(
             conf_dict, tmp_dir, continu=continu)
 
-    print('Preparing emodels at %s' % emodels_dir)
+    print('Preparing emodels in %s' % emodels_dir)
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
     # Clone the emodels repo and prepare the dirs for all the emodels
     emodel_dirs = prepare_emodel_dirs.prepare_emodel_dirs(
@@ -62,19 +49,13 @@ def _run(conf_dict, continu, scores_db_path):
     return final_dict, emodel_dirs
 
 
-def print_help():
-    _create_parser().print_help()
-
-
-def main(arg_list):
-    args = _create_parser().parse_args(arg_list)
-
-    print('Reading configuration at %s' % args.conf_filename)
-    conf_dict = tools.load_json(args.conf_filename)
+def prepare_combos(conf_filename, continu):
+    print('Reading configuration at %s' % conf_filename)
+    conf_dict = tools.load_json(conf_filename)
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
-    # Prepare combinations
-    final_dict, emodel_dirs = _run(conf_dict, args.continu, scores_db_path)
+    final_dict, emodel_dirs = prepare_emodels(
+        conf_dict, continu, scores_db_path)
 
     # Save output
     # TODO: gather all output business here?
@@ -82,3 +63,12 @@ def main(arg_list):
     tools.makedirs(output_dir)
     tools.write_json(output_dir, 'final_dict.json', final_dict)
     tools.write_json(output_dir, 'emodel_dirs.json', emodel_dirs)
+
+
+def add_parser(action):
+    parser = action.add_parser(
+        'prepare',
+        help='Create and prepare database with me-combinations')
+    parser.add_argument('conf_filename')
+    parser.add_argument('--continu', action='store_true',
+                        help='continue from previous run')
