@@ -12,6 +12,9 @@ import nose.tools as nt
 
 from bluepymm import main, tools
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+
 
 def _clear_output_directories(directories):
     for unwanted in directories:
@@ -79,11 +82,10 @@ def test_main_no_command():
 
 
 def test_prepare_combos():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_prepare.json'
     nb_emodels = 2
 
-    with tools.cd(test_dir):
+    with tools.cd(TEST_DIR):
         config = tools.load_json(test_config)
 
         # Make sure the output directories are clean
@@ -100,10 +102,9 @@ def test_prepare_combos():
 
 
 def test_run_combos():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_run.json'
 
-    with tools.cd(test_dir):
+    with tools.cd(TEST_DIR):
         config = tools.load_json(test_config)
 
         # Run combination preparation
@@ -115,14 +116,13 @@ def test_run_combos():
 
 
 def test_select_combos():
-    test_dir = 'examples/simple1'
     test_config = 'simple1_conf_select.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
     output_dir = "output_megate"
 
-    with tools.cd(test_dir):
+    with tools.cd(TEST_DIR):
         # Make sure the output directory is clean
         _clear_output_directories([output_dir])
 
