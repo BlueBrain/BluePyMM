@@ -42,22 +42,10 @@ def test_check_no_null_nan_values():
 @attr('unit')
 def test_check_no_null_nan_values_nan():
     data = pandas.DataFrame([[1, float('nan')], [3, 4]], columns=list('AB'))
-    throws_exception = False
-    try:
-        tools.check_no_null_nan_values(data, 'test')
-    except ValueError as e:
-        throws_exception = True
-        nt.assert_equal(e.args[0], 'test contains None/NaN values.')
-    nt.assert_true(throws_exception)
+    nt.assert_raises(ValueError, tools.check_no_null_nan_values, data, 'test')
 
 
 @attr('unit')
 def test_check_no_null_nan_values_none():
     data = pandas.DataFrame([[1, 2], [None, 4]], columns=list('AB'))
-    throws_exception = False
-    try:
-        tools.check_no_null_nan_values(data, 'test')
-    except ValueError as e:
-        throws_exception = True
-        nt.assert_equal(e.args[0], 'test contains None/NaN values.')
-    nt.assert_true(throws_exception)
+    nt.assert_raises(ValueError, tools.check_no_null_nan_values, data, 'test')

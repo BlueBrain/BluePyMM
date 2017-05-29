@@ -51,6 +51,6 @@ def check_no_null_nan_values(data, description):
     Raises:
         ValueError: if `data` contains at least one None or NaN value.
     """
-    if data.isnull().sum().sum() > 0:
+    if data.isnull().values.any():
         raise ValueError('{} contains None/NaN values.'.format(description))
     return True
