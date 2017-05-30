@@ -5,7 +5,7 @@ from __future__ import print_function
 # Copyright BBP/EPFL 2017; All rights reserved.
 # Do not distribute without further notice.
 
-"""Some Code based on BrainBuilder and morph repair code"""
+"""Some code based on BrainBuilder and morph repair code"""
 
 # pylint: disable=R0912
 
@@ -17,13 +17,17 @@ import xml.etree.ElementTree
 from bluepymm import tools
 
 
-def _parse_recipe(recipe_filename):
-    """parse a BBP recipe and return the corresponding etree"""
+def _parse_xml_tree(filename):
+    """Read xml tree from file.
 
+    Args:
+        filename(str): filename of recipe (XML)
+
+    Returns:
+        xml.etree.ElementTree
+    """
     parser = xml.etree.ElementTree.XMLParser()
-    # Disabling, this is not standardized, and python 3 incompatible
-    # parser.entity = collections.defaultdict(lambda: '')
-    return xml.etree.ElementTree.parse(recipe_filename, parser=parser)
+    return xml.etree.ElementTree.parse(filename, parser=parser)
 
 
 def verify_no_zero_percentage(tree_element_list):
@@ -48,33 +52,39 @@ def verify_no_zero_percentage(tree_element_list):
     return True
 
 
+def read_recipe_records(recipe_tree):
+    """Parse recipe tree and yield (layer, m-type, e-type)-tuples.
+
+    Args:
+        recipe_tree(xml.etree.ElementTree): recipe tree
+
+    Yields:
+        (layer, m-type, e-type)-tuples
+    """
+    for layer in recipe_tree.findall('NeuronTypes')[0].getchildren():
+        for mtype in layer.getchildren():
+            if mtype.tag == "StructuralType":
+                for etype in mtype.getchildren():
+                    if etype.tag == "ElectroType":
+                        verify_no_zero_percentage([layer, mtype, etype])
+                        yield (layer.attrib['id'],
+                               mtype.attrib['id'],
+                               etype.attrib['id'])
+
+
 def read_mm_recipe(recipe_filename):
-    """Take a BBP builder recipe and return possible me combinations"""
-    recipe_tree = _parse_recipe(recipe_filename)
+    """Read a BBP builder recipe and return possible (layer, m-type, e-type)-
+    combinations.
 
-    def read_records():
-        '''parse each neuron posibility in the recipe'''
+    Args:
+        recipe_filename(str): filename of recipe (XML)
 
-        for layer in recipe_tree.findall('NeuronTypes')[0].getchildren():
-
-            for structural_type in layer.getchildren():
-                if structural_type.tag == 'StructuralType':
-
-                    for electro_type in structural_type.getchildren():
-                        if electro_type.tag == 'ElectroType':
-                            verify_no_zero_percentage([structural_type,
-                                                       electro_type,
-                                                       layer])
-                            yield (layer.attrib['id'],
-                                   structural_type.attrib['id'],
-                                   electro_type.attrib['id'])
-
-    return pandas.DataFrame(
-        read_records(),
-        columns=[
-            'layer',
-            'fullmtype',
-            'etype'])
+    Returns:
+        A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
+    """
+    recipe_tree = _parse_xml_tree(recipe_filename)
+    return pandas.DataFrame(read_recipe_records(recipe_tree),
+                            columns=["layer", "fullmtype", "etype"])
 
 
 def xmlmorphinfo_from_xml(xml_morph):
@@ -97,7 +107,7 @@ def extract_morphinfo_from_xml(root, wanted=None):
 def read_mtype_morph_map(neurondb_xml_filename):
     """Read neurondb.xml"""
 
-    xml_tree = _parse_recipe(neurondb_xml_filename)
+    xml_tree = _parse_xml_tree(neurondb_xml_filename)
 
     mtype_morph_map = pandas.DataFrame(
         extract_morphinfo_from_xml(xml_tree.getroot()), columns=[
