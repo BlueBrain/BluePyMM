@@ -15,7 +15,7 @@ install_in_venv:
 	$(VENV) python setup.py sdist
 	$(VENV) pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_test_requirements:
-	$(VENV) pip install -q $(TEST_REQUIREMENTS) --upgrade
+	$(VENV) pip install -q $(TEST_REQUIREMENTS) -I --upgrade
 test: clean venv codingstyle unit functional
 test3: clean venv3 codingstyle unit functional
 clean:
@@ -27,16 +27,26 @@ clean:
 	rm -rf bluepymm/tests/examples/simple1/output
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
+	rm -rf doc/build
 codingstyle: install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
 unit: install_in_venv install_test_requirements
-	$(VENV) cd bluepymm/tests; nosetests -a 'unit' -s -v -x --with-coverage --cover-xml \
+	$(VENV) cd bluepymm/tests; nosetests -a 'unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 functional: install_in_venv install_test_requirements simple1_git
-	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -s -v -x --with-coverage --cover-xml \
+	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 simple1_git:
 	$(VENV) cd bluepymm/tests/examples/simple1; python build_git.py
 autopep8: clean venv
 	$(VENV) pip install autopep8
 	$(VENV) find bluepymm -name '*.py' -exec autopep8 -i '{}' \;
+doc: venv install_in_venv
+	$(VENV) pip install -q sphinx sphinx-autobuild sphinx_rtd_theme -I
+	$(VENV) sphinx-apidoc -o docs/source bluepymm
+	$(VENV) cd docs; $(MAKE) clean; $(MAKE) html
+docpdf: venv install_in_venv
+	$(VENV) pip install sphinx sphinx-autobuild -I
+	$(VENV) cd docs; $(MAKE) clean; $(MAKE) latexpdf
+docopen: doc
+	open docs/build/html/index.html

@@ -32,8 +32,7 @@ def _test_main(test_dir, test_config, benchmark_dir, output_dir):
         _clear_main_output("output_megate")
 
         # Run combination selection
-        args_list = [test_config]
-        select_combos.main(args_list)
+        select_combos.select_combos(test_config)
 
         # Test output
         _verify_main_output(benchmark_dir, output_dir)
