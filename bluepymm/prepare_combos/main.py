@@ -31,8 +31,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
 
     if not continu:
         print('Creating sqlite db at %s' % scores_db_path)
-        skip_repaired_exemplar = conf_dict['skip_repaired_exemplar'] \
-            if 'skip_repaired_exemplar' in conf_dict else False
+        skip_repaired_exemplar = conf_dict.get('skip_repaired_exemplar', False)
         recipe_filename = conf_dict['recipe_path']
         morph_dir = conf_dict['morph_path']
 

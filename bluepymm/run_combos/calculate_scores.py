@@ -72,12 +72,10 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
     try:
         sys.stdout = open('/dev/null', 'w')
-        print(
-            'Running emodel %s on morph %s in %s' %
-            (emodel, morph_path, emodel_dir))
+        print('Running emodel %s on morph %s in %s' %
+              (emodel, morph_path, emodel_dir))
 
-        sys.path.append(emodel_dir)
-        import setup
+        setup = tools.load_module('setup', emodel_dir)
 
         print("Changing path to %s" % emodel_dir)
 
@@ -91,13 +89,9 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
             extra_values = {}
             extra_values['holding_current'] = \
-                responses['bpo_holding_current'] \
-                if 'bpo_holding_current' in responses \
-                else None
+                responses.get('bpo_holding_current', None)
             extra_values['threshold_current'] = \
-                responses['bpo_threshold_current'] \
-                if 'bpo_threshold_current' in responses \
-                else None
+                responses.get('bpo_threshold_current', None)
 
             scores = evaluator.fitness_calculator.calculate_scores(responses)
 
