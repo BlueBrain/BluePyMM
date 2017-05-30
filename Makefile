@@ -27,6 +27,7 @@ clean:
 	rm -rf bluepymm/tests/examples/simple1/output
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
+	rm -rf doc/build
 codingstyle: install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
 unit: install_in_venv install_test_requirements
@@ -40,3 +41,12 @@ simple1_git:
 autopep8: clean venv
 	$(VENV) pip install autopep8
 	$(VENV) find bluepymm -name '*.py' -exec autopep8 -i '{}' \;
+doc: venv install_in_venv
+	$(VENV) pip install -q sphinx sphinx-autobuild sphinx_rtd_theme -I
+	$(VENV) sphinx-apidoc -o docs/source bluepymm
+	$(VENV) cd docs; $(MAKE) clean; $(MAKE) html
+docpdf: venv install_in_venv
+	$(VENV) pip install sphinx sphinx-autobuild -I
+	$(VENV) cd docs; $(MAKE) clean; $(MAKE) latexpdf
+docopen: doc
+	open docs/build/html/index.html
