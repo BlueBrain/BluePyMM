@@ -1,5 +1,7 @@
 /tmp
 *.pyc
+.*.swp
 /bluepymm.egg-info
 /dist/
 /venv
+.noseids

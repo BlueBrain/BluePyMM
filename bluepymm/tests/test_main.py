@@ -3,9 +3,9 @@
 # Copyright BBP/EPFL 2017; All rights reserved.
 # Do not distribute without further notice.
 
+import filecmp
 import os
 import shutil
-import filecmp
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
@@ -58,27 +58,6 @@ def _verify_select_combos_output(benchmark_dir, output_dir):
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
     nt.assert_equal(len(matches[0]), len(files))
-
-
-# TODO: how to test what is printed to standard output?
-def test_main_unknown_command():
-    args_list = ['anything']
-    main(args_list)
-
-
-# TODO: how to test what is printed to standard output?
-def test_main_help():
-    args_list = ['help']
-    main(args_list)
-
-    args_list = ['--help']
-    main(args_list)
-
-
-# TODO: how to test what is printed to standard output?
-def test_main_no_command():
-    args_list = []
-    main(args_list)
 
 
 def test_prepare_combos():

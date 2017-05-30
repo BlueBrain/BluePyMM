@@ -30,10 +30,10 @@ clean:
 codingstyle: install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
 unit: install_in_venv install_test_requirements
-	$(VENV) cd bluepymm/tests; nosetests -a 'unit' -s -v -x --with-coverage --cover-xml \
+	$(VENV) cd bluepymm/tests; nosetests -a 'unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 functional: install_in_venv install_test_requirements simple1_git
-	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -s -v -x --with-coverage --cover-xml \
+	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 simple1_git:
 	$(VENV) cd bluepymm/tests/examples/simple1; python build_git.py
