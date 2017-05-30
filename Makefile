@@ -15,7 +15,7 @@ install_in_venv:
 	$(VENV) python setup.py sdist
 	$(VENV) pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_test_requirements:
-	$(VENV) pip install -q $(TEST_REQUIREMENTS) --upgrade
+	$(VENV) pip install -q $(TEST_REQUIREMENTS) -I --upgrade
 test: clean venv codingstyle unit functional
 test3: clean venv3 codingstyle unit functional
 clean:
