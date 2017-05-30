@@ -118,7 +118,24 @@ def extract_emodel_etype_json(json_filename):
 
 
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
-    """Resolve regex's in emodel etype map"""
+    """Resolve regular expressions in an e-model e-type map and convert the
+    result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
+    or "morph_name" in the e-model e-type map, the regular expression ".*" is
+    assumed.
+
+    Args:
+        emodel_etype_map: A dict mapping e-models to a dict with keys
+            "mm_recipe" and "layer". Optional additional keys are "etype",
+            "mtype", and "morph_name", which may contain regular expressions.
+            In absence of these keys, the regular expression ".*" is assumed.
+        fullmtypes: A set of unique full m-types
+        etypes: A set of unique e-types
+
+    Returns:
+        A pandas.DataFrame with fields 'emodel', 'layer', 'fullmtype', 'etype',
+        'morph_regex', and 'original_emodel'. Each row corresponds to a unique
+        e-model description.
+    """
 
     return_df = pandas.DataFrame()
     morph_name_regexs = {}
