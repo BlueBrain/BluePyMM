@@ -48,7 +48,7 @@ def check_emodels_in_repo(conf_dict):
     return emodels_in_repo
 
 
-def convert_emodel_input(conf_dict):
+def convert_emodel_input(conf_dict, continu):
     """Convert e-model input to BluePyMM file structure and return path to that
     structure.
 
@@ -84,7 +84,7 @@ def get_emodel_dicts(conf_dict, continu=False):
     """Convert e-model input to BluePyMM file structure and return detailed
     e-model information."""
 
-    tmp_opt_repo = convert_emodel_input(conf_dict)
+    tmp_opt_repo = convert_emodel_input(conf_dict, continu)
 
     # gather e-model information
     final_dict_path = os.path.join(tmp_opt_repo, conf_dict['final_json_path'])
