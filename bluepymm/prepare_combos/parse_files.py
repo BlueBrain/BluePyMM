@@ -123,17 +123,6 @@ def read_mtype_morph_map(neurondb_filename):
                             columns=column_labels)
 
 
-def extract_emodel_etype_json(json_filename):
-    """Read emodel etype json"""
-
-    emodel_etype_dict = tools.load_json(json_filename)
-
-    for emodel, etype_dict in emodel_etype_dict.items():
-        for etype, layers in etype_dict.items():
-            for layer in layers:
-                yield (emodel, etype, layer)
-
-
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     """Resolve regular expressions in an e-model e-type map and convert the
     result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
