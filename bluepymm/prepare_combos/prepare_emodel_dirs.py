@@ -20,8 +20,8 @@ def check_emodels_in_repo(conf_dict):
     """Check whether input e-models are organized in branches of a repository.
 
     Args:
-        conf_dict: A dict with either the key 'emodels_repo' or the key
-            'emodels_dir'.
+        conf_dict: A dict with either the key "emodels_repo" or the key
+            "emodels_dir".
 
     Returns:
         True if the input e-models are organized in separate branches of a
@@ -48,16 +48,19 @@ def check_emodels_in_repo(conf_dict):
     return emodels_in_repo
 
 
-def get_emodel_dicts(
-        conf_dict,
-        tmp_dir,
-        continu=False):
-    """Get dictionary with final emodels"""
+def convert_emodel_input(conf_dict):
+    """Convert e-model input to BluePyMM file structure and return path to that
+    structure.
+
+    Args:
+        conf_dict: A dict with e-model input configuration.
+
+    Returns:
+        Path to BluePyMM file structure.
+    """
     emodels_in_repo = check_emodels_in_repo(conf_dict)
-
-    tmp_opt_repo = os.path.abspath(
-        os.path.join(tmp_dir, 'emodels_repo'))
-
+    tmp_opt_repo = os.path.abspath(os.path.join(conf_dict["tmp_dir"],
+                                                'emodels_repo'))
     if not continu:
         if emodels_in_repo:
             print('Cloning emodels repo in %s' % tmp_opt_repo)
@@ -74,18 +77,22 @@ def get_emodel_dicts(
                     conf_dict['emodels_githash'])
         else:
             shutil.copytree(conf_dict['emodels_dir'], tmp_opt_repo)
+    return tmp_opt_repo
 
-    final_dict = tools.load_json(os.path.join(
-        tmp_opt_repo,
-        conf_dict['final_json_path']))
 
-    emodel_etype_map = tools.load_json(
-        os.path.join(
-            tmp_opt_repo,
-            conf_dict['emodel_etype_map_path']))
+def get_emodel_dicts(conf_dict, continu=False):
+    """Convert e-model input to BluePyMM file structure and return detailed
+    e-model information."""
 
-    opt_dir = os.path.dirname(os.path.join(tmp_opt_repo,
-                                           conf_dict['final_json_path']))
+    tmp_opt_repo = convert_emodel_input(conf_dict)
+
+    # gather e-model information
+    final_dict_path = os.path.join(tmp_opt_repo, conf_dict['final_json_path'])
+    final_dict = tools.load_json(final_dict_path)
+    e_map_path = os.path.join(tmp_opt_repo, conf_dict['emodel_etype_map_path'])
+    emodel_etype_map = tools.load_json(e_map_path)
+    opt_dir = os.path.dirname(final_dict_path)
+
     return final_dict, emodel_etype_map, opt_dir, emodels_in_repo
 
 

@@ -15,7 +15,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
     print('Getting final emodels dict')
     final_dict, emodel_etype_map, opt_dir, emodels_in_repo = \
         prepare_emodel_dirs.get_emodel_dicts(
-            conf_dict, tmp_dir, continu=continu)
+            conf_dict, continu=continu)
 
     print('Preparing emodels in %s' % emodels_dir)
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
