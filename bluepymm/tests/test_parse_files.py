@@ -64,7 +64,7 @@ def test_read_recipe_records():
                 </Layer>
             </NeuronTypes>
         </blueColumn>
-        """
+    """
     expected_records = [("1", "mtype1", "etype1"),
                         ("1", "mtype1", "etype2"),
                         ("1", "mtype2", "etype1"),
@@ -80,7 +80,7 @@ def test_read_mm_recipe():
     """bluepymm.prepare_combos.parse_files: test read_mm_recipe with recipe
     from test example "simple1".
     """
-    recipe_file = './examples/simple1/data/simple1_recipe.xml'
+    recipe_filename = './examples/simple1/data/simple1_recipe.xml'
     expected_records = [("1", "mtype1", "etype1"),
                         ("1", "mtype1", "etype2"),
                         ("1", "mtype2", "etype1"),
@@ -88,7 +88,59 @@ def test_read_mm_recipe():
                         ]
     expected_df = pandas.DataFrame(expected_records,
                                    columns=["layer", "fullmtype", "etype"])
-    df = parse_files.read_mm_recipe(recipe_file)
+    df = parse_files.read_mm_recipe(recipe_filename)
+    pandas.util.testing.assert_frame_equal(df, expected_df)
+
+
+@attr('unit')
+def test_read_morph_records():
+    """bluepymm.prepare_combos.parse_files: test read_morph_records.
+    """
+    tree_string = """
+        <neurondb>
+            <listing>
+                <morphology>
+                    <name>morph1</name>
+                  <mtype>mtype1</mtype>
+                  <msubtype />
+                  <layer>1</layer>
+                </morphology>
+                <morphology>
+                    <name>morph2</name>
+                  <mtype>mtype2</mtype>
+                  <msubtype>subtype2</msubtype>
+                  <layer>layer2</layer>
+                </morphology>
+            </listing>
+            <overview>
+                <count>
+                    2
+                </count>
+            </overview>
+        </neurondb>
+    """
+    expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
+                        ("morph2", "mtype2:subtype2", "mtype2", "subtype2",
+                         "layer2")
+                        ]
+    morph_tree = ET.fromstring(tree_string)
+    records = [r for r in parse_files.read_morph_records(morph_tree)]
+    nt.assert_list_equal(records, expected_records)
+
+
+@attr('unit')
+def test_read_mtype_morph_map():
+    """bluepymm.prepare_combos.parse_files: test read_mtype_morph_map with
+    morphology database from test example "simple1".
+    """
+    neurondb_filename = "examples/simple1/data/morphs/neuronDB.xml"
+    expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
+                        ("morph2", "mtype2", "mtype2", "", "1")
+                        ]
+    expected_df = pandas.DataFrame(expected_records,
+                                   columns=["morph_name", "fullmtype", "mtype",
+                                            "submtype", "layer"])
+    df = parse_files.read_mtype_morph_map(neurondb_filename)
     pandas.util.testing.assert_frame_equal(df, expected_df)
 
 

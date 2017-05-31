@@ -73,8 +73,8 @@ def read_recipe_records(recipe_tree):
 
 
 def read_mm_recipe(recipe_filename):
-    """Read a BBP builder recipe and return possible (layer, m-type, e-type)-
-    combinations.
+    """Read a BBP builder recipe and return a pandas.DataFrame with all
+    possible (layer, m-type, e-type)-combinations.
 
     Args:
         recipe_filename(str): filename of recipe (XML)
@@ -87,44 +87,40 @@ def read_mm_recipe(recipe_filename):
                             columns=["layer", "fullmtype", "etype"])
 
 
-def xmlmorphinfo_from_xml(xml_morph):
-    '''extracts properties from a neurondb.xml <morphology> stanza'''
-    name = xml_morph.findtext('name')
-    mtype = xml_morph.findtext('mtype')
-    msubtype = xml_morph.findtext('msubtype')
-    fullmtype = '%s:%s' % (mtype, msubtype) if msubtype != '' else mtype
-    layer = xml_morph.findtext('layer')
-    return (name, fullmtype, mtype, msubtype, layer)
+def read_morph_records(morph_tree):
+    """Parse morphology tree and yield (name, fullmtype, mtype, msubtype,
+    layer)-tuples.
+
+    Args:
+        morph_tree(xml.etree.ElementTree): morphology tree
+
+    Yields:
+        (name, fullmtype, mtype, msubtype, layer)-tuples
+    """
+    for morph in morph_tree.findall('.//morphology'):
+        name = morph.findtext('name')
+        mtype = morph.findtext('mtype')
+        msubtype = morph.findtext('msubtype')
+        fullmtype = '%s:%s' % (mtype, msubtype) if msubtype != '' else mtype
+        layer = morph.findtext('layer')
+        yield (name, fullmtype, mtype, msubtype, layer)
 
 
-def extract_morphinfo_from_xml(root, wanted=None):
-    '''returns a generator that contains all the morphologies from `root`'''
-    for morph in root.findall('.//morphology'):
-        morph = xmlmorphinfo_from_xml(morph)
-        yield morph
+def read_mtype_morph_map(neurondb_filename):
+    """Read morphology database and return a pandas.DataFrame with all
+    morphology records.
 
+    Args:
+        neurondb_filename(str): filename of morphology database (XML)
 
-def read_mtype_morph_map(neurondb_xml_filename):
-    """Read neurondb.xml"""
-
-    xml_tree = _parse_xml_tree(neurondb_xml_filename)
-
-    mtype_morph_map = pandas.DataFrame(
-        extract_morphinfo_from_xml(xml_tree.getroot()), columns=[
-            'morph_name', 'fullmtype', 'mtype', 'submtype', 'layer'])
-
-    return mtype_morph_map
-
-
-def extract_emodel_etype_json(json_filename):
-    """Read emodel etype json"""
-
-    emodel_etype_dict = tools.load_json(json_filename)
-
-    for emodel, etype_dict in emodel_etype_dict.items():
-        for etype, layers in etype_dict.items():
-            for layer in layers:
-                yield (emodel, etype, layer)
+    Returns:
+        A pandas.DataFrame with field "morph_name", "fullmtype", "mtype",
+        "submtype", "layer".
+    """
+    xml_tree = _parse_xml_tree(neurondb_filename)
+    column_labels = ["morph_name", "fullmtype", "mtype", "submtype", "layer"]
+    return pandas.DataFrame(read_morph_records(xml_tree.getroot()),
+                            columns=column_labels)
 
 
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
