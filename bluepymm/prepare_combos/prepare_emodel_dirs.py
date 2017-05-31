@@ -16,22 +16,44 @@ import tarfile
 from bluepymm import tools
 
 
-def get_emodel_dicts(
-        conf_dict,
-        tmp_dir,
-        continu=False):
-    """Get dictionary with final emodels"""
+def check_emodels_in_repo(conf_dict):
+    """Check whether input e-models are organized in branches of a repository.
 
+    Args:
+        conf_dict: A dict with either the key 'emodels_repo' or the key
+            'emodels_dir'.
+
+    Returns:
+        True if the input e-models are organized in separate branches of a
+        git repository, false if the e-models are organized into separate
+        subdirectories.
+
+    Raises:
+        ValueError: if both or none of the keys "emodels_repo" and
+            "emodels_dir" are present.
+
+    TODO: replace "emodels_repo" and "emodels_dir" by "emodels_input_type" and
+        "emodels_path" or similar.
+    """
     if 'emodels_repo' in conf_dict and 'emodels_dir' in conf_dict:
-        raise ValueError('Impossible to specify both emodels_repo and '
-                         'emodels_dir')
+        raise ValueError("Impossible to specify both 'emodels_repo' and"
+                         " 'emodels_dir' in configuration file")
     elif 'emodels_repo' in conf_dict:
         emodels_in_repo = True
     elif 'emodels_dir' in conf_dict:
         emodels_in_repo = False
     else:
-        raise ValueError('Need to specify emodels_dir or emodels_repo in '
-                         'configuration file')
+        raise ValueError("Need to specify either 'emodels_dir' or"
+                         " 'emodels_repo' in configuration file")
+    return emodels_in_repo
+
+
+def get_emodel_dicts(
+        conf_dict,
+        tmp_dir,
+        continu=False):
+    """Get dictionary with final emodels"""
+    emodels_in_repo = check_emodels_in_repo(conf_dict)
 
     tmp_opt_repo = os.path.abspath(
         os.path.join(tmp_dir, 'emodels_repo'))
