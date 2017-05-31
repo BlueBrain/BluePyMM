@@ -352,6 +352,7 @@ def render_pep440_pre(pieces):
         rendered = "0.post.dev%d" % pieces["distance"]
     return rendered
 
+
 def render_pep440_minor(pieces):
     """TAG[.DISTANCE] . No -dirty
 
@@ -367,6 +368,7 @@ def render_pep440_minor(pieces):
         # exception #1
         rendered = "0.%d" % pieces["distance"]
     return rendered
+
 
 def render_pep440_post(pieces):
     """TAG[.postDISTANCE[.dev0]+gHEX] .
