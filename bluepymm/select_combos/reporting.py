@@ -21,6 +21,7 @@ FIGSIZE = (15, 10)
 
 
 def pdf_file(pdf_filename):
+    """Return object that start pdf file"""
     return PdfPages(pdf_filename)
 
 
@@ -55,6 +56,7 @@ def plot_megate_thresholds(megate_thresholds, pp):
 
 
 def plot_stacked_bars(data, xlabel, ylabel, title, color_map, pp):
+    """Plot stacked bars"""
     ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True,
                    color=color_map)
     ax.get_xaxis().set_major_locator(
@@ -82,8 +84,7 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
                       '{}: number of tested morphologies per feature'.format(
                           emodel),
                       [BLUE, RED],
-                      pp,
-                      )
+                      pp,)
 
 
 def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
@@ -102,12 +103,11 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
                       '',
                       '{}: number of tested morphologies per m-type'.format(
                           emodel),
-                      [BLUE, RED],
-                      pp,
-                      )
+                      [BLUE, RED], pp,)
 
 
 def create_morphology_label(data_frame):
+    """Create label for morphology"""
     morph = data_frame.iloc[0]['morph_name']
     mtype = data_frame.iloc[0]['fullmtype']
     etype = data_frame.iloc[0]['etype']
@@ -137,8 +137,7 @@ def plot_emodels_per_morphology(data, final_db, pp):
                       'Morphology name',
                       'Number of tested e-models for each morphology',
                       [BLUE, YELLOW, RED],
-                      pp,
-                      )
+                      pp)
 
 
 def plot_emodels_per_metype(data, final_db, pp):
@@ -146,10 +145,11 @@ def plot_emodels_per_metype(data, final_db, pp):
     """
 
     # Add helper column 'metype'
-    def lambda_metype(x):
+    def create_metype(x):
+        """Create me-type from m-type and e-type"""
         return '%s_%s' % (x['etype'], x['fullmtype'])
-    data['metype'] = data.apply(lambda_metype, axis=1)
-    final_db['metype'] = final_db.apply(lambda_metype, axis=1)
+    data['metype'] = data.apply(create_metype, axis=1)
+    final_db['metype'] = final_db.apply(create_metype, axis=1)
 
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
@@ -174,5 +174,4 @@ def plot_emodels_per_metype(data, final_db, pp):
                       'Number of tested (e-model, morphology) combinations per'
                       ' me-type',
                       [BLUE, YELLOW, RED],
-                      pp,
-                      )
+                      pp)
