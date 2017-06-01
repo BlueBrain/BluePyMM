@@ -1,5 +1,7 @@
 """Run combinations and calculate scores."""
 
+from __future__ import print_function
+
 import os
 
 from bluepymm import tools
@@ -7,6 +9,7 @@ from . import calculate_scores
 
 
 def add_parser(action):
+    """Add parser"""
     parser = action.add_parser(
         'run',
         help='Calculate scores of me-combinations')
@@ -19,6 +22,8 @@ def add_parser(action):
 
 
 def run_combos(conf_filename, ipyp, ipyp_profile):
+    """Run combos"""
+
     print('Reading configuration at %s' % conf_filename)
     conf_dict = tools.load_json(conf_filename)
 

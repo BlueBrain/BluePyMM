@@ -1,4 +1,4 @@
-TEST_REQUIREMENTS=nose coverage pep8
+TEST_REQUIREMENTS=nose coverage pep8 pylint
 VENV=. ./venv/bin/activate;
 
 all: install
@@ -12,12 +12,11 @@ install: clean
 	python setup.py sdist
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_in_venv:
-	$(VENV) python setup.py sdist
+	$(VENV) python setup.py sdist bdist_wheel
 	$(VENV) pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_test_requirements:
 	$(VENV) pip install -q $(TEST_REQUIREMENTS) -I --upgrade
-test: clean venv codingstyle unit functional
-test3: clean venv3 codingstyle unit functional
+test: codingstyle unit functional
 clean:
 	rm -rf bluepymm.egg-info
 	rm -rf dist
@@ -28,12 +27,15 @@ clean:
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf doc/build
-codingstyle: install_test_requirements
+codingstyle: pep8
+pep8: clean venv install_test_requirements 
 	$(VENV) pep8 --ignore=E402 bluepymm
-unit: install_in_venv install_test_requirements
+pylint: clean venv install_test_requirements 
+	$(VENV) pylint -d C0103,E1101,R0901,R0902,R0903,R0904,R0913,R0915,W0141,W0142,W0221,W0232,W0613,W0631,I0011,W0105,W0511,C0413,E1120,E1130,E1103,W1401 --ignore=bluepymm._version bluepymm
+unit: clean venv install_in_venv install_test_requirements
 	$(VENV) cd bluepymm/tests; nosetests -a 'unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
-functional: install_in_venv install_test_requirements simple1_git
+functional: clean venv install_in_venv install_test_requirements simple1_git
 	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 simple1_git:

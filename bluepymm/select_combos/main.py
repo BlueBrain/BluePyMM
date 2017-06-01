@@ -15,6 +15,8 @@ from . import process_megate_config as proc_config
 
 
 def select_combos(conf_filename):
+    """Select combos"""
+
     conf_dict = tools.load_json(conf_filename)
 
     if 'skip_repaired_exemplar' in conf_dict:
@@ -93,6 +95,8 @@ def select_combos(conf_filename):
 
 
 def add_parser(action):
+    """Add parser"""
+
     parser = action.add_parser('select',
                                help='Select feasible me-combinations')
     parser.add_argument('conf_filename')

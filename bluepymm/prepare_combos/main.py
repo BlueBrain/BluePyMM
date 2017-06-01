@@ -1,5 +1,7 @@
 """ Create database of possible me-combinations."""
 
+from __future__ import print_function
+
 import os
 
 from bluepymm import tools
@@ -8,6 +10,8 @@ from . import create_mm_sqlite
 
 
 def prepare_emodels(conf_dict, continu, scores_db_path):
+    """Prepare emodels"""
+
     tmp_dir = conf_dict['tmp_dir']
     emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
 
@@ -55,6 +59,8 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
 
 
 def prepare_combos(conf_filename, continu):
+    """Prepare combos"""
+
     print('Reading configuration at %s' % conf_filename)
     conf_dict = tools.load_json(conf_filename)
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
@@ -71,6 +77,8 @@ def prepare_combos(conf_filename, continu):
 
 
 def add_parser(action):
+    """Add option parser"""
+
     parser = action.add_parser(
         'prepare',
         help='Create and prepare database with me-combinations')
