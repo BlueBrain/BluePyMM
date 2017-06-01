@@ -102,7 +102,7 @@ def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
 def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                               template, template_dir=None, morph_path=None,
                               model_name=None):
-    """Create .hoc file for emodel based on code from <setup_dir>, given
+    """Create .hoc file for a given e-model based on code from <setup_dir>,
     emodel_params and template, and write out to file <hoc_dir>/<emodel>.hoc.
 
     Args:
@@ -119,21 +119,21 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         model_name: String used to name hoc-file. If None, the name of the
                     e-model is used.
     """
-    # load python module
-    sys.path.append(emodel_dir)
-    import setup
+    setup = tools.load_module('setup', emodel_dir)
 
     with open(os.devnull, 'w') as devnull:
         old_stdout = sys.stdout
-        sys.stdout = devnull
-        evaluator = setup.evaluator.create(emodel)
-        # set some template variables
-        if morph_path is not None:
-            evaluator.cell_model.morphology.morphology_path = morph_path
-        if model_name is not None:
-            evaluator.cell_model.name = model_name.replace("-", "_")
-            evaluator.cell_model.check_name()
-        sys.stdout = old_stdout
+        try:
+            sys.stdout = devnull
+            evaluator = setup.evaluator.create(emodel)
+            # set some template variables
+            if morph_path is not None:
+                evaluator.cell_model.morphology.morphology_path = morph_path
+            if model_name is not None:
+                evaluator.cell_model.name = model_name.replace("-", "_")
+                evaluator.cell_model.check_name()
+        finally:
+            sys.stdout = old_stdout
 
     # create hoc code
     hoc = evaluator.cell_model.create_hoc(emodel_params, template=template,

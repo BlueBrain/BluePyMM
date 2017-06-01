@@ -7,6 +7,8 @@ import contextlib
 import os
 import json
 import errno
+import sys
+import imp
 
 
 @contextlib.contextmanager
@@ -54,3 +56,22 @@ def check_no_null_nan_values(data, description):
     if data.isnull().values.any():
         raise ValueError('{} contains None/NaN values.'.format(description))
     return True
+
+
+def load_module(name, path):
+    """Try and load module `name` but *only* in `path`
+
+    from https://docs.python.org/2/library/imp.html#examples
+    """
+    # Fast path: see if the module has already been imported.
+    try:
+        return sys.modules[name]
+    except KeyError:
+        pass
+
+    fp, pathname, description = imp.find_module(name, [path])
+    try:
+        return imp.load_module(name, fp, pathname, description)
+    finally:
+        if fp:
+            fp.close()
