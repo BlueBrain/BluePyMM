@@ -20,8 +20,8 @@ def check_emodels_in_repo(conf_dict):
     """Check whether input e-models are organized in branches of a repository.
 
     Args:
-        conf_dict: A dict with either the key 'emodels_repo' or the key
-            'emodels_dir'.
+        conf_dict: A dict with either the key "emodels_repo" or the key
+            "emodels_dir".
 
     Returns:
         True if the input e-models are organized in separate branches of a
@@ -48,45 +48,55 @@ def check_emodels_in_repo(conf_dict):
     return emodels_in_repo
 
 
-def get_emodel_dicts(
-        conf_dict,
-        tmp_dir,
-        continu=False):
-    """Get dictionary with final emodels"""
-    emodels_in_repo = check_emodels_in_repo(conf_dict)
+def convert_emodel_input(emodels_in_repo, conf_dict, continu):
+    """Convert e-model input to BluePyMM file structure and return path to that
+    structure.
 
-    tmp_opt_repo = os.path.abspath(
-        os.path.join(tmp_dir, 'emodels_repo'))
+    Args:
+        emodels_in_repo: True if the input e-models are organized in separate
+            branches of a git repository, false if the e-models are organized
+            into separate subdirectories.
+        conf_dict: A dict with e-model input configuration.
 
+    Returns:
+        Path to BluePyMM file structure.
+    """
+    tmp_emodels_dir = os.path.abspath(os.path.join(conf_dict['tmp_dir'],
+                                                   'emodels_repo'))
     if not continu:
         if emodels_in_repo:
-            print('Cloning emodels repo in %s' % tmp_opt_repo)
-            sh.git(  # pylint: disable=E1121
-                'clone',
-                '%s' %
-                conf_dict['emodels_repo'],
-                tmp_opt_repo)
+            print('Cloning input e-models repository in %s' % tmp_emodels_dir)
+            sh.git('clone', conf_dict['emodels_repo'], tmp_emodels_dir)
 
-            with tools.cd(tmp_opt_repo):
-                sh.git(  # pylint: disable=E1121
-                    'checkout',
-                    '%s' %
-                    conf_dict['emodels_githash'])
+            with tools.cd(tmp_emodels_dir):
+                sh.git('checkout', conf_dict['emodels_githash'])
         else:
-            shutil.copytree(conf_dict['emodels_dir'], tmp_opt_repo)
+            shutil.copytree(conf_dict['emodels_dir'], tmp_emodels_dir)
+    return tmp_emodels_dir
 
-    final_dict = tools.load_json(os.path.join(
-        tmp_opt_repo,
-        conf_dict['final_json_path']))
 
-    emodel_etype_map = tools.load_json(
-        os.path.join(
-            tmp_opt_repo,
-            conf_dict['emodel_etype_map_path']))
+def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
+    """Read and return detailed e-model information.
 
-    opt_dir = os.path.dirname(os.path.join(tmp_opt_repo,
-                                           conf_dict['final_json_path']))
-    return final_dict, emodel_etype_map, opt_dir, emodels_in_repo
+    Args:
+        emodels_dir: Path to BluePyMM file structure.
+        final_json_path: Path to final e-model map, relative to
+            `emodels_dir`.
+        emodel_etype_map_path: Path to e-model e-type map, relative to
+            `emodels_dir`.
+
+    Returns:
+        (string, dict, dict)-tuple with:
+            - final e-model map,
+            - e-model e-type map,
+            - name of directory containing final e-model map.
+    """
+    final_dict_path = os.path.join(emodels_dir, final_json_path)
+    final_dict = tools.load_json(final_dict_path)
+    e_map_path = os.path.join(emodels_dir, emodel_etype_map_path)
+    emodel_etype_map = tools.load_json(e_map_path)
+    dict_dir = os.path.dirname(final_dict_path)
+    return final_dict, emodel_etype_map, dict_dir
 
 
 def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
