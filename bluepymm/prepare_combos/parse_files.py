@@ -14,8 +14,6 @@ import re
 
 import xml.etree.ElementTree
 
-from bluepymm import tools
-
 
 def _parse_xml_tree(filename):
     """Read xml tree from file.

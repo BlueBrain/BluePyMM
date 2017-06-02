@@ -148,11 +148,11 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         emodel_hoc_file.write(hoc)
 
 
-def prepare_emodel_dir(input):
+def prepare_emodel_dir(input_args):
     """Prepare emodel dir"""
 
     original_emodel, emodel, emodel_dict, emodels_dir, \
-        opt_dir, emodels_hoc_dir, emodels_in_repo, continu = input
+        opt_dir, emodels_hoc_dir, emodels_in_repo, continu = input_args
 
     try:
         emodel_dirs = {}
