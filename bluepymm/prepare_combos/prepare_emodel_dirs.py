@@ -102,22 +102,24 @@ def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
 def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                               template, template_dir=None, morph_path=None,
                               model_name=None):
-    """Create .hoc file for a given e-model based on code from <setup_dir>,
-    emodel_params and template, and write out to file <hoc_dir>/<emodel>.hoc.
+    """Create .hoc code for a given e-model based on code from
+    '<emodel_dir>/setup', e-model parameters and a given template, and write
+    out the result to a file named <hoc_dir>/<model_name or emodel>.hoc.
 
     Args:
-        emodel: A string representing the cell model name.
-        emodel_dir: The directory containing the code for a specific emodel
-        hoc_dir: The directory to which the resulting .hoc file will be written
+        emodel: e-model name
+        emodel_dir: the directory containing a module 'setup', which describes
+            the e-model
+        hoc_dir: the directory to which the resulting .hoc file will be written
                  out.
-        emodel_params: E-model parameters
-        template: Template file use for creation of .hoc files
-        template_dir: Directory that contains the template. If None, a template
-                      provided by the bluepyopt is used. Default is None.
-        morph_path: Path to morphology file, used to overwrite the original
+        emodel_params: a dict with e-model parameters
+        template: template file used for the creation of the .hoc file
+        template_dir: directory that contains the template. If None, a template
+                      provided by BluePyOpt is used. Default is None.
+        morph_path: path to morphology file, used to overwrite the original
                     morphology of an e-model. Default is None.
-        model_name: String used to name hoc-file. If None, the name of the
-                    e-model is used.
+        model_name: used to name the .hoc file. If None, the e-model name is
+                    used. Default is None.
     """
     setup = tools.load_module('setup', emodel_dir)
 
