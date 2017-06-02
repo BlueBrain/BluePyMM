@@ -189,3 +189,39 @@ def test_create_and_write_hoc_file_morph_path_model_name():
     _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
                                     emodel_parameters, template, morph_path,
                                     model_name)
+
+
+@attr('unit')
+def test_prepare_emodel_dir():
+    """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dir
+    based on test example 'simple1'.
+    """
+    original_emodel = 'emodel1'
+    emodel = 'emodel1'
+    emodel_dict = {'main_path': '.',
+                   'seed': 2,
+                   'rank': 0,
+                   'notes': '',
+                   'branch': 'emodel1',
+                   'params': {'cm': 1.0},
+                   'fitness': {'Step1.SpikeCount': 20.0},
+                   'score': 104.72906197480131,
+                   'morph_path': 'morphologies/morph1.asc'
+                   }
+    emodels_dir = './tmp/emodels/'
+    opt_dir = './tmp/emodels_repo/'
+    hoc_dir = './output/emodels_hoc/'
+    emodels_in_repo = False
+    continu = False
+
+    _clear_dirs(['./tmp', './output'])
+    for path in [emodels_dir, opt_dir, hoc_dir]:
+        tools.makedirs(path)
+
+    arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
+                os.path.abspath(hoc_dir), emodels_in_repo, continu)
+    prepare_emodel_dirs.prepare_emodel_dir(arg_list)
+
+    nt.assert_true(os.path.isdir(os.path.join(emodels_dir, emodel)))
+    hoc_path = os.path.join(hoc_dir, '{}.hoc'.format(emodel))
+    nt.assert_true(os.path.isfile(hoc_path))
