@@ -169,7 +169,10 @@ def prepare_emodel_dir(input_args):
                     '%s.tar' %
                     emodel))
 
-            main_path = emodel_dict.get('main_path', '.')
+            if 'main_path' in emodel_dict:
+                main_path = emodel_dict['main_path']
+            else:
+                main_path = '.'
 
             if emodels_in_repo:
                 with tools.cd(os.path.join(opt_dir, main_path)):

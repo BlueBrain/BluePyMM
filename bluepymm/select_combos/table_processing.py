@@ -42,11 +42,17 @@ def row_transform(row, exemplar_row, to_skip_patterns, skip_repaired_exemplar):
             if megate_feature_threshold['features'].match(column):
                 megate_threshold = megate_feature_threshold['megate_threshold']
 
-        if skip_repaired_exemplar:
-            row[column] = row[column] <= megate_threshold
+        if not skip_repaired_exemplar:
+            if row[column] <= max(megate_threshold,
+                                  megate_threshold * exemplar_row[column]):
+                row[column] = True
+            else:
+                row[column] = False
         else:
-            row[column] = row[column] <= max(
-                megate_threshold, megate_threshold * exemplar_row[column])
+            if row[column] <= megate_threshold:
+                row[column] = True
+            else:
+                row[column] = False
 
     return row
 
@@ -59,13 +65,13 @@ def row_threshold_transform(row, megate_patterns):
     etype = row['etype']
 
     for pattern_dict in megate_patterns:
-        if(pattern_dict['emodel'].match(emodel) and
-           pattern_dict['fullmtype'].match(fullmtype) and
-           pattern_dict['etype'].match(etype)):
-            if row['megate_feature_threshold'] is None:
-                row['megate_feature_threshold'] = []
-            row['megate_feature_threshold'].append(pattern_dict[
-                'megate_feature_threshold'])
+        if pattern_dict['emodel'].match(emodel):
+            if pattern_dict['fullmtype'].match(fullmtype):
+                if pattern_dict['etype'].match(etype):
+                    if row['megate_feature_threshold'] is None:
+                        row['megate_feature_threshold'] = []
+                    row['megate_feature_threshold'].append(pattern_dict[
+                        'megate_feature_threshold'])
 
     return row
 
@@ -73,9 +79,10 @@ def row_threshold_transform(row, megate_patterns):
 def check_opt_scores(emodel, scores):
     """Check if opt_scores match with unrepaired exemplar runs"""
 
-    test_rows = scores[(scores.emodel == emodel) &
-                       (scores.is_exemplar == 1) &
-                       (scores.is_repaired == 0)]
+    test_rows = scores[
+        (scores.emodel == emodel) & (
+            scores.is_exemplar == 1) & (
+            scores.is_repaired == 0)]
 
     for _, row in test_rows.iterrows():
         opt_score = json.loads(row['opt_scores'])
@@ -133,8 +140,8 @@ def process_emodel(
             (emodel, exemplar_score_values))
 
     emodel_score_values = score_values[
-        (scores.emodel == emodel) &
-        (scores.is_exemplar == 0)].copy()
+        (scores.emodel == emodel) & (
+            scores.is_exemplar == 0)].copy()
     emodel_score_values.dropna(axis=1, how='all', inplace=True)
 
     mtypes = scores[
@@ -142,8 +149,7 @@ def process_emodel(
         (scores.is_exemplar == 0)].loc[:, 'mtype']
 
     emodel_mtype_etypes = scores[
-        (scores.emodel == emodel) &
-        (scores.is_exemplar == 0)].copy()
+        (scores.emodel == emodel) & (scores.is_exemplar == 0)].copy()
 
     if len(emodel_mtype_etypes) == 0:
         print('%s: skipping, was not run on any release morph' % emodel)
@@ -158,29 +164,43 @@ def process_emodel(
         lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
 
-    exemplar_row = None if skip_repaired_exemplar else \
-        exemplar_score_values.iloc[0]
+    megate_scores = emodel_score_values
 
-    megate_scores = pandas.concat(
-        [emodel_mtype_etype_thresholds['megate_feature_threshold'],
-         emodel_score_values],
-        axis=1).apply(
+    if not skip_repaired_exemplar:
+        megate_scores = pandas.concat(
+            [
+                emodel_mtype_etype_thresholds['megate_feature_threshold'],
+                emodel_score_values],
+            axis=1). apply(
             lambda row: row_transform(
                 row,
-                exemplar_row,
+                exemplar_score_values.iloc[0],
                 to_skip_patterns,
                 skip_repaired_exemplar),
-        axis=1)
+            axis=1)
 
-    del megate_scores['megate_feature_threshold']
+        del megate_scores['megate_feature_threshold']
+    else:
+        megate_scores = pandas.concat(
+            [
+                emodel_mtype_etype_thresholds['megate_feature_threshold'],
+                emodel_score_values],
+            axis=1). apply(
+            lambda row: row_transform(
+                row,
+                None,
+                to_skip_patterns,
+                skip_repaired_exemplar),
+            axis=1)
+
+        del megate_scores['megate_feature_threshold']
 
     megate_scores['Passed all'] = megate_scores.all(axis=1)
 
     emodel_scores = scores[(scores.emodel == emodel) &
                            (scores.is_exemplar == 0)].copy()
     passed_combos = emodel_scores[megate_scores['Passed all']]
-
-    if len(passed_combos[passed_combos['emodel'] != emodel]):
+    if len(passed_combos[passed_combos['emodel'] != emodel]) != 0:
         raise Exception('Something went wrong during row indexing in megating')
 
     emodel_ext_neurondb = passed_combos.ix[
@@ -192,7 +212,7 @@ def process_emodel(
          'emodel',
          'extra_values')].copy()
 
-    if len(emodel_ext_neurondb):
+    if len(emodel_ext_neurondb) > 0:
         emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
             lambda x: '%s_%s_%s_%s' %
             (x['emodel'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)

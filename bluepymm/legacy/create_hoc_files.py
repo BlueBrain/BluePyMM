@@ -22,7 +22,7 @@ def add_full_paths(config, directory):
     Args:
         config: Dictionary
     """
-    for k, v in config.items():
+    for k, v in config.iteritems():
         if isinstance(v, basestring):
             test_path = os.path.join(directory, v)
             if os.path.isdir(test_path) or os.path.isfile(test_path):
@@ -95,7 +95,7 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
         template: Template to be used to create .hoc files.
         hoc_dir: Directory where all create .hoc files will be written.
     """
-    for combination, comb_data in combinations_dict.items():
+    for combination, comb_data in combinations_dict.iteritems():
         print "Working on combination {}".format(combination)
         emodel = comb_data["emodel"]
         setup_dir = os.path.join(emodels_dir, emodel)

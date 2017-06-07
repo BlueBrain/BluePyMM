@@ -4,11 +4,11 @@
 # Do not distribute without further notice.
 
 import contextlib
-import errno
-import imp
-import json
 import os
+import json
+import errno
 import sys
+import imp
 
 
 @contextlib.contextmanager
@@ -30,7 +30,7 @@ def load_json(path):
 def write_json(output_dir, output_name, config):
     path = os.path.join(output_dir, output_name)
     with open(path, 'w') as fd:
-        json.dump(config, fd, indent=2, sort_keys=True)
+        fd.write(json.dumps(config, indent=2, sort_keys=True))
     return path
 
 
@@ -40,6 +40,7 @@ def makedirs(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+        pass
     return path
 
 
