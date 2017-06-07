@@ -57,6 +57,8 @@ def convert_emodel_input(emodels_in_repo, conf_dict, continu):
             branches of a git repository, false if the e-models are organized
             into separate subdirectories.
         conf_dict: A dict with e-model input configuration.
+        continu: True if this BluePyMM run builds on a previous run, False
+            otherwise
 
     Returns:
         Path to BluePyMM file structure.
@@ -144,49 +146,57 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
     # write out result
     hoc_file_name = '{}.hoc'.format(model_name or emodel)
     emodel_hoc_path = os.path.join(hoc_dir, hoc_file_name)
+    print(os.path.abspath(emodel_hoc_path))
     with open(emodel_hoc_path, 'w') as emodel_hoc_file:
         emodel_hoc_file.write(hoc)
 
 
 def prepare_emodel_dir(input_args):
-    """Prepare emodel dir"""
+    """Clone e-model input and prepare the e-model directory.
 
+    Args:
+        input_args: tuple
+            - original_emodel(str): e-model name
+            - emodel(str): e-model name
+            - emodel_dict: dict with all e-model parameters
+            - emodels_dir: directory with all e-models
+            - opt_dir: directory with all opt e-models (TODO: clarify)
+            - hoc_dir: absolute path to the directory to which the .hoc files
+                will be written out
+            - emodels_in_repo: True if the input e-models are organized in
+                separate branches of a git repository, false if the e-models
+                are organized into separate subdirectories.
+            - continu: True if this BluePyMM run builds on a previous run,
+                False otherwise
+
+    Returns:
+        A dict mapping the e-model and the original e-model to the e-model dir
+    """
     original_emodel, emodel, emodel_dict, emodels_dir, \
-        opt_dir, emodels_hoc_dir, emodels_in_repo, continu = input_args
+        opt_dir, hoc_dir, emodels_in_repo, continu = input_args
 
     try:
-        emodel_dirs = {}
-
         print('Preparing: %s' % emodel)
         emodel_dir = os.path.join(emodels_dir, emodel)
-        emodel_dirs[emodel] = emodel_dir
-        emodel_dirs[original_emodel] = emodel_dir
 
         if not continu:
-            tar_filename = os.path.abspath(
-                os.path.join(
-                    emodels_dir,
-                    '%s.tar' %
-                    emodel))
-
-            if 'main_path' in emodel_dict:
-                main_path = emodel_dict['main_path']
-            else:
-                main_path = '.'
-
-            if emodels_in_repo:
-                with tools.cd(os.path.join(opt_dir, main_path)):
-                    sh.git(
-                        'archive',
-                        '--format=tar',
-                        '--prefix=%s/' % emodel,
-                        'origin/%s' % emodel_dict['branch'],
-                        _out=tar_filename)
-            else:
-                with tools.cd(os.path.join(opt_dir, main_path)):
+            # create .tar of input e-model
+            tar_filename = os.path.abspath(os.path.join(emodels_dir,
+                                                        '%s.tar' % emodel))
+            main_path = emodel_dict.get('main_path', '.')
+            with tools.cd(os.path.join(opt_dir, main_path)):
+                if emodels_in_repo:
+                    sh.git('archive',
+                           '--format=tar',
+                           '--prefix=%s/' % emodel,
+                           'origin/%s' % emodel_dict['branch'],
+                           _out=tar_filename)
+                else:
                     with tarfile.open(tar_filename, 'w') as tar_file:
                         tar_file.add('.', arcname=emodel)
 
+            # extract in e-model directory, compile mechanisms and create .hoc
+            # TODO: clean up .tar file?
             with tools.cd(emodels_dir):
                 sh.tar('xf', tar_filename)
 
@@ -194,16 +204,14 @@ def prepare_emodel_dir(input_args):
                     print('Compiling mechanisms ...')
                     sh.nrnivmodl('mechanisms')
 
-                    create_and_write_hoc_file(
-                        emodel, emodel_dir, emodels_hoc_dir,
-                        emodel_dict['params'],
-                        'cell_template.jinja2')
+                    create_and_write_hoc_file(emodel, emodel_dir, hoc_dir,
+                                              emodel_dict['params'],
+                                              'cell_template.jinja2')
 
     except:
-        raise Exception(
-            "".join(traceback.format_exception(*sys.exc_info())))
+        raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
 
-    return emodel_dirs
+    return {emodel: emodel_dir, original_emodel: emodel_dir}
 
 
 def prepare_emodel_dirs(
