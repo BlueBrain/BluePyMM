@@ -58,10 +58,10 @@ def check_no_null_nan_values(data, description):
 
 
 def load_module(name, path):
-    '''Try and load module `name` but *only* in `path`
+    """Try and load module `name` but *only* in `path`
 
     from https://docs.python.org/2/library/imp.html#examples
-    '''
+    """
     # Fast path: see if the module has already been imported.
     try:
         return sys.modules[name]
