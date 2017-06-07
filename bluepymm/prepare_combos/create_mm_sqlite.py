@@ -9,7 +9,6 @@ from __future__ import print_function
 
 # pylint: disable=R0914
 
-import collections
 import os
 import json
 
@@ -18,9 +17,6 @@ import sqlite3
 
 from bluepymm import tools
 from . import parse_files
-
-
-Combo = collections.namedtuple('Combo', 'stored_emodel, original, repaired')
 
 
 def create_exemplar_rows(
@@ -41,72 +37,86 @@ def create_exemplar_rows(
 
         original_emodel_dict = final_dict[original_emodel]
 
+        layer = None
         morph_name = os.path.basename(original_emodel_dict['morph_path'])[:-4]
 
-        fullmtype = None
-        mtype = None
-        msubtype = None
-
-        if not skip_repaired_exemplar:
+        if skip_repaired_exemplar:
+            fullmtype = None
+            mtype = None
+            msubtype = None
+        else:
             morph_info_list = fullmtype_morph_map[
                 fullmtype_morph_map['morph_name'] == morph_name].values
-            if not len(morph_info_list):
+            if len(morph_info_list) == 0:
                 raise Exception(
                     'Morphology %s for %s emodel not found in morphology '
                     'release' %
                     (morph_name, original_emodel))
-            _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
+            else:
+                _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
 
+        scores = None
         opt_scores = original_emodel_dict['fitness']
+
+        etype = emodel_etype_map[original_emodel]['etype']
 
         unrep_morph_dir = os.path.dirname(os.path.abspath(
             os.path.join(
                 emodel_dirs[emodel],
                 original_emodel_dict['morph_path'])))
 
-        full_morph_name = '%s.asc' % morph_name
-        unrep_morph_filename = os.path.join(unrep_morph_dir, full_morph_name)
-        rep_morph_filename = os.path.join(rep_morph_dir, full_morph_name)
+        unrep_morph_filename = os.path.join(
+            unrep_morph_dir,
+            '%s.asc' % (morph_name))
+
+        rep_morph_filename = os.path.join(
+            rep_morph_dir, '%s.asc' % (morph_name))
 
         if not os.path.isfile(unrep_morph_filename):
             raise Exception(
                 'Unrepaired morphology %s doesnt exist at %s' %
                 (morph_name, unrep_morph_filename))
 
+        is_exemplar = True
+        to_run = True
+        exception = None
+
         if skip_repaired_exemplar:
             # Don't run repaired version
-            combos = [Combo(emodel, False, False),
-                      Combo(original_emodel, True, False)]
+            combos = [(emodel, False, False),
+                      (original_emodel, True, False)]
         else:
             if not os.path.isfile(rep_morph_filename):
                 raise Exception(
                     'Repaired morphology %s doesnt exist at %s' %
                     (morph_name, rep_morph_filename))
             # Run repaired version
-            combos = [Combo(emodel, False, True),
-                      Combo(original_emodel, True, True),
-                      Combo(emodel, False, False),
-                      Combo(original_emodel, True, False)]
+            combos = [(emodel, False, True),
+                      (original_emodel, True, True),
+                      (emodel, False, False),
+                      (original_emodel, True, False)]
 
-        exemplar_rows.extend(
-            {'layer': None,
-             'fullmtype': fullmtype,
-             'mtype': mtype,
-             'msubtype': msubtype,
-             'etype': emodel_etype_map[original_emodel]['etype'],
-             'morph_name': morph_name,
-             'emodel': combo.stored_emodel,
-             'original_emodel': original_emodel,
-             'morph_dir': rep_morph_dir if combo.repaired else unrep_morph_dir,
-             'scores': None,
-             'opt_scores': None if combo.repaired else json.dumps(opt_scores),
-             'exception': None,
-             'to_run': True,
-             'is_exemplar': True,
-             'is_repaired': combo.repaired,
-             'is_original': combo.original,
-             }
-            for combo in combos)
+        for (stored_emodel, original, repaired) in combos:
+            new_row_dict = {
+                'layer': layer,
+                'fullmtype': fullmtype,
+                'mtype': mtype,
+                'msubtype': msubtype,
+                'etype': etype,
+                'morph_name': morph_name,
+                'emodel': stored_emodel,
+                'original_emodel': original_emodel,
+                'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
+                'scores': scores,
+                'opt_scores': json.dumps(opt_scores) if not repaired else None,
+                'exception': exception,
+                'to_run': to_run,
+                'is_exemplar': is_exemplar,
+                'is_repaired': repaired,
+                'is_original': original}
+
+            exemplar_rows.append(
+                new_row_dict)
 
     exemplar_rows_df = pandas.DataFrame(exemplar_rows)
 
@@ -188,7 +198,7 @@ def create_mm_sqlite(
 
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
 
-    if len(null_emodel_rows):
+    if len(null_emodel_rows) > 0:
         raise Exception(
             'No emodels found for the following layer, etype, fullmtype'
             ' combinations: \n%s' %

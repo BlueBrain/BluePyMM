@@ -140,32 +140,47 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
         'morph_regex', and 'original_emodel'. Each row corresponds to a unique
         e-model description.
     """
-    morph_name_regexs_cache = {}
 
-    def read_records():
-        for original_emodel, etype_map in emodel_etype_map.items():
-            etype_regex = re.compile(etype_map.get('etype', '.*'))
-            mtype_regex = re.compile(etype_map.get('mtype', '.*'))
+    return_df = pandas.DataFrame()
+    morph_name_regexs = {}
+    for original_emodel in emodel_etype_map:
+        emodel = emodel_etype_map[original_emodel]['mm_recipe']
+        layers = emodel_etype_map[original_emodel]['layer']
 
-            morph_name_regex = etype_map.get('morph_name', '.*')
-            morph_name_regex = morph_name_regexs_cache.setdefault(
-                morph_name_regex, re.compile(morph_name_regex))
+        if 'etype' in emodel_etype_map[original_emodel]:
+            etype_regex = re.compile(
+                emodel_etype_map[original_emodel]['etype'])
+        else:
+            etype_regex = re.compile('.*')
 
-            emodel = etype_map['mm_recipe']
-            for layer in etype_map['layer']:
-                for fullmtype in fullmtypes:
-                    if mtype_regex.match(fullmtype):
-                        for etype in etypes:
-                            if etype_regex.match(etype):
-                                yield (emodel,
-                                       layer,
-                                       fullmtype,
-                                       etype,
-                                       morph_name_regex,
-                                       original_emodel,
-                                       )
+        if 'mtype' in emodel_etype_map[original_emodel]:
+            mtype_regex = re.compile(
+                emodel_etype_map[original_emodel]['mtype'])
+        else:
+            mtype_regex = re.compile('.*')
 
-    columns = ['emodel', 'layer', 'fullmtype', 'etype', 'morph_regex',
-               'original_emodel',
-               ]
-    return pandas.DataFrame(read_records(), columns=columns)
+        if 'morph_name' in emodel_etype_map[original_emodel]:
+            morph_name_regex = emodel_etype_map[original_emodel]['morph_name']
+        else:
+            morph_name_regex = '.*'
+
+        if morph_name_regex not in morph_name_regexs:
+            morph_name_regexs[morph_name_regex] = re.compile(morph_name_regex)
+
+        for layer in layers:
+            for fullmtype in fullmtypes:
+                if mtype_regex.match(fullmtype):
+                    for etype in etypes:
+                        if etype_regex.match(etype):
+                            return_df = return_df.append(
+                                {'emodel': emodel,
+                                 'layer': layer,
+                                 'fullmtype': fullmtype,
+                                 'etype': etype,
+                                 'morph_regex':
+                                 morph_name_regexs[morph_name_regex],
+                                 'original_emodel':
+                                 original_emodel},
+                                ignore_index=True)
+
+    return return_df
