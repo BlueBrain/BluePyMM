@@ -146,7 +146,6 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
     # write out result
     hoc_file_name = '{}.hoc'.format(model_name or emodel)
     emodel_hoc_path = os.path.join(hoc_dir, hoc_file_name)
-    print(os.path.abspath(emodel_hoc_path))
     with open(emodel_hoc_path, 'w') as emodel_hoc_file:
         emodel_hoc_file.write(hoc)
 
@@ -222,12 +221,28 @@ def prepare_emodel_dirs(
         emodels_hoc_dir,
         emodels_in_repo,
         continu=False):
-    """Prepare the directories for the emodels"""
+    """Prepare the directories for the emodels.
 
+    Args:
+        final_dict: final e-model map
+        emodel_etype_map: e-model e-type map
+        emodels_dir: absolute path to the directory with all e-models. This
+            directory is created by this function if it does not exist yet.
+        opt_dir: directory with all opt e-models (TODO: clarify)
+        emodels_hoc_dir: absolute path to the directory to which the .hoc files
+            will be written out. Created by this function if it does not exist
+            yet.
+        emodels_in_repo: True if the input e-models are organized in separate
+            branches of a git repository, false if the e-models are organized
+            into separate subdirectories.
+        continu: True if this BluePyMM run builds on a previous run, False
+            otherwise.
+
+    Return:
+        A dict mapping e-models to prepared e-model directories.
+    """
     tools.makedirs(emodels_dir)
     tools.makedirs(emodels_hoc_dir)
-
-    emodel_dirs = {}
 
     arg_list = []
     for original_emodel in emodel_etype_map:
@@ -243,8 +258,9 @@ def prepare_emodel_dirs(
              emodels_in_repo,
              continu))
 
-    print('Parallelising preparation of emodel dirs')
+    print('Parallelising preparation of e-model directories')
     pool = multiprocessing.Pool(maxtasksperchild=1)
+    emodel_dirs = {}
     for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list, chunksize=1):
         for emodel, emodel_dir in emodel_dir_dict.items():
             emodel_dirs[emodel] = emodel_dir
