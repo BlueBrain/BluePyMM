@@ -164,13 +164,11 @@ def process_emodel(
     megate_scores = pandas.concat(
         [emodel_mtype_etype_thresholds['megate_feature_threshold'],
          emodel_score_values],
-        axis=1).apply(
-            lambda row: row_transform(
-                row,
-                exemplar_row,
-                to_skip_patterns,
-                skip_repaired_exemplar),
-        axis=1)
+        axis=1).apply(lambda row: row_transform(row,
+                                                exemplar_row,
+                                                to_skip_patterns,
+                                                skip_repaired_exemplar),
+                      axis=1)
 
     del megate_scores['megate_feature_threshold']
 
@@ -192,7 +190,7 @@ def process_emodel(
          'emodel',
          'extra_values')].copy()
 
-    if len(emodel_ext_neurondb):
+    if len(emodel_ext_neurondb) > 0:
         emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
             lambda x: '%s_%s_%s_%s' %
             (x['emodel'], x['fullmtype'], x['layer'], x['morph_name']), axis=1)
