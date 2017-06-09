@@ -189,3 +189,103 @@ def test_create_and_write_hoc_file_morph_path_model_name():
     _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
                                     emodel_parameters, template, morph_path,
                                     model_name)
+
+
+@attr('unit')
+def test_prepare_emodel_dir():
+    """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dir
+    based on test example 'simple1'.
+    """
+    original_emodel = 'emodel1'
+    emodel = 'emodel1'
+    emodel_dict = {'main_path': '.',
+                   'seed': 2,
+                   'rank': 0,
+                   'notes': '',
+                   'branch': 'emodel1',
+                   'params': {'cm': 1.0},
+                   'fitness': {'Step1.SpikeCount': 20.0},
+                   'score': 104.72906197480131,
+                   'morph_path': 'morphologies/morph1.asc'
+                   }
+    emodels_dir = './tmp/emodels/'
+    opt_dir = './tmp/emodels_repo/'
+    hoc_dir = './output/emodels_hoc/'
+    emodels_in_repo = False
+    continu = False
+
+    _clear_dirs(['./tmp', './output'])
+    for path in [emodels_dir, opt_dir, hoc_dir]:
+        tools.makedirs(path)
+
+    arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
+                os.path.abspath(hoc_dir), emodels_in_repo, continu)
+    ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
+
+    # test side effects: creation of .hoc-file
+    nt.assert_true(os.path.isdir(os.path.join(emodels_dir, emodel)))
+    hoc_path = os.path.join(hoc_dir, '{}.hoc'.format(emodel))
+    nt.assert_true(os.path.isfile(hoc_path))
+
+    # test returned dict
+    expected_emodel_dir = os.path.join(emodels_dir, emodel)
+    expected_ret = {emodel: expected_emodel_dir,
+                    original_emodel: expected_emodel_dir}
+    nt.assert_dict_equal(ret, expected_ret)
+
+
+@attr('unit')
+def test_prepare_emodel_dirs():
+    """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dirs
+    based on test example 'simple1'.
+    """
+    final_dict = {'emodel1': {'main_path': '.',
+                              'seed': 2,
+                              'rank': 0,
+                              'notes': '',
+                              'branch': 'emodel1',
+                              'params': {'cm': 1.0},
+                              'fitness': {'Step1.SpikeCount': 20.0},
+                              'score': 104.72906197480131,
+                              'morph_path': 'morphologies/morph1.asc'
+                              },
+                  'emodel2': {'main_path': '.',
+                              'seed': 2,
+                              'rank': 0,
+                              'notes': '',
+                              'branch': 'emodel2',
+                              'params': {'cm': 0.5},
+                              'fitness': {'Step1.SpikeCount': 20.0},
+                              'score': 104.72906197480131,
+                              'morph_path': 'morphologies/morph2.asc'
+                              }
+                  }
+    emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel1',
+                                    'etype': 'etype1',
+                                    'layer': ['1', 'str1']
+                                    },
+                        'emodel2': {'mm_recipe': 'emodel2',
+                                    'etype': 'etype2',
+                                    'layer': ['1', '2']
+                                    }
+                        }
+    emodels_dir = os.path.abspath('./tmp/emodels/')
+    opt_dir = './tmp/emodels_repo'
+    emodels_hoc_dir = os.path.abspath('./output/emodels_hoc/')
+    emodels_in_repo = False
+    continu = False
+
+    expected_ret = {emodel: os.path.join(
+        emodels_dir, emodel) for emodel in final_dict}
+
+    _clear_dirs(['./tmp', './output'])
+    tools.makedirs(opt_dir)
+
+    with tools.cd(TEST_DIR):
+        ret = prepare_emodel_dirs.prepare_emodel_dirs(
+            final_dict, emodel_etype_map, emodels_dir, opt_dir,
+            emodels_hoc_dir, emodels_in_repo, continu)
+
+    nt.assert_true(os.path.isdir(emodels_dir))
+    nt.assert_true(os.path.isdir(emodels_hoc_dir))
+    nt.assert_dict_equal(ret, expected_ret)

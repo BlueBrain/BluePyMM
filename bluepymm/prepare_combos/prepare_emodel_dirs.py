@@ -57,6 +57,8 @@ def convert_emodel_input(emodels_in_repo, conf_dict, continu):
             branches of a git repository, false if the e-models are organized
             into separate subdirectories.
         conf_dict: A dict with e-model input configuration.
+        continu: True if this BluePyMM run builds on a previous run, False
+            otherwise
 
     Returns:
         Path to BluePyMM file structure.
@@ -149,18 +151,32 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
 
 
 def prepare_emodel_dir(input_args):
-    """Prepare emodel dir"""
+    """Clone e-model input and prepare the e-model directory.
 
+    Args:
+        input_args: tuple
+            - original_emodel(str): e-model name
+            - emodel(str): e-model name
+            - emodel_dict: dict with all e-model parameters
+            - emodels_dir: directory with all e-models
+            - opt_dir: directory with all opt e-models (TODO: clarify)
+            - hoc_dir: absolute path to the directory to which the .hoc files
+                will be written out
+            - emodels_in_repo: True if the input e-models are organized in
+                separate branches of a git repository, false if the e-models
+                are organized into separate subdirectories.
+            - continu: True if this BluePyMM run builds on a previous run,
+                False otherwise
+
+    Returns:
+        A dict mapping the e-model and the original e-model to the e-model dir
+    """
     original_emodel, emodel, emodel_dict, emodels_dir, \
-        opt_dir, emodels_hoc_dir, emodels_in_repo, continu = input_args
+        opt_dir, hoc_dir, emodels_in_repo, continu = input_args
 
     try:
-        emodel_dirs = {}
-
         print('Preparing: %s' % emodel)
         emodel_dir = os.path.join(emodels_dir, emodel)
-        emodel_dirs[emodel] = emodel_dir
-        emodel_dirs[original_emodel] = emodel_dir
 
         if not continu:
             tar_filename = os.path.abspath(
@@ -184,6 +200,8 @@ def prepare_emodel_dir(input_args):
                     with tarfile.open(tar_filename, 'w') as tar_file:
                         tar_file.add('.', arcname=emodel)
 
+            # extract in e-model directory, compile mechanisms and create .hoc
+            # TODO: clean up .tar file?
             with tools.cd(emodels_dir):
                 sh.tar('xf', tar_filename)
 
@@ -191,16 +209,14 @@ def prepare_emodel_dir(input_args):
                     print('Compiling mechanisms ...')
                     sh.nrnivmodl('mechanisms')
 
-                    create_and_write_hoc_file(
-                        emodel, emodel_dir, emodels_hoc_dir,
-                        emodel_dict['params'],
-                        'cell_template.jinja2')
+                    create_and_write_hoc_file(emodel, emodel_dir, hoc_dir,
+                                              emodel_dict['params'],
+                                              'cell_template.jinja2')
 
     except:
-        raise Exception(
-            "".join(traceback.format_exception(*sys.exc_info())))
+        raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
 
-    return emodel_dirs
+    return {emodel: emodel_dir, original_emodel: emodel_dir}
 
 
 def prepare_emodel_dirs(
@@ -211,12 +227,28 @@ def prepare_emodel_dirs(
         emodels_hoc_dir,
         emodels_in_repo,
         continu=False):
-    """Prepare the directories for the emodels"""
+    """Prepare the directories for the emodels.
 
+    Args:
+        final_dict: final e-model map
+        emodel_etype_map: e-model e-type map
+        emodels_dir: absolute path to the directory with all e-models. This
+            directory is created by this function if it does not exist yet.
+        opt_dir: directory with all opt e-models (TODO: clarify)
+        emodels_hoc_dir: absolute path to the directory to which the .hoc files
+            will be written out. Created by this function if it does not exist
+            yet.
+        emodels_in_repo: True if the input e-models are organized in separate
+            branches of a git repository, false if the e-models are organized
+            into separate subdirectories.
+        continu: True if this BluePyMM run builds on a previous run, False
+            otherwise.
+
+    Return:
+        A dict mapping e-models to prepared e-model directories.
+    """
     tools.makedirs(emodels_dir)
     tools.makedirs(emodels_hoc_dir)
-
-    emodel_dirs = {}
 
     arg_list = []
     for original_emodel in emodel_etype_map:
@@ -232,8 +264,9 @@ def prepare_emodel_dirs(
              emodels_in_repo,
              continu))
 
-    print('Parallelising preparation of emodel dirs')
+    print('Parallelising preparation of e-model directories')
     pool = multiprocessing.Pool(maxtasksperchild=1)
+    emodel_dirs = {}
     for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list, chunksize=1):
         for emodel, emodel_dir in emodel_dir_dict.items():
             emodel_dirs[emodel] = emodel_dir
