@@ -178,7 +178,7 @@ def process_emodel(
                            (scores.is_exemplar == 0)].copy()
     passed_combos = emodel_scores[megate_scores['Passed all']]
 
-    if len(passed_combos[passed_combos['emodel'] != emodel]):
+    if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')
 
     emodel_ext_neurondb = passed_combos.ix[
