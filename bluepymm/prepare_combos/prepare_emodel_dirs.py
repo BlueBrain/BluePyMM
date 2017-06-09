@@ -179,17 +179,22 @@ def prepare_emodel_dir(input_args):
         emodel_dir = os.path.join(emodels_dir, emodel)
 
         if not continu:
-            # create .tar of input e-model
-            tar_filename = os.path.abspath(os.path.join(emodels_dir,
-                                                        '%s.tar' % emodel))
+            tar_filename = os.path.abspath(
+                os.path.join(
+                    emodels_dir,
+                    '%s.tar' %
+                    emodel))
+
             main_path = emodel_dict.get('main_path', '.')
+
             with tools.cd(os.path.join(opt_dir, main_path)):
                 if emodels_in_repo:
-                    sh.git('archive',
-                           '--format=tar',
-                           '--prefix=%s/' % emodel,
-                           'origin/%s' % emodel_dict['branch'],
-                           _out=tar_filename)
+                    sh.git(
+                        'archive',
+                        '--format=tar',
+                        '--prefix=%s/' % emodel,
+                        'origin/%s' % emodel_dict['branch'],
+                        _out=tar_filename)
                 else:
                     with tarfile.open(tar_filename, 'w') as tar_file:
                         tar_file.add('.', arcname=emodel)

@@ -65,12 +65,12 @@ def create_exemplar_rows(
                 emodel_dirs[emodel],
                 original_emodel_dict['morph_path'])))
 
-        unrep_morph_filename = os.path.join(
-            unrep_morph_dir,
-            '%s.asc' % (morph_name))
+        full_morph_filename = '%s.asc' % morph_name
 
-        rep_morph_filename = os.path.join(
-            rep_morph_dir, '%s.asc' % (morph_name))
+        unrep_morph_filename = os.path.join(unrep_morph_dir,
+                                            full_morph_filename)
+
+        rep_morph_filename = os.path.join(rep_morph_dir, full_morph_filename)
 
         if not os.path.isfile(unrep_morph_filename):
             raise Exception(
