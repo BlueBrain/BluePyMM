@@ -49,3 +49,24 @@ def test_check_no_null_nan_values_nan():
 def test_check_no_null_nan_values_none():
     data = pandas.DataFrame([[1, 2], [None, 4]], columns=list('AB'))
     nt.assert_raises(ValueError, tools.check_no_null_nan_values, data, 'test')
+
+
+@attr('unit')
+def test_convert_string():
+    """bluepymm.tools: test convert string"""
+    label = 'testtesttesttesttesttesttesttesttest'
+    nt.assert_equal(label, tools.convert_string(label))
+
+    keep_length = 3
+    hash_length = 20
+    expected_length = keep_length + hash_length + 1
+    ret = tools.convert_string(label, keep_length=keep_length,
+                               hash_length=hash_length)
+    nt.assert_not_equal(label, ret)
+    nt.assert_equal(len(ret), expected_length)
+    nt.assert_equal(label[0:keep_length], ret[0:keep_length])
+    nt.assert_equal('_', ret[keep_length])
+
+    hash_length = 21
+    nt.assert_raises(ValueError, tools.convert_string, label, keep_length,
+                     hash_length)
