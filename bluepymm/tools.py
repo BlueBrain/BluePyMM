@@ -9,6 +9,7 @@ import imp
 import json
 import os
 import sys
+import hashlib
 
 
 @contextlib.contextmanager
@@ -74,3 +75,36 @@ def load_module(name, path):
     finally:
         if fp:
             fp.close()
+
+
+def convert_string(label, keep_length=40, hash_length=9):
+    """Convert string to a shorter string if required.
+
+    Args:
+        label: a string to be converted
+        keep_length: length of the original string to keep. Default is 40
+            characters.
+        hash_length: length of the hash to generate, should not be more then
+            20. Default is 9 characters.
+
+    Returns:
+        If the length of the original label is shorter than the sum of
+        'keep_length' and 'hash_length' plus one the original string is
+        returned. Otherwise, a string with structure <partial>_<hash> is
+        returned, where <partial> is the first part of the original string
+        with length equal to <keep_length> and the last part is a hash of
+        'hash_length' characters, based on the original string.
+
+    Raises:
+        ValueError, if 'hash_length' exceeds 20.
+    """
+
+    if hash_length > 20:
+        raise ValueError('Parameter hash_length should not exceed 20, '
+                         ' received: {}'.format(hash_length))
+
+    if len(label) <= keep_length + hash_length + 1:
+        return label
+
+    hash_string = hashlib.sha1(label.encode('utf-8')).hexdigest()
+    return '{}_{}'.format(label[0:keep_length], hash_string[0:hash_length])
