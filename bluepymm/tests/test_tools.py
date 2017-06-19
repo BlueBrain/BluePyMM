@@ -52,6 +52,19 @@ def test_check_no_null_nan_values_none():
 
 
 @attr('unit')
+def test_check_compliance_template_name_with_neuron():
+    """bluepymm.tools: test check compliance with neuron template name rules"""
+    not_compl = ['', '1test', 'test-test',
+                 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttes']
+    for name in not_compl:
+        nt.assert_false(tools.check_compliance_template_name_with_neuron(name))
+
+    compliant = ['test_tesT', 'test123test', 'Test']
+    for name in compliant:
+        nt.assert_true(tools.check_compliance_template_name_with_neuron(name))
+
+
+@attr('unit')
 def test_convert_string():
     """bluepymm.tools: test convert string"""
     label = 'testtesttesttesttesttesttesttesttest'
