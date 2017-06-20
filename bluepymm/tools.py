@@ -77,7 +77,7 @@ def load_module(name, path):
             fp.close()
 
 
-def check_compliance_template_name_with_neuron(name):
+def check_compliance_with_neuron(template_name):
     """Verify that a given name is compliant with the rules for a NEURON
     template name: a name should be a non-empty alphumeric string, and start
     with a letter. Underscores are allowed. The length should not exceed 50
@@ -87,8 +87,9 @@ def check_compliance_template_name_with_neuron(name):
         True if compliant, false otherwise.
     """
     max_len = 50
-    return (name and name[0].isalpha() and name.replace('_', '').isalnum() and
-            len(name) <= max_len)
+    return (template_name and template_name[0].isalpha() and
+            template_name.replace('_', '').isalnum() and
+            len(template_name) <= max_len)
 
 
 def convert_string(label, keep_length=40, hash_length=9):
@@ -122,3 +123,11 @@ def convert_string(label, keep_length=40, hash_length=9):
 
     hash_string = hashlib.sha1(label.encode('utf-8')).hexdigest()
     return '{}_{}'.format(label[0:keep_length], hash_string[0:hash_length])
+
+
+def get_neuron_compliant_template_name(name):
+    template_name = name
+    if not check_compliance_with_neuron(template_name):
+        template_name = template_name.replace("-", "_")
+        template_name = convert_string(template_name)
+    return template_name

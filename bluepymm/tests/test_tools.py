@@ -52,16 +52,16 @@ def test_check_no_null_nan_values_none():
 
 
 @attr('unit')
-def test_check_compliance_template_name_with_neuron():
+def test_check_compliance_with_neuron():
     """bluepymm.tools: test check compliance with neuron template name rules"""
     not_compl = ['', '1test', 'test-test',
                  'testtesttesttesttesttesttesttesttesttesttesttesttesttesttes']
     for name in not_compl:
-        nt.assert_false(tools.check_compliance_template_name_with_neuron(name))
+        nt.assert_false(tools.check_compliance_with_neuron(name))
 
     compliant = ['test_tesT', 'test123test', 'Test']
     for name in compliant:
-        nt.assert_true(tools.check_compliance_template_name_with_neuron(name))
+        nt.assert_true(tools.check_compliance_with_neuron(name))
 
 
 @attr('unit')
@@ -83,3 +83,24 @@ def test_convert_string():
     hash_length = 21
     nt.assert_raises(ValueError, tools.convert_string, label, keep_length,
                      hash_length)
+
+
+@attr('unit')
+def test_get_neuron_compliant_template_name():
+    """bluepymm.tools: test get neuron-compliant template name"""
+    name = 'test'
+    nt.assert_true(tools.check_compliance_with_neuron(name))
+    ret = tools.get_neuron_compliant_template_name(name)
+    nt.assert_equal(ret, name)
+    nt.assert_true(tools.check_compliance_with_neuron(ret))
+
+    name = 'test-test'
+    nt.assert_false(tools.check_compliance_with_neuron(name))
+    ret = tools.get_neuron_compliant_template_name(name)
+    nt.assert_equal(ret, name.replace('-', '_'))
+    nt.assert_true(tools.check_compliance_with_neuron(ret))
+
+    name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'
+    nt.assert_false(tools.check_compliance_with_neuron(name))
+    ret = tools.get_neuron_compliant_template_name(name)
+    nt.assert_true(tools.check_compliance_with_neuron(ret))
