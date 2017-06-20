@@ -192,6 +192,38 @@ def test_create_and_write_hoc_file_morph_path_model_name():
 
 
 @attr('unit')
+def test_create_and_write_hoc_file_morph_path_model_name_not_compliant():
+    """prepare_combos.prepare_emodel_dirs: test create_and_write_hoc_file
+    based on morph1 of test example 'simple1'.
+    """
+    emodel = 'emodel1'
+    emodel_dir = './data/emodels_dir/subdir/'
+    hoc_dir = './output/emodels_hoc'
+    emodel_parameters = {'cm': 1.0}
+    template = 'cell_template.jinja2'
+    morph_path = 'morph.asc'
+    model_name = '123test'
+    nt.assert_false(tools.check_compliance_with_neuron(model_name))
+
+    with tools.cd(TEST_DIR):
+        nt.assert_raises(ValueError,
+                         prepare_emodel_dirs.create_and_write_hoc_file,
+                         emodel, emodel_dir, hoc_dir, emodel_parameters,
+                         template, morph_path=morph_path,
+                         model_name=model_name)
+
+    model_name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'
+    nt.assert_false(tools.check_compliance_with_neuron(model_name))
+
+    with tools.cd(TEST_DIR):
+        nt.assert_raises(ValueError,
+                         prepare_emodel_dirs.create_and_write_hoc_file,
+                         emodel, emodel_dir, hoc_dir, emodel_parameters,
+                         template, morph_path=morph_path,
+                         model_name=model_name)
+
+
+@attr('unit')
 def test_prepare_emodel_dir():
     """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dir
     based on test example 'simple1'.
