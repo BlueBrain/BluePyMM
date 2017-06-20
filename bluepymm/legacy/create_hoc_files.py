@@ -7,15 +7,6 @@ import utils
 from bluepymm.prepare_combos.prepare_emodel_dirs import (
     create_and_write_hoc_file
 )
-from bluepymm import tools
-
-
-def _get_neuron_compliant_template_name(name):
-    template_name = name
-    if not tools.check_compliance_template_name_with_neuron(template_name):
-        template_name = combination.replace("-", "_")
-        template_name = tools.convert_string(template_name)
-    return template_name
 
 
 def parse_arguments():
@@ -110,7 +101,6 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
         setup_dir = os.path.join(emodels_dir, emodel)
         morph_path = "{}.asc".format(comb_data["morph_name"])
         emodel_params = final_dict[emodel]["params"]
-        template_name = _get_neuron_compliant_template_name(combination)
 
         run_create_and_write_hoc_file((emodel,
                                        setup_dir,
@@ -119,7 +109,7 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
                                        os.path.basename(template),
                                        os.path.dirname(template),
                                        morph_path,
-                                       template_name))
+                                       combination))
 
 
 def main():

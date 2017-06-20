@@ -126,6 +126,16 @@ def convert_string(label, keep_length=40, hash_length=9):
 
 
 def get_neuron_compliant_template_name(name):
+    """Get template name that is compliant with NEURON based on given name.
+
+    Args:
+        name: string
+
+    Returns:
+        If `name' is NEURON-compliant, the same string is return. Otherwise,
+        hyphens are replaced by underscores and if appropriate, the string is
+        shortened.
+    """
     template_name = name
     if not check_compliance_with_neuron(template_name):
         template_name = template_name.replace("-", "_")
