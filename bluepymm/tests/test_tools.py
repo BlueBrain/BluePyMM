@@ -4,8 +4,8 @@
 # Do not distribute without further notice.
 
 import os
-
 import pandas
+from string import digits
 
 import nose.tools as nt
 from nose.plugins.attrib import attr
@@ -94,10 +94,10 @@ def test_get_neuron_compliant_template_name():
     nt.assert_equal(ret, name)
     nt.assert_true(tools.check_compliance_with_neuron(ret))
 
-    name = 'test-test'
+    name = '123test-test'
     nt.assert_false(tools.check_compliance_with_neuron(name))
     ret = tools.get_neuron_compliant_template_name(name)
-    nt.assert_equal(ret, name.replace('-', '_'))
+    nt.assert_equal(ret, name.lstrip(digits).replace('-', '_'))
     nt.assert_true(tools.check_compliance_with_neuron(ret))
 
     name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'

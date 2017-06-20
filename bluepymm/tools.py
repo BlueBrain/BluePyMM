@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import hashlib
+from string import digits
 
 
 @contextlib.contextmanager
@@ -134,10 +135,10 @@ def get_neuron_compliant_template_name(name):
     Returns:
         If `name' is NEURON-compliant, the same string is return. Otherwise,
         hyphens are replaced by underscores and if appropriate, the string is
-        shortened.
+        shortened. Leading numbers are removed.
     """
     template_name = name
     if not check_compliance_with_neuron(template_name):
-        template_name = template_name.replace("-", "_")
+        template_name = template_name.lstrip(digits).replace("-", "_")
         template_name = convert_string(template_name)
     return template_name
