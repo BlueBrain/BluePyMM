@@ -63,7 +63,7 @@ def extract_mm_parameters(mm_config_file):
 
 def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
                                    template, template_dir, morph_path,
-                                   model_name)):
+                                   model_name, make_template_name_compatible)):
     """Run create_and_write_hoc_file in isolated environment.
 
     Args:
@@ -77,7 +77,8 @@ def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
                                            template,
                                            template_dir,
                                            morph_path,
-                                           model_name))
+                                           model_name,
+                                           make_template_name_compatible))
     pool.terminate()
     pool.join()
     del pool
@@ -101,6 +102,7 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
         setup_dir = os.path.join(emodels_dir, emodel)
         morph_path = "{}.asc".format(comb_data["morph_name"])
         emodel_params = final_dict[emodel]["params"]
+        make_template_name_compatible = True
 
         run_create_and_write_hoc_file((emodel,
                                        setup_dir,
@@ -109,7 +111,8 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
                                        os.path.basename(template),
                                        os.path.dirname(template),
                                        morph_path,
-                                       combination))
+                                       combination,
+                                       make_template_name_compatible))
 
 
 def main():
