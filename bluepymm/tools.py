@@ -93,7 +93,7 @@ def check_compliance_with_neuron(template_name):
             len(template_name) <= max_len)
 
 
-def convert_string(label, keep_length=40, hash_length=9):
+def shorten_and_hash_string(label, keep_length=40, hash_length=9):
     """Convert string to a shorter string if required.
 
     Args:
@@ -140,5 +140,7 @@ def get_neuron_compliant_template_name(name):
     template_name = name
     if not check_compliance_with_neuron(template_name):
         template_name = template_name.lstrip(digits).replace("-", "_")
-        template_name = convert_string(template_name)
+        template_name = shorten_and_hash_string(template_name,
+                                                keep_length=40,
+                                                hash_length=9)
     return template_name
