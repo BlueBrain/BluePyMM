@@ -19,77 +19,93 @@ from bluepymm import tools
 from . import parse_files
 
 
+def check_morphology_existence(morph_name, morph_type, morph_path):
+    """Check if a morphology exists based on its path.
+
+    Args:
+        morph_name: a string representing the name of the morphology. Used for
+            makeing a pretty error string.
+        morph_type: a string representing the type of the morphology. Used for
+            making a pretty error string.
+        morph_path: the path to the morphology file
+
+    Returns:
+        True if the morphology exists.
+
+    Raises:
+        ValueError: The morphology does not exist.
+    """
+    if not os.path.isfile(morph_path):
+        raise ValueError(
+            "{} morphology {} doesn't exist at {}".format(
+                morph_type.capitalize(), morph_name, morph_path))
+    else:
+        return True
+
+
 def create_exemplar_rows(
-        full_map,
         final_dict,
         fullmtype_morph_map,
         emodel_etype_map,
         emodel_dirs,
         rep_morph_dir,
         skip_repaired_exemplar=False):
-    """Create exemplar rows"""
+    """Create exemplar rows.
+
+    Args:
+        final_dict: final e-model map
+        fullmtype_morph_map: pandas.DataFrame with morphology database
+        emodel_etype_map: e-model e-type map
+        emodel_dirs: a dict mapping e-models to prepared e-model directories
+        rep_morph_dir: directory with repaired morphologies
+        skip_repaired_exemplar: indicates whether repaired exemplar should be
+            skipped. Default value is False.
+
+    Returns:
+        pandas.DataFrame with one row for each exemplar. Keys are 'layer',
+        'fullmtype', 'mtype', 'msubtype', 'etype', 'morph_name', 'emodel',
+        'original_emodel', 'morph_dir', 'scores', 'opt_scores', 'exception',
+        'to_run', 'is_exemplar', 'is_repaired', and 'is_original'.
+    """
 
     exemplar_rows = []
 
     for original_emodel in emodel_etype_map:
         emodel = emodel_etype_map[original_emodel]['mm_recipe']
-        print('Adding exemplar row for emodel %s' % emodel)
+        print('Adding exemplar row for e-model %s' % emodel)
 
         original_emodel_dict = final_dict[original_emodel]
 
-        layer = None
-        morph_name = os.path.basename(original_emodel_dict['morph_path'])[:-4]
+        opt_scores = original_emodel_dict['fitness']
+
+        morph_filename = os.path.basename(original_emodel_dict['morph_path'])
+        morph_name, _ = os.path.splitext(morph_filename)
+        unrep_morph_dir = os.path.dirname(os.path.abspath(
+            os.path.join(
+                emodel_dirs[emodel],
+                original_emodel_dict['morph_path'])))
+        morph_path = os.path.join(unrep_morph_dir, morph_filename)
+        check_morphology_existence(morph_filename, 'unrepaired', morph_path)
 
         if skip_repaired_exemplar:
             fullmtype = None
             mtype = None
             msubtype = None
+            # Don't run repaired version
+            combos = [(emodel, False, False),
+                      (original_emodel, True, False)]
         else:
             morph_info_list = fullmtype_morph_map[
                 fullmtype_morph_map['morph_name'] == morph_name].values
             if len(morph_info_list) == 0:
                 raise Exception(
-                    'Morphology %s for %s emodel not found in morphology '
-                    'release' %
-                    (morph_name, original_emodel))
+                    'Morphology %s for %s e-model not found in morphology '
+                    'release' % (morph_name, original_emodel))
             else:
                 _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
 
-        scores = None
-        opt_scores = original_emodel_dict['fitness']
-
-        etype = emodel_etype_map[original_emodel]['etype']
-
-        unrep_morph_dir = os.path.dirname(os.path.abspath(
-            os.path.join(
-                emodel_dirs[emodel],
-                original_emodel_dict['morph_path'])))
-
-        full_morph_filename = '%s.asc' % morph_name
-
-        unrep_morph_filename = os.path.join(unrep_morph_dir,
-                                            full_morph_filename)
-
-        rep_morph_filename = os.path.join(rep_morph_dir, full_morph_filename)
-
-        if not os.path.isfile(unrep_morph_filename):
-            raise Exception(
-                'Unrepaired morphology %s doesnt exist at %s' %
-                (morph_name, unrep_morph_filename))
-
-        is_exemplar = True
-        to_run = True
-        exception = None
-
-        if skip_repaired_exemplar:
-            # Don't run repaired version
-            combos = [(emodel, False, False),
-                      (original_emodel, True, False)]
-        else:
-            if not os.path.isfile(rep_morph_filename):
-                raise Exception(
-                    'Repaired morphology %s doesnt exist at %s' %
-                    (morph_name, rep_morph_filename))
+            morph_path = os.path.join(rep_morph_dir, morph_filename)
+            check_morphology_existence(morph_filename, 'repaired', morph_path)
             # Run repaired version
             combos = [(emodel, False, True),
                       (original_emodel, True, True),
@@ -98,55 +114,57 @@ def create_exemplar_rows(
 
         for (stored_emodel, original, repaired) in combos:
             new_row_dict = {
-                'layer': layer,
+                'layer': None,
                 'fullmtype': fullmtype,
                 'mtype': mtype,
                 'msubtype': msubtype,
-                'etype': etype,
+                'etype': emodel_etype_map[original_emodel]['etype'],
                 'morph_name': morph_name,
                 'emodel': stored_emodel,
                 'original_emodel': original_emodel,
                 'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
-                'scores': scores,
+                'scores': None,
                 'opt_scores': json.dumps(opt_scores) if not repaired else None,
-                'exception': exception,
-                'to_run': to_run,
-                'is_exemplar': is_exemplar,
+                'exception': None,
+                'to_run': True,
+                'is_exemplar': True,
                 'is_repaired': repaired,
                 'is_original': original}
+            exemplar_rows.append(new_row_dict)
 
-            exemplar_rows.append(
-                new_row_dict)
-
-    exemplar_rows_df = pandas.DataFrame(exemplar_rows)
-
-    return exemplar_rows_df
+    return pandas.DataFrame(exemplar_rows)
 
 
 def remove_morph_regex_failures(full_map):
-    """Remove all rows where morph_name doesn't match morp_regex"""
+    """Remove all rows where morph_name doesn't match morph_regex.
 
+    Args:
+        full_map: pandas.DataFrame with keys 'morph_name' and 'morph_regex'
+
+    Returns:
+        The processed pandas.DataFrame, with all rows of the input table where
+        'morph_name' matched 'morph_regex'. The column 'morph_regex' is
+        removed.
+    """
     # Add a new column to store the regex match result
     full_map.insert(len(full_map.columns), 'morph_regex_matches', None)
 
     def match_morph_regex(row):
-        """Check if morph matches regex"""
+        """Check if 'morph_name' matches 'morph_regex'."""
         row['morph_regex_matches'] = \
             bool(row['morph_regex'].match(row['morph_name']))
-
         return row
 
-    # Check if morph_name matches morph_regex
+    # Check if 'morph_name' matches 'morph_regex'
     full_map = full_map.apply(match_morph_regex, axis=1)
 
     # Prune all the rows that didn't match
     full_map = full_map[full_map['morph_regex_matches'] == True]  # NOQA
 
-    # Delete obsolete columns
+    # Delete obsolete columns and reset index
     del full_map['morph_regex']
     del full_map['morph_regex_matches']
-
-    return full_map
+    return full_map.reset_index(drop=True)
 
 
 def create_mm_sqlite(
@@ -157,8 +175,19 @@ def create_mm_sqlite(
         final_dict,
         emodel_dirs,
         skip_repaired_exemplar=False):
-    """Create SQLite db"""
+    """Create SQLite database with all possible me-combinations.
 
+    Args:
+        output_filename
+        recipe_filename
+        morph_dir: directory with morphology release, contains neuronDB.xml
+            file
+        original_emodel_etype_map
+        final_dict: e-model parameters
+        emodel_dirs: prepared e-model directories
+        skip_repaired_exemplar: indicates whether repaired exemplar should be
+            skipped. Default value is False.
+    """
     neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
 
     # Contains layer, fullmtype, etype
@@ -202,8 +231,7 @@ def create_mm_sqlite(
         raise Exception(
             'No emodels found for the following layer, etype, fullmtype'
             ' combinations: \n%s' %
-            null_emodel_rows[
-                ['layer', 'etype', 'fullmtype']])
+            null_emodel_rows[['layer', 'etype', 'fullmtype']])
 
     print('Filtering out morp_names that dont match regex')
     # Contains layer, fullmtype, etype, morph_name, e_model
@@ -222,7 +250,6 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'to_run', True)
 
     exemplar_rows = create_exemplar_rows(
-        full_map,
         final_dict,
         fullmtype_morph_map,
         original_emodel_etype_map,
@@ -231,8 +258,7 @@ def create_mm_sqlite(
         skip_repaired_exemplar=skip_repaired_exemplar)
 
     # Prepend exemplar rows to full_map
-    full_map = pandas.concat(
-        [exemplar_rows, full_map], ignore_index=True)
+    full_map = pandas.concat([exemplar_rows, full_map], ignore_index=True)
 
     # Writing full table to sqlite
     with sqlite3.connect(output_filename) as conn:
