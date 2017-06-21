@@ -1,4 +1,4 @@
-"""Functions fro BluePyMM reporting."""
+"""Functions for BluePyMM reporting."""
 
 # Copyright BBP/EPFL 2017; All rights reserved.
 # Do not distribute without further notice.
@@ -6,12 +6,16 @@
 # pylint: disable=R0914, C0325, W0640
 
 import pandas
+import os
 
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
+
+from . import table_processing
+from bluepymm import tools
 
 
 BLUE = 'C1'
@@ -22,6 +26,7 @@ FIGSIZE = (15, 10)
 
 def pdf_file(pdf_filename):
     """Return object that start pdf file"""
+    tools.makedirs(os.path.dirname(pdf_filename))
     return PdfPages(pdf_filename)
 
 
@@ -175,3 +180,43 @@ def plot_emodels_per_metype(data, final_db, pp):
                       ' me-type',
                       [BLUE, YELLOW, RED],
                       pp)
+
+
+# TODO: can this function be split into processing and reporting?
+def create_final_db_and_write_report(pdf_filename,
+                                     to_skip_features,
+                                     to_skip_patterns,
+                                     megate_thresholds,
+                                     megate_patterns,
+                                     skip_repaired_exemplar,
+                                     check_opt_scores,
+                                     scores,
+                                     score_values,
+                                     enable_plot_emodels_per_morphology):
+    ext_neurondb = pandas.DataFrame()
+
+    with pdf_file(pdf_filename) as pp:
+        # Create a table with the skipped features
+        plot_to_skip_features(to_skip_features, pp)
+        plot_megate_thresholds(megate_thresholds, pp)
+
+        # Process all the e-models
+        emodels = sorted(scores[scores.is_original == 0].emodel.unique())
+        for emodel in emodels:
+            emodel_ext_neurondb_rows, megate_scores, emodel_score_values,\
+                mtypes = table_processing.process_emodel(
+                    emodel, scores, score_values, to_skip_patterns,
+                    megate_patterns, skip_repaired_exemplar, check_opt_scores)
+            ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+
+            # Reporting per e-model
+            plot_morphs_per_feature_for_emodel(emodel, megate_scores,
+                                               emodel_score_values, pp)
+            plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp)
+
+        # More reporting
+        if enable_plot_emodels_per_morphology:
+            plot_emodels_per_morphology(scores, ext_neurondb, pp)
+        plot_emodels_per_metype(scores, ext_neurondb, pp)
+
+    return ext_neurondb

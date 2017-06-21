@@ -9,8 +9,6 @@
 import json
 import pandas
 
-from . import reporting
-
 
 def convert_extra_values(row):
     """Convert extra values row: if 'extra_values' is available a field,
@@ -97,15 +95,13 @@ def check_opt_scores(emodel, scores):
                         (emodel, opt_score, bluepymm_score))
 
 
-def process_emodel(
-        emodel,
-        scores,
-        score_values,
-        to_skip_patterns,
-        megate_patterns,
-        pp,
-        skip_repaired_exemplar,
-        enable_check_opt_scores):
+def process_emodel(emodel,
+                   scores,
+                   score_values,
+                   to_skip_patterns,
+                   megate_patterns,
+                   skip_repaired_exemplar,
+                   enable_check_opt_scores):
     """Process emodel"""
     print('Processing emodel %s' % emodel)
     exemplar_morph = scores[
@@ -181,14 +177,13 @@ def process_emodel(
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')
 
-    emodel_ext_neurondb = passed_combos.ix[
-        :,
-        ('morph_name',
-         'layer',
-         'fullmtype',
-         'etype',
-         'emodel',
-         'extra_values')].copy()
+    emodel_ext_neurondb = passed_combos.ix[:,
+                                           ('morph_name',
+                                            'layer',
+                                            'fullmtype',
+                                            'etype',
+                                            'emodel',
+                                            'extra_values')].copy()
 
     if len(emodel_ext_neurondb) > 0:
         emodel_ext_neurondb['combo_name'] = emodel_ext_neurondb.apply(
@@ -203,11 +198,4 @@ def process_emodel(
 
         del emodel_ext_neurondb['extra_values']
 
-    # TODO: move out reporting
-    reporting.plot_morphs_per_feature_for_emodel(emodel, megate_scores,
-                                                 emodel_score_values, pp)
-    # TODO: move out reporting
-    reporting.plot_morphs_per_mtype_for_emodel(
-        emodel, mtypes, megate_scores, pp)
-
-    return emodel_ext_neurondb
+    return emodel_ext_neurondb, megate_scores, emodel_score_values, mtypes
