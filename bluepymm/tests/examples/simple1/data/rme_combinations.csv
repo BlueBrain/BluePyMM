@@ -1,0 +1,5 @@
+region,fullmtype,etype
+1,mtype1,etype1
+1,mtype1,etype2
+1,mtype2,etype1
+2,mtype1,etype2

@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import hashlib
+import pandas
 
 
 @contextlib.contextmanager
@@ -42,6 +43,19 @@ def makedirs(path):
         if exception.errno != errno.EEXIST:
             raise
     return path
+
+
+def load_dataframe_from_csv(filename):
+    """Load pandas.DataFrame from .csv file. All fields are interpreted as
+    strings.
+
+    Args:
+        filename: path to .csv file.
+
+    Returns:
+        pandas.DataFrame
+    """
+    return pandas.read_csv(filename, dtype='str')
 
 
 def check_no_null_nan_values(data, description):
