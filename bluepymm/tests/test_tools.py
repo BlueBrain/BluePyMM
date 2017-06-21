@@ -28,6 +28,21 @@ def test_cd():
 
 
 @attr('unit')
+def test_load_dataframe_from_csv():
+    """bluepymm.tools: test load pandas.DataFrame from csv file"""
+    filename = os.path.join(EXAMPLES, 'simple1/data/rme_combinations.csv')
+    ret = tools.load_dataframe_from_csv(filename)
+    expected_records = [('1', 'mtype1', 'etype1'),
+                        ('1', 'mtype1', 'etype2'),
+                        ('1', 'mtype2', 'etype1'),
+                        ('2', 'mtype1', 'etype2'),
+                        ]
+    expected_df = pandas.DataFrame(expected_records,
+                                   columns=['region', 'fullmtype', 'etype'])
+    pandas.util.testing.assert_frame_equal(ret, expected_df)
+
+
+@attr('unit')
 def test_check_no_null_nan_values():
     data = pandas.DataFrame([[1, 2], [3, 4]], columns=list('AB'))
     throws_exception = False
