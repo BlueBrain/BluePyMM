@@ -11,9 +11,9 @@ import os
 from bluepymm import tools
 
 
-def _write_pure_ext_neuron_db_dat(ext_neuron_db, filename):
+def _write_pure_extneurondbdat(extneurondb, filename):
     """Write pure extneurondb.dat"""
-    neuron_db = ext_neuron_db.copy()
+    neuron_db = extneurondb.copy()
     if 'threshold_current' in neuron_db:
         del neuron_db['threshold_current']
     if 'holding_current' in neuron_db:
@@ -26,8 +26,8 @@ def _write_pure_ext_neuron_db_dat(ext_neuron_db, filename):
     neuron_db.to_csv(filename, sep=' ', index=False, header=False)
 
 
-def save_megate_results(ext_neuron_db, pure_ext_neuron_db_dat_filename,
-                        ext_neuron_db_dat_filename):
+def save_megate_results(extneurondb, pure_extneurondbdat_filename,
+                        extneurondbdat_filename):
     """Write results of megating to two files:
     - a 'pure' database: the columns of this file are ordered as
     'morphology name', 'layer', 'm-type', 'e-type', 'combination name'. Values
@@ -36,13 +36,12 @@ def save_megate_results(ext_neuron_db, pure_ext_neuron_db_dat_filename,
     The extended neuron database is first sorted along the first axis.
 
     Args:
-        ext_neuron_db (pandas dataframe): result of me-gating
-        pure_ext_neuron_db_dat_filename (str): filename of 'pure' database
-        ext_neuron_db_dat_filename (str): filename of 'full' database
+        extneurondb (pandas dataframe): result of me-gating
+        pure_extneurondbdat_filename (str): filename of 'pure' database
+        extneurondbdat_filename (str): filename of 'full' database
     """
-    tools.makedirs(os.path.dirname(pure_ext_neuron_db_dat_filename))
-    tools.makedirs(os.path.dirname(ext_neuron_db_dat_filename))
-    ext_neuron_db = ext_neuron_db.sort_index()
-    _write_pure_ext_neuron_db_dat(ext_neuron_db,
-                                  pure_ext_neuron_db_dat_filename)
-    ext_neuron_db.to_csv(ext_neuron_db_dat_filename, index=False)
+    tools.makedirs(os.path.dirname(pure_extneurondbdat_filename))
+    tools.makedirs(os.path.dirname(extneurondbdat_filename))
+    extneurondb = extneurondb.sort_index()
+    _write_pure_extneurondbdat(extneurondb, pure_extneurondbdat_filename)
+    extneurondb.to_csv(extneurondbdat_filename, index=False)

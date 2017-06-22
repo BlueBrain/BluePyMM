@@ -30,40 +30,27 @@ def pdf_file(pdf_filename):
     return PdfPages(pdf_filename)
 
 
-def plot_to_skip_features(to_skip_features, pp):
-    """Make table with skipped features"""
-
-    plt.figure(figsize=FIGSIZE)
-    plt.axis('off')
-    if to_skip_features:
-        plt.table(
-            cellText=[[x] for x in to_skip_features],
-            loc='center')
-    plt.title('Ignored feature patterns')
-    plt.tight_layout()
-    plt.savefig(pp, format='pdf', bbox_inches='tight')
+def add_plot_to_report(pp, plot_function, *args):
+    fig = plot_function(*args)
+    pp.savefig(fig, bbox_inches='tight')
     plt.close()
 
 
-def plot_megate_thresholds(megate_thresholds, pp):
-    """Make table with skipped features"""
-
-    plt.figure(figsize=FIGSIZE)
+def plot_dict(dict_data, title):
+    fig = plt.figure(figsize=FIGSIZE)
     plt.axis('off')
-    if megate_thresholds:
+    if dict_data:
         plt.table(
-            cellText=[[x] for x in megate_thresholds],
+            cellText=[[x] for x in dict_data],
             loc='center')
-    plt.title('MEGating thresholds')
+    plt.title(title)
     plt.tight_layout()
-    plt.savefig(pp, format='pdf', bbox_inches='tight')
-    plt.close()
+    return fig
 
 
-def plot_stacked_bars(data, xlabel, ylabel, title, color_map, pp):
+def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
     """Plot stacked bars"""
-    ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True,
-                   color=color_map)
+    ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=color_map)
     ax.get_xaxis().set_major_locator(
         matplotlib.ticker.MaxNLocator(integer=True))
     plt.xlabel(xlabel)
@@ -71,28 +58,24 @@ def plot_stacked_bars(data, xlabel, ylabel, title, color_map, pp):
     plt.title(title)
     plt.tight_layout()
     plt.legend(loc='upper right')
-    plt.savefig(pp, format='pdf', bbox_inches='tight')
-    plt.close()
+    return ax.get_figure()
 
 
 def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
-                                       emodel_score_values, pp):
+                                       emodel_score_values):
     """Display number of morphs matches per feature for a given emodel"""
 
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
     sums['failed'] = len(emodel_score_values) - sums['passed']
 
-    plot_stacked_bars(sums,
-                      '# morphologies',
-                      '',
-                      '{}: number of tested morphologies per feature'.format(
-                          emodel),
-                      [BLUE, RED],
-                      pp,)
+    return plot_stacked_bars(
+        sums, '# morphologies', '',
+        '{}: number of tested morphologies per feature'.format(emodel),
+        [BLUE, RED])
 
 
-def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
+def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
     """Display number of morphs matches per mtype for a given emodel"""
 
     sums = pandas.DataFrame()
@@ -103,12 +86,10 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp):
         sums.ix[mtype, 'failed'] = (len(megate_scores_mtype) -
                                     sums.ix[mtype, 'passed'])
 
-    plot_stacked_bars(sums,
-                      '# morphologies',
-                      '',
-                      '{}: number of tested morphologies per m-type'.format(
-                          emodel),
-                      [BLUE, RED], pp,)
+    return plot_stacked_bars(
+        sums, '# morphologies', '',
+        '{}: number of tested morphologies per m-type'.format(emodel),
+        [BLUE, RED])
 
 
 def create_morphology_label(data_frame):
@@ -119,9 +100,8 @@ def create_morphology_label(data_frame):
     return '{} ({}, {})'.format(morph, mtype, etype)
 
 
-def plot_emodels_per_morphology(data, final_db, pp):
+def plot_emodels_per_morphology(data, final_db):
     """Display result of tested e-models for each morphology"""
-
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
     for morph_name in non_exemplars['morph_name'].unique():
@@ -137,15 +117,12 @@ def plot_emodels_per_morphology(data, final_db, pp):
         sums.ix[label, 'error'] = nb_errors
         sums.ix[label, 'failed'] = nb_combos - nb_matches - nb_errors
 
-    plot_stacked_bars(sums,
-                      '# tested e-models',
-                      'Morphology name',
-                      'Number of tested e-models for each morphology',
-                      [BLUE, YELLOW, RED],
-                      pp)
+    return plot_stacked_bars(
+        sums, '# tested e-models', 'Morphology name',
+        'Number of tested e-models for each morphology', [BLUE, YELLOW, RED])
 
 
-def plot_emodels_per_metype(data, final_db, pp):
+def plot_emodels_per_metype(data, final_db):
     """Display result of tested e-model / morphology combinations per me-type.
     """
 
@@ -173,13 +150,10 @@ def plot_emodels_per_metype(data, final_db, pp):
     del data['metype']
     del final_db['metype']
 
-    plot_stacked_bars(sums,
-                      '# tested (e-model, morphology) combinations',
-                      'me-type',
-                      'Number of tested (e-model, morphology) combinations per'
-                      ' me-type',
-                      [BLUE, YELLOW, RED],
-                      pp)
+    return plot_stacked_bars(
+        sums, '# tested (e-model, morphology) combinations', 'me-type',
+        'Number of tested (e-model, morphology) combinations per me-type',
+        [BLUE, YELLOW, RED])
 
 
 # TODO: can this function be split into processing and reporting?
@@ -196,9 +170,11 @@ def create_final_db_and_write_report(pdf_filename,
     ext_neurondb = pandas.DataFrame()
 
     with pdf_file(pdf_filename) as pp:
-        # Create a table with the skipped features
-        plot_to_skip_features(to_skip_features, pp)
-        plot_megate_thresholds(megate_thresholds, pp)
+        # Plot input configuration details
+        add_plot_to_report(pp, plot_dict, to_skip_features,
+                           'Ignored feature patterns')
+        add_plot_to_report(pp, plot_dict, megate_thresholds,
+                           'MEGating thresholds')
 
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
@@ -210,13 +186,15 @@ def create_final_db_and_write_report(pdf_filename,
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
             # Reporting per e-model
-            plot_morphs_per_feature_for_emodel(emodel, megate_scores,
-                                               emodel_score_values, pp)
-            plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores, pp)
+            add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
+                               megate_scores, emodel_score_values)
+            add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
+                               mtypes, megate_scores)
 
         # More reporting
         if enable_plot_emodels_per_morphology:
-            plot_emodels_per_morphology(scores, ext_neurondb, pp)
-        plot_emodels_per_metype(scores, ext_neurondb, pp)
+            add_plot_to_report(pp, plot_emodels_per_morphology, scores,
+                               ext_neurondb)
+        add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
 
     return ext_neurondb
