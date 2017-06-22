@@ -16,6 +16,18 @@ import tarfile
 from bluepymm import tools
 
 
+def _get_neuron_compliant_template_name(emodel, model_name,
+                                        make_template_name_compatible):
+    template_name = model_name or emodel
+    if not tools.check_compliance_with_neuron(template_name):
+        if make_template_name_compatible:
+            return tools.get_neuron_compliant_template_name(template_name)
+        else:
+            raise ValueError('Template name "{}" not compliant with'
+                             ' NEURON'.format(template_name))
+    return template_name
+
+
 def check_emodels_in_repo(conf_dict):
     """Check whether input e-models are organized in branches of a repository.
 
@@ -103,7 +115,8 @@ def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
 
 def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                               template, template_dir=None, morph_path=None,
-                              model_name=None):
+                              model_name=None,
+                              make_template_name_compatible=False):
     """Create .hoc code for a given e-model based on code from
     '<emodel_dir>/setup', e-model parameters and a given template, and write
     out the result to a file named <hoc_dir>/<model_name or emodel>.hoc.
@@ -122,6 +135,10 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                     morphology of an e-model. Default is None.
         model_name: used to name the .hoc file. If None, the e-model name is
                     used. Default is None.
+        make_template_name_compatible: True if the template name needs to be
+            made NEURON-compatible, False otherwise. In the latter case, an
+            exception is thrown if the template name is not NEURON-compatible.
+            Default value is False.
     """
     setup = tools.load_module('setup', emodel_dir)
 
@@ -130,12 +147,16 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         try:
             sys.stdout = devnull
             evaluator = setup.evaluator.create(emodel)
-            # set some template variables
+
+            # set path to morphology
             if morph_path is not None:
                 evaluator.cell_model.morphology.morphology_path = morph_path
-            if model_name is not None:
-                evaluator.cell_model.name = model_name.replace("-", "_")
-                evaluator.cell_model.check_name()
+
+            # set template name
+            template_name = _get_neuron_compliant_template_name(
+                emodel, model_name, make_template_name_compatible)
+            evaluator.cell_model.name = template_name
+            evaluator.cell_model.check_name()
         finally:
             sys.stdout = old_stdout
 
@@ -144,7 +165,7 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                                           template_dir=template_dir)
 
     # write out result
-    hoc_file_name = '{}.hoc'.format(model_name or emodel)
+    hoc_file_name = '{}.hoc'.format(template_name)
     emodel_hoc_path = os.path.join(hoc_dir, hoc_file_name)
     with open(emodel_hoc_path, 'w') as emodel_hoc_file:
         emodel_hoc_file.write(hoc)
