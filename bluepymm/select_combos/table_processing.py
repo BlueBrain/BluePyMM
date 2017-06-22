@@ -10,22 +10,27 @@ import json
 import pandas
 
 
-def convert_extra_values(row):
-    """Convert extra values row: if 'extra_values' is available a field,
-    extract 'threshold_current' and 'holding_current' and add these to the row.
+def convert_extra_values(data):
+    """Convert value of key 'extra_values' to new key, value pairs and add them
+    to given data.
+
+    Args:
+        data: contains key 'extra_values', with string value
+
+    Returns:
+        data, with extra keys 'threshold_current' and/or 'holding_current', and
+        associated value, as extracted from data['extra_values']
     """
 
-    extra_values_str = row['extra_values']
+    extra_values_str = data['extra_values']
 
     if extra_values_str is not None:
         extra_values = json.loads(extra_values_str)
         if extra_values:
-            if 'threshold_current' in extra_values:
-                row['threshold_current'] = extra_values['threshold_current']
-            if 'holding_current' in extra_values:
-                row['holding_current'] = extra_values['holding_current']
-
-    return row
+            for field in ['threshold_current', 'holding_current']:
+                if field in extra_values:
+                    data[field] = extra_values[field]
+    return data
 
 
 def row_transform(row, exemplar_row, to_skip_patterns, skip_repaired_exemplar):
