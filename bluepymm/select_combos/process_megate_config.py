@@ -19,10 +19,18 @@ def _join_regex(list_regex):
 
 
 def read_to_skip_features(conf_dict):
-    """Read feature to skip from configuration"""
+    """Parse features to skip from configuration and return list of compiled
+    regular expressions.
 
-    to_skip_features = conf_dict['to_skip_features'] \
-        if 'to_skip_features' in conf_dict else []
+    Args:
+        conf_dict: dictionary, value of conf_dict[to_skip_features] is
+            processed if available.
+
+    Returns:
+        A tuple (<compiled_regular_expression>, <conf_dict[to_skip_features]>)
+    """
+
+    to_skip_features = conf_dict.get('to_skip_features', [])
 
     return [re.compile(feature_str)
             for feature_str in to_skip_features], to_skip_features
