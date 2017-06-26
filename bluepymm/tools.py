@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import hashlib
+from string import digits
 
 
 @contextlib.contextmanager
@@ -77,7 +78,22 @@ def load_module(name, path):
             fp.close()
 
 
-def convert_string(label, keep_length=40, hash_length=9):
+def check_compliance_with_neuron(template_name):
+    """Verify that a given name is compliant with the rules for a NEURON
+    template name: a name should be a non-empty alphumeric string, and start
+    with a letter. Underscores are allowed. The length should not exceed 50
+    characters.
+
+    Returns:
+        True if compliant, false otherwise.
+    """
+    max_len = 50
+    return (template_name and template_name[0].isalpha() and
+            template_name.replace('_', '').isalnum() and
+            len(template_name) <= max_len)
+
+
+def shorten_and_hash_string(label, keep_length=40, hash_length=9):
     """Convert string to a shorter string if required.
 
     Args:
@@ -108,3 +124,23 @@ def convert_string(label, keep_length=40, hash_length=9):
 
     hash_string = hashlib.sha1(label.encode('utf-8')).hexdigest()
     return '{}_{}'.format(label[0:keep_length], hash_string[0:hash_length])
+
+
+def get_neuron_compliant_template_name(name):
+    """Get template name that is compliant with NEURON based on given name.
+
+    Args:
+        name: string
+
+    Returns:
+        If `name' is NEURON-compliant, the same string is return. Otherwise,
+        hyphens are replaced by underscores and if appropriate, the string is
+        shortened. Leading numbers are removed.
+    """
+    template_name = name
+    if not check_compliance_with_neuron(template_name):
+        template_name = template_name.lstrip(digits).replace("-", "_")
+        template_name = shorten_and_hash_string(template_name,
+                                                keep_length=40,
+                                                hash_length=9)
+    return template_name

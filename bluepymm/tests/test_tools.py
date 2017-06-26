@@ -4,8 +4,8 @@
 # Do not distribute without further notice.
 
 import os
-
 import pandas
+from string import digits
 
 import nose.tools as nt
 from nose.plugins.attrib import attr
@@ -52,21 +52,55 @@ def test_check_no_null_nan_values_none():
 
 
 @attr('unit')
-def test_convert_string():
+def test_check_compliance_with_neuron():
+    """bluepymm.tools: test check compliance with neuron template name rules"""
+    not_compl = ['', '1test', 'test-test',
+                 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttes']
+    for name in not_compl:
+        nt.assert_false(tools.check_compliance_with_neuron(name))
+
+    compliant = ['test_tesT', 'test123test', 'Test']
+    for name in compliant:
+        nt.assert_true(tools.check_compliance_with_neuron(name))
+
+
+@attr('unit')
+def test_shorten_and_hash_string():
     """bluepymm.tools: test convert string"""
     label = 'testtesttesttesttesttesttesttesttest'
-    nt.assert_equal(label, tools.convert_string(label))
+    nt.assert_equal(label, tools.shorten_and_hash_string(label))
 
     keep_length = 3
     hash_length = 20
     expected_length = keep_length + hash_length + 1
-    ret = tools.convert_string(label, keep_length=keep_length,
-                               hash_length=hash_length)
+    ret = tools.shorten_and_hash_string(label, keep_length=keep_length,
+                                        hash_length=hash_length)
     nt.assert_not_equal(label, ret)
     nt.assert_equal(len(ret), expected_length)
     nt.assert_equal(label[0:keep_length], ret[0:keep_length])
     nt.assert_equal('_', ret[keep_length])
 
     hash_length = 21
-    nt.assert_raises(ValueError, tools.convert_string, label, keep_length,
-                     hash_length)
+    nt.assert_raises(ValueError, tools.shorten_and_hash_string, label,
+                     keep_length, hash_length)
+
+
+@attr('unit')
+def test_get_neuron_compliant_template_name():
+    """bluepymm.tools: test get neuron-compliant template name"""
+    name = 'test'
+    nt.assert_true(tools.check_compliance_with_neuron(name))
+    ret = tools.get_neuron_compliant_template_name(name)
+    nt.assert_equal(ret, name)
+    nt.assert_true(tools.check_compliance_with_neuron(ret))
+
+    name = '123test-test'
+    nt.assert_false(tools.check_compliance_with_neuron(name))
+    ret = tools.get_neuron_compliant_template_name(name)
+    nt.assert_equal(ret, name.lstrip(digits).replace('-', '_'))
+    nt.assert_true(tools.check_compliance_with_neuron(ret))
+
+    name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'
+    nt.assert_false(tools.check_compliance_with_neuron(name))
+    ret = tools.get_neuron_compliant_template_name(name)
+    nt.assert_true(tools.check_compliance_with_neuron(ret))
