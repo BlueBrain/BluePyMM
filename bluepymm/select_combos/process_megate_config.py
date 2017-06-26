@@ -9,13 +9,11 @@
 import re
 
 
-def _join_regex(list_regex):
-    """Create regex that match one of list of regex"""
-    return re.compile(
-        '(' +
-        ')|('.join(
-            list_regex) +
-        ')')
+def join_regex(list_regex):
+    """Create regular expresssion that matches one of a given list of regular
+    expressions."""
+
+    return re.compile('(' + ')|('.join(list_regex) + ')')
 
 
 def read_to_skip_features(conf_dict):
@@ -23,11 +21,11 @@ def read_to_skip_features(conf_dict):
     regular expressions.
 
     Args:
-        conf_dict: dictionary, value of conf_dict[to_skip_features] is
+        conf_dict: dictionary, value of conf_dict['to_skip_features'] is
             processed if available.
 
     Returns:
-        A tuple (<compiled_regular_expression>, <conf_dict[to_skip_features]>)
+        A tuple (<list_of_compiled_reg_exprs>, <conf_dict['to_skip_features']>)
     """
 
     to_skip_features = conf_dict.get('to_skip_features', [])
@@ -37,21 +35,28 @@ def read_to_skip_features(conf_dict):
 
 
 def read_megate_thresholds(conf_dict):
-    """Read feature to skip from configuration"""
+    """Parse megate thresholds from configuraiton and return list of compiled
+    regular expressions.
 
-    megate_thresholds = conf_dict['megate_thresholds'] \
-        if 'megate_thresholds' in conf_dict else []
+    Args:
+        conf_dict: dictionary, value of conf_dict['megate_thresholds'] is
+            processed if available.
+
+    Returns:
+        A tuple (<list_of_dicts>, <conf_dict['megate_thresholds']>)"""
+
+    megate_thresholds = conf_dict.get('megate_thresholds', [])
 
     megate_patterns = []
     for megate_threshold_dict in megate_thresholds:
         megate_pattern = {}
-        megate_pattern["megate_feature_threshold"] = {
-            'megate_threshold': megate_threshold_dict["megate_threshold"],
-            'features': _join_regex(megate_threshold_dict["features"])
+        megate_pattern['megate_feature_threshold'] = {
+            'megate_threshold': megate_threshold_dict['megate_threshold'],
+            'features': join_regex(megate_threshold_dict['features'])
         }
-        for key in ["emodel", "fullmtype", "etype"]:
+        for key in ['emodel', 'fullmtype', 'etype']:
             if key in megate_threshold_dict:
-                megate_pattern[key] = _join_regex(megate_threshold_dict[key])
+                megate_pattern[key] = join_regex(megate_threshold_dict[key])
             else:
                 megate_pattern[key] = re.compile('.*')
 
