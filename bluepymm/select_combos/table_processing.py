@@ -55,7 +55,18 @@ def row_transform(row, exemplar_row, to_skip_patterns, skip_repaired_exemplar):
 
 
 def row_threshold_transform(row, megate_patterns):
-    """Transform threshold row based on MEGate rule"""
+    """Transform threshold row based on me-gate rule: add matching me-gate
+    patterns to row data.
+
+    Args:
+        row: has keys 'emodel', 'fullmtype', 'etype', and
+            'megate_feature_threshold'
+
+    Returns:
+        Processed row data: for all me-gate patterns that match the row data,
+        the corresponding megate feature threshold is appended to
+        row['megate_feature_threshold'].
+    """
 
     emodel = row['emodel']
     fullmtype = row['fullmtype']
