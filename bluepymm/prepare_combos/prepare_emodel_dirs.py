@@ -16,9 +16,8 @@ import tarfile
 from bluepymm import tools
 
 
-def _get_neuron_compliant_template_name(emodel, model_name,
+def _get_neuron_compliant_template_name(template_name,
                                         make_template_name_compatible):
-    template_name = model_name or emodel
     if not tools.check_compliance_with_neuron(template_name):
         if make_template_name_compatible:
             return tools.get_neuron_compliant_template_name(template_name)
@@ -146,15 +145,18 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         old_stdout = sys.stdout
         try:
             sys.stdout = devnull
-            evaluator = setup.evaluator.create(emodel)
+            emodel_name = _get_neuron_compliant_template_name(
+                emodel, make_template_name_compatible)
+            evaluator = setup.evaluator.create(emodel_name)
 
             # set path to morphology
             if morph_path is not None:
                 evaluator.cell_model.morphology.morphology_path = morph_path
 
             # set template name
+            template_name = model_name or emodel
             template_name = _get_neuron_compliant_template_name(
-                emodel, model_name, make_template_name_compatible)
+                template_name, make_template_name_compatible)
             evaluator.cell_model.name = template_name
             evaluator.cell_model.check_name()
         finally:
