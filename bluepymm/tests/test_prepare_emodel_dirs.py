@@ -276,13 +276,15 @@ def test_prepare_emodel_dir():
     hoc_dir = './output/emodels_hoc/'
     emodels_in_repo = False
     continu = False
+    make_template_name_compatible = False
 
     _clear_dirs(['./tmp', './output'])
     for path in [emodels_dir, opt_dir, hoc_dir]:
         tools.makedirs(path)
 
     arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
-                os.path.abspath(hoc_dir), emodels_in_repo, continu)
+                os.path.abspath(hoc_dir), emodels_in_repo, continu,
+                make_template_name_compatible)
     ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
 
     # test side effects: creation of .hoc-file

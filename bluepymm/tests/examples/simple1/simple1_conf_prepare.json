@@ -8,5 +8,6 @@
     "final_json_path": "subdir/final.json",
     "tmp_dir": "./tmp",
     "scores_db": "./output/scores.sqlite",
-    "output_dir": "./output/"
+    "output_dir": "./output/",
+    "make_template_name_compatible": "True"
 }

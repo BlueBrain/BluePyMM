@@ -175,7 +175,7 @@ def prepare_emodel_dir(input_args):
     """Clone e-model input and prepare the e-model directory.
 
     Args:
-        input_args: tuple
+        input_args: 9-tuple
             - original_emodel(str): e-model name
             - emodel(str): e-model name
             - emodel_dict: dict with all e-model parameters
@@ -188,12 +188,14 @@ def prepare_emodel_dir(input_args):
                 are organized into separate subdirectories.
             - continu: True if this BluePyMM run builds on a previous run,
                 False otherwise
+            - make_template_name_compatible: True if the template name needs to
+                be made NEURON-compatible, False otherwise.
 
     Returns:
         A dict mapping the e-model and the original e-model to the e-model dir
     """
     original_emodel, emodel, emodel_dict, emodels_dir, \
-        opt_dir, hoc_dir, emodels_in_repo, continu = input_args
+        opt_dir, hoc_dir, emodels_in_repo, continu, templ_compat = input_args
 
     try:
         print('Preparing: %s' % emodel)
@@ -229,9 +231,10 @@ def prepare_emodel_dir(input_args):
                     print('Compiling mechanisms ...')
                     sh.nrnivmodl('mechanisms')
 
-                    create_and_write_hoc_file(emodel, emodel_dir, hoc_dir,
-                                              emodel_dict['params'],
-                                              'cell_template.jinja2')
+                    create_and_write_hoc_file(
+                        emodel, emodel_dir, hoc_dir, emodel_dict['params'],
+                        'cell_template.jinja2',
+                        make_template_name_compatible=templ_compat)
 
     except:
         raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
@@ -246,7 +249,8 @@ def prepare_emodel_dirs(
         opt_dir,
         emodels_hoc_dir,
         emodels_in_repo,
-        continu=False):
+        continu=False,
+        make_template_name_compatible=False):
     """Prepare the directories for the emodels.
 
     Args:
@@ -262,7 +266,9 @@ def prepare_emodel_dirs(
             branches of a git repository, false if the e-models are organized
             into separate subdirectories.
         continu: True if this BluePyMM run builds on a previous run, False
-            otherwise.
+            otherwise. Default is False.
+        make_template_name_compatible: True if the template name needs to be
+            made NEURON-compatible, False otherwise. Default is False.
 
     Return:
         A dict mapping e-models to prepared e-model directories.
@@ -282,7 +288,8 @@ def prepare_emodel_dirs(
              opt_dir,
              emodels_hoc_dir,
              emodels_in_repo,
-             continu))
+             continu,
+             make_template_name_compatible))
 
     print('Parallelising preparation of e-model directories')
     pool = multiprocessing.Pool(maxtasksperchild=1)
