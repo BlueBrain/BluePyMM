@@ -56,7 +56,8 @@ def select_combos(conf_filename):
 
     # Write extNeuronDB.dat
     if conf_dict.get('make_template_name_compatible', False):
-        table_processing.process_combo_name(ext_neurondb)
+        table_processing.process_combo_name(
+            ext_neurondb, os.path.dirname(extneurondb_filename))
     megate_output.save_megate_results(ext_neurondb,
                                       extneurondb_filename,
                                       combo_emodel_filename)

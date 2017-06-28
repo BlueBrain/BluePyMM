@@ -1,5 +1,6 @@
 import json
 import pandas
+import os
 from string import digits
 
 import nose.tools as nt
@@ -8,6 +9,10 @@ from nose.plugins.attrib import attr
 from bluepymm.select_combos import table_processing
 from bluepymm.select_combos import process_megate_config as proc_config
 from bluepymm import tools
+
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 @attr('unit')
@@ -65,6 +70,10 @@ def test_process_combo_name():
         'test', '123test-test',
         'testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest']
     data = pandas.DataFrame(combo_names, columns=['combo_name'])
+    log_filename = os.path.join(TEST_DIR, 'log.csv')
+    # make sure the file does not exist yet
+    if os.path.isfile(log_filename):
+        os.remove(log_filename)
 
     # compose expected NEURON-compliant names
     expected_names = []
@@ -81,5 +90,9 @@ def test_process_combo_name():
 
     expected_df = pandas.DataFrame(expected_names, columns=['combo_name'])
 
-    table_processing.process_combo_name(data)
+    table_processing.process_combo_name(data, log_filename)
     pandas.util.testing.assert_frame_equal(data, expected_df)
+    nt.assert_true(os.path.isfile(log_filename))
+    # clear output
+    if os.path.isfile(log_filename):
+        os.remove(log_filename)
