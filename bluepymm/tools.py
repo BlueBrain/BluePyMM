@@ -80,7 +80,7 @@ def load_module(name, path):
 
 def check_compliance_with_neuron(template_name):
     """Verify that a given name is compliant with the rules for a NEURON
-    template name: a name should be a non-empty alphumeric string, and start
+    template name: a name should be a non-empty alphanumeric string, and start
     with a letter. Underscores are allowed. The length should not exceed 50
     characters.
 
