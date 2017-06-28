@@ -9,6 +9,7 @@ venv3:
 	python3 -m venv venv
 	$(VENV) pip install pip --upgrade
 install: clean
+	python -c 'import sys, pip; if map(int, pip.__version__.split(".")) <= [9, 0, 0]: sys.exit("Need pip version >= 9")'
 	python setup.py sdist
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 install_in_venv:
