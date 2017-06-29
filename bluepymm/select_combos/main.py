@@ -10,7 +10,7 @@ import pandas
 
 from bluepymm import tools
 
-from . import sqlite_io, reporting, megate_output
+from . import sqlite_io, reporting, megate_output, table_processing
 from . import process_megate_config as proc_config
 
 
@@ -55,6 +55,11 @@ def select_combos(conf_filename):
     print('Wrote pdf to %s' % pdf_filename)
 
     # Write extNeuronDB.dat
+    if conf_dict.get('make_template_name_compatible', False):
+        log_filename = os.path.join(os.path.dirname(extneurondb_filename),
+                                    'log_make_template_name_compatible.csv')
+        table_processing.process_combo_name(
+            ext_neurondb, log_filename)
     megate_output.save_megate_results(ext_neurondb,
                                       extneurondb_filename,
                                       combo_emodel_filename)

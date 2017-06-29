@@ -136,22 +136,17 @@ def _test_create_and_write_hoc_file(test_dir,
                                     emodel_parameters,
                                     template,
                                     morph_path,
-                                    model_name,
-                                    make_compatible):
+                                    model_name):
     with tools.cd(test_dir):
         _clear_dirs([hoc_dir])
         tools.makedirs(hoc_dir)
 
         prepare_emodel_dirs.create_and_write_hoc_file(
             emodel, emodel_dir, hoc_dir, emodel_parameters, template,
-            morph_path=morph_path, model_name=model_name,
-            make_template_name_compatible=make_compatible)
+            morph_path=morph_path, model_name=model_name)
 
         # TODO: test hoc file contents
         template_name = model_name or emodel
-        if make_compatible:
-            template_name = tools.get_neuron_compliant_template_name(
-                template_name)
         hoc_filename = '{}.hoc'.format(template_name)
         hoc_path = os.path.join(hoc_dir, hoc_filename)
         nt.assert_true(os.path.isfile(hoc_path))
@@ -169,11 +164,10 @@ def test_create_and_write_hoc_file_none():
     template = 'cell_template.jinja2'
     morph_path = None
     model_name = None
-    make_compatible = False
 
     _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
                                     emodel_parameters, template, morph_path,
-                                    model_name, make_compatible)
+                                    model_name)
 
 
 @attr('unit')
@@ -188,70 +182,10 @@ def test_create_and_write_hoc_file_morph_path_model_name():
     template = 'cell_template.jinja2'
     morph_path = 'morph.asc'
     model_name = 'test'
-    make_compatible = False
 
     _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
                                     emodel_parameters, template, morph_path,
-                                    model_name, make_compatible)
-
-
-@attr('unit')
-def test_create_and_write_hoc_file_morph_path_model_name_not_compliant():
-    """prepare_combos.prepare_emodel_dirs: test create_and_write_hoc_file
-    based on morph1 of test example 'simple1'.
-    """
-    emodel = 'emodel1'
-    emodel_dir = './data/emodels_dir/subdir/'
-    hoc_dir = './output/emodels_hoc'
-    emodel_parameters = {'cm': 1.0}
-    template = 'cell_template.jinja2'
-    morph_path = 'morph.asc'
-    model_name = '123test'
-    nt.assert_false(tools.check_compliance_with_neuron(model_name))
-
-    with tools.cd(TEST_DIR):
-        nt.assert_raises(ValueError,
-                         prepare_emodel_dirs.create_and_write_hoc_file,
-                         emodel, emodel_dir, hoc_dir, emodel_parameters,
-                         template, morph_path=morph_path,
-                         model_name=model_name)
-
-    model_name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'
-    nt.assert_false(tools.check_compliance_with_neuron(model_name))
-
-    with tools.cd(TEST_DIR):
-        nt.assert_raises(ValueError,
-                         prepare_emodel_dirs.create_and_write_hoc_file,
-                         emodel, emodel_dir, hoc_dir, emodel_parameters,
-                         template, morph_path=morph_path,
-                         model_name=model_name)
-
-
-@attr('unit')
-def test_create_and_write_hoc_file_morph_path_model_name_make_compliant():
-    """prepare_combos.prepare_emodel_dirs: test create_and_write_hoc_file
-    based on morph1 of test example 'simple1'.
-    """
-    emodel = 'emodel1'
-    emodel_dir = './data/emodels_dir/subdir/'
-    hoc_dir = './output/emodels_hoc'
-    emodel_parameters = {'cm': 1.0}
-    template = 'cell_template.jinja2'
-    morph_path = 'morph.asc'
-    model_name = '123test'
-    make_compatible = True
-    nt.assert_false(tools.check_compliance_with_neuron(model_name))
-
-    _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
-                                    emodel_parameters, template, morph_path,
-                                    model_name, make_compatible)
-
-    model_name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'
-    nt.assert_false(tools.check_compliance_with_neuron(model_name))
-
-    _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
-                                    emodel_parameters, template, morph_path,
-                                    model_name, make_compatible)
+                                    model_name)
 
 
 @attr('unit')
@@ -276,15 +210,13 @@ def test_prepare_emodel_dir():
     hoc_dir = './output/emodels_hoc/'
     emodels_in_repo = False
     continu = False
-    make_template_name_compatible = False
 
     _clear_dirs(['./tmp', './output'])
     for path in [emodels_dir, opt_dir, hoc_dir]:
         tools.makedirs(path)
 
     arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
-                os.path.abspath(hoc_dir), emodels_in_repo, continu,
-                make_template_name_compatible)
+                os.path.abspath(hoc_dir), emodels_in_repo, continu)
     ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
 
     # test side effects: creation of .hoc-file
