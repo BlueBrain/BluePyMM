@@ -24,6 +24,7 @@ clean:
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
 	rm -rf bluepymm/tests/examples/simple1/output
+	rm -rf bluepymm/tests/examples/simple1/output_megate
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf bluepymm/tests/output
