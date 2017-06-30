@@ -24,9 +24,13 @@ clean:
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
 	rm -rf bluepymm/tests/examples/simple1/output
+	rm -rf bluepymm/tests/examples/simple1/output_megate
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
-	rm -rf doc/build
+	rm -rf bluepymm/tests/output
+	rm -rf bluepymm/tests/tmp
+	rm -rf docs/build
+	rm -rf build
 codingstyle: pep8
 pep8: clean venv install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
