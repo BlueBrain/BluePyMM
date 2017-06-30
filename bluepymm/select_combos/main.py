@@ -6,7 +6,6 @@
 # pylint: disable=R0914, C0325, W0640
 
 import os
-import pandas
 
 from bluepymm import tools
 
@@ -26,7 +25,7 @@ def select_combos(conf_filename):
     mm_run_path = conf_dict['mm_run_path']
     pdf_filename = conf_dict['pdf_filename']
     extneurondb_filename = conf_dict['extneurondb_filename']
-    combo_emodel_filename = conf_dict['combo_emodel_filename']
+    combo_model_filename = conf_dict['combo_model_filename']
 
     # Read skip features
     to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
@@ -62,9 +61,9 @@ def select_combos(conf_filename):
             ext_neurondb, log_filename)
     megate_output.save_megate_results(ext_neurondb,
                                       extneurondb_filename,
-                                      combo_emodel_filename)
-    print('Wrote extneurondb to %s' % extneurondb_filename)
-    print('Wrote combo_model to %s' % combo_emodel_filename)
+                                      combo_model_filename)
+    print('Wrote extneurondb.dat to %s' % extneurondb_filename)
+    print('Wrote combo_model.tsv to %s' % combo_model_filename)
 
 
 def add_parser(action):
