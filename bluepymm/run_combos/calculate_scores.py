@@ -17,10 +17,22 @@ import traceback
 from bluepymm import tools
 
 
-def run_emodel_morph_isolated(input):
-    """Run emodel in isolated environment"""
+def run_emodel_morph_isolated(input_args):
+    """Run e-model morphology combination in isolated environment.
 
-    uid, emodel, emodel_dir, emodel_params, morph_path = input
+    Args:
+        input_args: tuple
+        - uid: unique identifier of the e-model morphology combination
+        - emodel: e-model name
+        - emodel_dir: directory containing e-model files
+        - emodel_params: dict that maps e-model parameters to their values
+        - morph_path: path to morphology
+
+    Returns:
+        Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
+    """
+
+    uid, emodel, emodel_dir, emodel_params, morph_path = input_args
 
     return_dict = {}
     return_dict['uid'] = uid
@@ -34,9 +46,8 @@ def run_emodel_morph_isolated(input):
     except:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
-        return_dict['exception'] = "".join(
-            traceback.format_exception(
-                *sys.exc_info()))
+        return_dict['exception'] = "".join(traceback.format_exception(
+                                           *sys.exc_info()))
 
     pool.terminate()
     pool.join()
@@ -68,17 +79,28 @@ class NestedPool(multiprocessing.pool.Pool):
 
 
 def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
-    """Run emodel morph combo"""
+    """Run e-model morphology combination.
+
+    Args:
+        emodel: e-model name
+        emodel_dir: directory containing e-model files
+        emodel_params: dict that maps e-model parameters to their values
+        morph_path: path to morphology
+
+    Returns:
+        tuple:
+            - dict that maps features to scores
+            - dict with extra values: 'holding_current' and 'threshold_current'
+    """
 
     try:
         sys.stdout = open('/dev/null', 'w')
-        print('Running emodel %s on morph %s in %s' %
+        print('Running e-model %s on morphology %s in %s' %
               (emodel, morph_path, emodel_dir))
 
         setup = tools.load_module('setup', emodel_dir)
 
         print("Changing path to %s" % emodel_dir)
-
         with tools.cd(emodel_dir):
             evaluator = setup.evaluator.create(etype='%s' % emodel)
             evaluator.cell_model.morphology.morphology_path = morph_path
@@ -86,14 +108,13 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
             responses = evaluator.run_protocols(
                 evaluator.fitness_protocols.values(),
                 emodel_params)
+            scores = evaluator.fitness_calculator.calculate_scores(responses)
 
             extra_values = {}
             extra_values['holding_current'] = \
                 responses.get('bpo_holding_current', None)
             extra_values['threshold_current'] = \
                 responses.get('bpo_threshold_current', None)
-
-            scores = evaluator.fitness_calculator.calculate_scores(responses)
 
         return scores, extra_values
     except:
