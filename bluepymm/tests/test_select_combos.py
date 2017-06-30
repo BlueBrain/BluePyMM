@@ -43,7 +43,7 @@ def _test_main(test_dir, test_config, benchmark_dir, output_dir):
         _verify_main_output(benchmark_dir, output_dir)
 
 
-def test_main():
+def test_select_main():
     """Test main select combos"""
     test_config = 'simple1_conf_select.json'
     benchmark_dir = "output_megate_expected"
@@ -54,7 +54,7 @@ def test_main():
     _test_main(TEST_DIR, test_config, benchmark_dir, output_dir)
 
 
-def test_main_2():
+def test_select_main_2():
     """Test main select combos 2"""
     test_config = 'simple1_conf_select_2.json'
     benchmark_dir = "output_megate_expected"

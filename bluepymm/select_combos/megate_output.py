@@ -23,7 +23,7 @@ def _write_extneurondbdat(extneurondb, filename):
 
     column_order = ["morph_name", "layer", "fullmtype", "etype", "combo_name"]
     pure_extneuron_db = pure_extneuron_db[column_order]
-    pure_extneuron_db.to_csv(filename, index=False, header=False)
+    pure_extneuron_db.to_csv(filename, sep=' ', index=False, header=False)
 
 
 def save_megate_results(extneurondb, extneurondbdat_filename,

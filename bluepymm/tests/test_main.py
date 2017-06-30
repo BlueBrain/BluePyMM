@@ -11,10 +11,10 @@ import shutil
 
 import nose.tools as nt
 
-from bluepymm import main, tools
-
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+
+import bluepymm
 
 
 def _clear_output_directories(directories):
@@ -28,7 +28,7 @@ def _verify_emodel_json(filename, output_dir, nb_emodels):
     """Very emodel json"""
     data_json = os.path.join(output_dir, filename)
     nt.assert_true(os.path.isfile(data_json))
-    data = tools.load_json(data_json)
+    data = bluepymm.tools.load_json(data_json)
     nt.assert_equal(len(data), nb_emodels)
     return data
 
@@ -75,15 +75,15 @@ def test_prepare_combos():
     test_config = 'simple1_conf_prepare.json'
     nb_emodels = 2
 
-    with tools.cd(TEST_DIR):
-        config = tools.load_json(test_config)
+    with bluepymm.tools.cd(TEST_DIR):
+        config = bluepymm.tools.load_json(test_config)
 
         # Make sure the output directories are clean
         _clear_output_directories([config["tmp_dir"], config["output_dir"]])
 
         # Run combination preparation
         args_list = ['prepare', test_config]
-        main(args_list)
+        bluepymm.main(args_list)
 
         # Test output
         _verify_prepare_combos_output(config["scores_db"],
@@ -95,12 +95,12 @@ def test_run_combos():
     """Test run_combos"""
     test_config = 'simple1_conf_run.json'
 
-    with tools.cd(TEST_DIR):
-        config = tools.load_json(test_config)
+    with bluepymm.tools.cd(TEST_DIR):
+        config = bluepymm.tools.load_json(test_config)
 
         # Run combination preparation
         args_list = ['run', test_config]
-        main(args_list)
+        bluepymm.main(args_list)
 
         # Test output
         _verify_run_combos_output(config["scores_db"])
@@ -114,13 +114,13 @@ def test_select_combos():
     # e.g. extneurondb_filename
     output_dir = "output_megate"
 
-    with tools.cd(TEST_DIR):
+    with bluepymm.tools.cd(TEST_DIR):
         # Make sure the output directory is clean
         _clear_output_directories([output_dir])
 
         # Run combination selection
         args_list = ['select', test_config]
-        main(args_list)
+        bluepymm.main(args_list)
 
         # Test output
         _verify_select_combos_output(benchmark_dir, output_dir)
