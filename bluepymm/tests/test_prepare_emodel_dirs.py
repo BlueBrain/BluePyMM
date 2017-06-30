@@ -211,24 +211,25 @@ def test_prepare_emodel_dir():
     emodels_in_repo = False
     continu = False
 
-    _clear_dirs(['./tmp', './output'])
-    for path in [emodels_dir, opt_dir, hoc_dir]:
-        tools.makedirs(path)
+    with tools.cd(TEST_DIR):
+        _clear_dirs(['./tmp', './output'])
+        for path in [emodels_dir, opt_dir, hoc_dir]:
+            tools.makedirs(path)
 
-    arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
-                os.path.abspath(hoc_dir), emodels_in_repo, continu)
-    ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
+        arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
+                    os.path.abspath(hoc_dir), emodels_in_repo, continu)
+        ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
 
-    # test side effects: creation of .hoc-file
-    nt.assert_true(os.path.isdir(os.path.join(emodels_dir, emodel)))
-    hoc_path = os.path.join(hoc_dir, '{}.hoc'.format(emodel))
-    nt.assert_true(os.path.isfile(hoc_path))
+        # test side effects: creation of .hoc-file
+        nt.assert_true(os.path.isdir(os.path.join(emodels_dir, emodel)))
+        hoc_path = os.path.join(hoc_dir, '{}.hoc'.format(emodel))
+        nt.assert_true(os.path.isfile(hoc_path))
 
-    # test returned dict
-    expected_emodel_dir = os.path.join(emodels_dir, emodel)
-    expected_ret = {emodel: expected_emodel_dir,
-                    original_emodel: expected_emodel_dir}
-    nt.assert_dict_equal(ret, expected_ret)
+        # test returned dict
+        expected_emodel_dir = os.path.join(emodels_dir, emodel)
+        expected_ret = {emodel: expected_emodel_dir,
+                        original_emodel: expected_emodel_dir}
+        nt.assert_dict_equal(ret, expected_ret)
 
 
 @attr('unit')
@@ -266,19 +267,20 @@ def test_prepare_emodel_dirs():
                                     'layer': ['1', '2']
                                     }
                         }
-    emodels_dir = os.path.abspath('./tmp/emodels/')
-    opt_dir = './tmp/emodels_repo'
-    emodels_hoc_dir = os.path.abspath('./output/emodels_hoc/')
     emodels_in_repo = False
     continu = False
 
-    expected_ret = {emodel: os.path.join(
-        emodels_dir, emodel) for emodel in final_dict}
-
-    _clear_dirs(['./tmp', './output'])
-    tools.makedirs(opt_dir)
-
     with tools.cd(TEST_DIR):
+        emodels_dir = os.path.abspath('./tmp/emodels/')
+        opt_dir = './tmp/emodels_repo'
+        emodels_hoc_dir = os.path.abspath('./output/emodels_hoc/')
+
+        expected_ret = {emodel: os.path.join(
+            emodels_dir, emodel) for emodel in final_dict}
+
+        _clear_dirs(['./tmp', './output'])
+        tools.makedirs(opt_dir)
+
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
             emodels_hoc_dir, emodels_in_repo, continu)
