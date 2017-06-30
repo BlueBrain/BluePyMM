@@ -7,7 +7,7 @@
        {"emodel": [".*"], "fullmtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
    ],
    "extneurondb_filename": "output_megate/extNeuronDB.dat",
-   "combo_model_filename": "output_megate/combo_model.tsv",
+   "mecombo_emodel_filename": "output_megate/mecombo_emodel.tsv",
    "skip_repaired_exemplar": false,
    "plot_emodels_per_morphology": true
 }

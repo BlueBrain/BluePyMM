@@ -22,7 +22,7 @@ def _clear_main_output(output_dir):
 
 def _verify_main_output(benchmark_dir, output_dir):
     """Verify main output"""
-    files = ['combo_model.tsv', 'extNeuronDB.dat']
+    files = ['mecombo_emodel.tsv', 'extNeuronDB.dat']
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
 
     if len(matches[0]) != len(files):

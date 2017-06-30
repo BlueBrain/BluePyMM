@@ -62,7 +62,7 @@ def _verify_run_combos_output(scores_db):
 
 def _verify_select_combos_output(benchmark_dir, output_dir):
     """Verify output select combobs"""
-    files = ['combo_model.tsv', 'extNeuronDB.dat']
+    files = ['mecombo_emodel.tsv', 'extNeuronDB.dat']
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
 
     if len(matches[0]) != len(files):

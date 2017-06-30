@@ -85,7 +85,7 @@ def _verify_select_combos_output():
     """Verify output select combos"""
     matches = filecmp.cmpfiles(
         'output_megate_expected', 'output_megate',
-        ['combo_model.tsv', 'extNeuronDB.dat'])
+        ['mecombo_emodel.tsv', 'extNeuronDB.dat'])
 
     if len(matches[0]) != 2:
         print('Mismatch in files: %s' % matches[1])

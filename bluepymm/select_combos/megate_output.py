@@ -27,7 +27,7 @@ def _write_extneurondbdat(extneurondb, filename):
 
 
 def save_megate_results(extneurondb, extneurondbdat_filename,
-                        combo_model_filename):
+                        mecombo_emodel_filename):
     """Write results of megating to two files:
     - a 'pure' database: the columns of this file are ordered as
     'morphology name', 'layer', 'm-type', 'e-type', 'combination name'. Values
@@ -38,7 +38,7 @@ def save_megate_results(extneurondb, extneurondbdat_filename,
     Args:
         extneurondb (pandas dataframe): result of me-gating
         extneurondbdat_filename (str): path to extneurondb.dat file
-        combo_model_filename (str): path to ecomb_emodel file
+        mecombo_emodel_filename (str): path to ecomb_emodel file
     """
     tools.makedirs(os.path.dirname(extneurondbdat_filename))
     tools.makedirs(os.path.dirname(extneurondbdat_filename))
@@ -46,4 +46,4 @@ def save_megate_results(extneurondb, extneurondbdat_filename,
 
     _write_extneurondbdat(extneurondb, extneurondbdat_filename)
 
-    extneurondb.to_csv(combo_model_filename, sep='\t', index=False)
+    extneurondb.to_csv(mecombo_emodel_filename, sep='\t', index=False)

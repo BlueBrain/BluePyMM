@@ -34,7 +34,7 @@ def load_combinations_dict(megate_config_file):
     megate_config = utils.load_json(megate_config_file)
     megate_config_dir = os.path.dirname(megate_config_file)
     combinations_csv = os.path.join(megate_config_dir,
-                                    megate_config["combo_model_filename"])
+                                    megate_config["mecombo_emodel_filename"])
     return utils.load_csv_to_dict(combinations_csv)
 
 
