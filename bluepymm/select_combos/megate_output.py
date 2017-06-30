@@ -44,4 +44,4 @@ def save_megate_results(extneurondb, pure_extneurondbdat_filename,
     tools.makedirs(os.path.dirname(extneurondbdat_filename))
     extneurondb = extneurondb.sort_index()
     _write_pure_extneurondbdat(extneurondb, pure_extneurondbdat_filename)
-    extneurondb.to_csv(extneurondbdat_filename, index=False)
+    extneurondb.to_csv(extneurondbdat_filename, sep=' ', index=False)
