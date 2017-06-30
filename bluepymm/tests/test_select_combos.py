@@ -1,5 +1,7 @@
 """Test bluepymm/select_combos"""
 
+from __future__ import print_function
+
 import os
 import shutil
 import filecmp
@@ -13,12 +15,14 @@ TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 def _clear_main_output(output_dir):
+    """Clear main output"""
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
 
 def _verify_main_output(benchmark_dir, output_dir):
-    files = ['combo_model.csv', 'extNeuronDB.dat']
+    """Verify main output"""
+    files = ['mecombo_emodel.tsv', 'extNeuronDB.dat']
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
 
     if len(matches[0]) != len(files):
@@ -27,6 +31,7 @@ def _verify_main_output(benchmark_dir, output_dir):
 
 
 def _test_main(test_dir, test_config, benchmark_dir, output_dir):
+    """General test main"""
     with tools.cd(test_dir):
         # Make sure the output directory is clean
         _clear_main_output("output_megate")
@@ -38,7 +43,8 @@ def _test_main(test_dir, test_config, benchmark_dir, output_dir):
         _verify_main_output(benchmark_dir, output_dir)
 
 
-def test_main():
+def test_select_main():
+    """Test main select combos"""
     test_config = 'simple1_conf_select.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
@@ -48,7 +54,8 @@ def test_main():
     _test_main(TEST_DIR, test_config, benchmark_dir, output_dir)
 
 
-def test_main_2():
+def test_select_main_2():
+    """Test main select combos 2"""
     test_config = 'simple1_conf_select_2.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
