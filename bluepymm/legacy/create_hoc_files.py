@@ -1,6 +1,7 @@
 import os
 import argparse
 import multiprocessing
+import csv
 
 import utils
 
@@ -31,11 +32,16 @@ def add_full_paths(config, directory):
 
 
 def load_combinations_dict(megate_config_file):
+    # path to mecombo_emodel_filename
     megate_config = utils.load_json(megate_config_file)
     megate_config_dir = os.path.dirname(megate_config_file)
     combinations_csv = os.path.join(megate_config_dir,
                                     megate_config["mecombo_emodel_filename"])
-    return utils.load_csv_to_dict(combinations_csv)
+    # read and return combinations
+    with open(combinations_csv) as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        combinations_dict = {row['combo_name']: row for row in reader}
+    return combinations_dict
 
 
 def extract_mm_parameters(mm_config_file):
