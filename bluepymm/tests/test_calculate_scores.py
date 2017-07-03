@@ -1,9 +1,13 @@
+"""Tests for calculate_scores"""
+
+from __future__ import print_function
+
 import os
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
 
-from bluepymm.run_combos import calculate_scores
+import bluepymm.run_combos as run_combos
 from bluepymm import tools
 
 
@@ -21,7 +25,7 @@ def test_run_emodel_morph_isolated():
     morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
 
     input_args = (uid, emodel, emodel_dir, emodel_params, morph_path)
-    ret = calculate_scores.run_emodel_morph_isolated(input_args)
+    ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     expected_ret = {'exception': None,
                     'extra_values': {'holding_current': None,
@@ -39,8 +43,11 @@ def test_run_emodel_morph():
     emodel_params = {'cm': 1.0}
     morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
 
-    ret = calculate_scores.run_emodel_morph(emodel, emodel_dir, emodel_params,
-                                            morph_path)
+    ret = run_combos.calculate_scores.run_emodel_morph(
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path)
 
     expected_scores = {'Step1.SpikeCount': 20.0}
     expected_extra_values = {'holding_current': None,
@@ -61,6 +68,8 @@ def test_create_arg_list():
         TEST_DIR, emodel_dir, 'final.json'))
 
     expected_nb_entries = 11
-    ret = calculate_scores.create_arg_list(scores_db_filename, emodel_dirs,
-                                           final_dict)
+    ret = run_combos.calculate_scores.create_arg_list(
+        scores_db_filename,
+        emodel_dirs,
+        final_dict)
     nt.assert_equal(len(ret), expected_nb_entries)
