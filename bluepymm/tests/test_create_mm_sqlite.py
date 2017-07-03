@@ -33,7 +33,7 @@ def test_check_morphology_existence():
 
 
 @attr('unit')
-def test_create_examplar_rows_skip_repaired_exemplar():
+def test_create_exemplar_rows_skip_repaired_exemplar():
     """prepare_combos.create_mm_sqlite: test create_exemplar_rows
     based on test example 'simple1'.
     """
