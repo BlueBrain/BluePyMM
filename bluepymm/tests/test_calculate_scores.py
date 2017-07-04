@@ -51,8 +51,16 @@ def test_run_emodel_morph():
     nt.assert_dict_equal(ret[1], expected_extra_values)
 
 
+def _write_test_scores_database(row, filename):
+    """Helper function to create test scores database."""
+    df = pandas.DataFrame(row, index=[0])
+    with sqlite3.connect(filename) as conn:
+        df.to_sql('scores', conn, if_exists='replace')
+
+
 @attr('unit')
 def test_create_arg_list():
+    """run_combos.calculate_scores: test create_arg_list."""
     # write database
     filename = 'test.sqlite'
     index = 0
@@ -71,9 +79,7 @@ def test_create_arg_list():
            'emodel': emodel,
            'original_emodel': emodel,
            'to_run': 1}
-    df = pandas.DataFrame(row, index=[0])
-    with sqlite3.connect(filename) as conn:
-        df.to_sql('scores', conn, if_exists='replace')
+    _write_test_scores_database(row, filename)
 
     # extra input parameters
     emodel_dirs = {emodel: 'emodel_dirs'}
@@ -90,6 +96,42 @@ def test_create_arg_list():
                      params,
                      os.path.abspath(morph_path))]
     nt.assert_list_equal(ret, expected_ret)
+
+    # remove database
+    os.remove(filename)
+
+
+@attr('unit')
+def test_create_arg_list_exception():
+    """run_combos.calculate_scores: test create_arg_list for ValueError."""
+    # write database
+    filename = 'test.sqlite'
+    index = 0
+    morph_name = 'morph'
+    morph_dir = 'morph_dir'
+    mtype = 'mtype'
+    etype = 'etype'
+    layer = 'layer'
+    emodel = None
+    row = {'index': index,
+           'morph_name': morph_name,
+           'morph_dir': morph_dir,
+           'mtype': mtype,
+           'etype': etype,
+           'layer': layer,
+           'emodel': emodel,
+           'original_emodel': emodel,
+           'to_run': 1}
+    _write_test_scores_database(row, filename)
+
+    # extra input parameters
+    emodel_dirs = {emodel: 'emodel_dirs'}
+    params = 'test'
+    final_dict = {emodel: {'params': params}}
+
+    # emodel is None -> raises ValueError
+    nt.assert_raises(ValueError, calculate_scores.create_arg_list, filename,
+                     emodel_dirs, final_dict)
 
     # remove database
     os.remove(filename)
