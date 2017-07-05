@@ -60,6 +60,32 @@ def test_run_emodel_morph_isolated():
 
 
 @attr('unit')
+def test_run_emodel_morph_isolated_exception():
+    """run_combos.calculate_scores: test run_emodel_morph_isolated exception.
+    """
+    # input parameters
+    uid = 0
+    emodel = 'emodel_doesnt_exist'
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_params = {'cm': 1.0}
+    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+
+    # function call
+    input_args = (uid, emodel, emodel_dir, emodel_params, morph_path)
+    ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
+
+    # verify output: exception thrown because of non-existing e-model
+    expected_ret = {'exception': 'this_is_a_placeholder',
+                    'extra_values': None,
+                    'scores': None,
+                    'uid': 0}
+    nt.assert_list_equal(sorted(ret.keys()), sorted(expected_ret.keys()))
+    for k in ['extra_values', 'scores', 'uid']:
+        nt.assert_equal(ret[k], expected_ret[k])
+    nt.assert_true(emodel in ret['exception'])
+
+
+@attr('unit')
 def test_run_emodel_morph():
     """run_combos.calculate_scores: test run_emodel_morph."""
     emodel = 'emodel1'
@@ -78,6 +104,18 @@ def test_run_emodel_morph():
                              'threshold_current': None}
     nt.assert_dict_equal(ret[0], expected_scores)
     nt.assert_dict_equal(ret[1], expected_extra_values)
+
+
+@attr('unit')
+def test_run_emodel_morph_exception():
+    """run_combos.calculate_scores: test run_emodel_morph exception."""
+    emodel = 'emodel_doesnt_exist'
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_params = {'cm': 1.0}
+    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+
+    nt.assert_raises(Exception, run_combos.calculate_scores.run_emodel_morph,
+                     emodel, emodel_dir, emodel_params, morph_path)
 
 
 def _write_test_scores_database(row, testsqlite_filename):
