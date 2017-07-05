@@ -124,39 +124,44 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
 
 def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
-    """Create arguments for map function"""
+    """Create list of argument tuples to be used as an input for
+    run_emodel_morph.
 
+    Args:
+        scores_db_filename: path to .sqlite database
+        emodel_dirs: a dict mapping e-models to the directories with e-model
+            input files
+        final_dict: a dict mapping e-models to dicts with e-model parameters
+
+    Raises:
+        ValueError, if one of the database entries contains has value None for
+        the key 'emodel'.
+    """
     arg_list = []
 
     with sqlite3.connect(scores_db_filename) as scores_db:
-
         scores_db.row_factory = sqlite3.Row
-
         scores_cursor = scores_db.execute('SELECT * FROM scores')
 
         for row in scores_cursor.fetchall():
             index = row['index']
             morph_name = row['morph_name']
             morph_filename = '%s.asc' % morph_name
-            morph_path = os.path.abspath(
-                os.path.join(
-                    row['morph_dir'],
-                    morph_filename))
+            morph_path = os.path.abspath(os.path.join(row['morph_dir'],
+                                                      morph_filename))
             if row['to_run'] == 1:
                 emodel = row['emodel']
                 original_emodel = row['original_emodel']
                 if emodel is None:
-                    raise Exception(
-                        'scores db row %s for morph %s, etype %s, mtype %s, '
-                        'layer %s,'
-                        'doesnt have an emodel assigned to it' %
+                    raise ValueError(
+                        "scores db row %s for morph %s, etype %s, mtype %s, "
+                        "layer %s doesn't have an e-model assigned to it" %
                         (index, morph_name, row['etype'], row['mtype'],
-                            row['layer']))
+                         row['layer']))
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
                         morph_path)
-
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))
@@ -164,14 +169,23 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
     return arg_list
 
 
-def save_scores(
-        scores_db_filename,
-        uid,
-        scores,
-        extra_values,
-        exception,
-        float_representation='.17g'):
-    """Save scores in db"""
+def save_scores(scores_db_filename, uid, scores, extra_values, exception,
+                float_representation='.17g'):
+    """Update a specific entry in a given database with scores and related
+    parameters.
+
+    Args:
+        scores_db_filename: path to .sqlite database
+        uid: unique identifier of database entry
+        scores: scores dict to be added to entry as a json string
+        extra_values: dict to be added to entry as a json string
+        exception: description of exception that may have happened during score
+            calculation
+        float_representation: use for json encoding. Default is '.17g'.
+
+    Returns:
+        ValueError if entry has already been updated.
+    """
 
     json.encoder.FLOAT_REPR = lambda x: format(x, float_representation)
 
@@ -183,7 +197,7 @@ def save_scores(
                     'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
                     (uid, False))
                 if scores_cursor.fetchone() is None:
-                    # Update row with calculate scores
+                    # Update row with calculated scores and related values
                     scores_db.execute(
                         'UPDATE scores SET '
                         'scores=?, '
@@ -198,13 +212,12 @@ def save_scores(
                          uid))
                     break
                 else:
-                    raise Exception(
-                        'save_scores: trying to update scores in row that '
-                        'was already executed: %d' %
-                        uid)
+                    raise ValueError(
+                        'save_scores: trying to update scores in a row that '
+                        'was already executed: %d' % uid)
                     break
         except sqlite3.OperationalError:
-            # Keep retrying is something if database is locked
+            # Keep retrying if database is locked
             pass
 
 

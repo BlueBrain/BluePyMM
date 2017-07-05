@@ -27,8 +27,6 @@ clean:
 	rm -rf bluepymm/tests/examples/simple1/output_megate
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
-	rm -rf bluepymm/tests/output
-	rm -rf bluepymm/tests/tmp
 	rm -rf docs/build
 	rm -rf build
 codingstyle: pep8
