@@ -238,13 +238,21 @@ def save_scores(scores_db_filename, uid, scores, extra_values, exception,
             pass
 
 
-def calculate_scores(
-        final_dict,
-        emodel_dirs,
-        scores_db_filename,
-        use_ipyp=None,
-        ipyp_profile=None):
-    """Calculate scores"""
+def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
+                     use_ipyp=False, ipyp_profile=None):
+    """Calculate scores of e-model morphology combinations and update the
+    database accordingly.
+
+    Args:
+        scores_db_filename: path to .sqlite database with e-model morphology
+            combinations
+        final_dict: a dict mapping e-models to dicts with e-model parameters
+        emodel_dirs: a dict mapping e-models to the directories with e-model
+            input files
+        use_ipyp: bool indicating whether ipyparallel is used. Default is
+            False.
+        ipyp_profile: path to ipyparallel profile. Default is None.
+    """
 
     print('Creating argument list for parallelisation')
     arg_list = create_arg_list(scores_db_filename, emodel_dirs, final_dict)
