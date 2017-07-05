@@ -1,3 +1,25 @@
+"""Test table processing"""
+
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
+
 import json
 import pandas
 import os
@@ -41,13 +63,12 @@ def test_row_threshold_transform():
     # megate_feature_threshold is None
     row = {'emodel': 'test1', 'fullmtype': 'test2', 'etype': 'test3',
            'megate_feature_threshold': None}
-    patterns = [{'megate_feature_threshold': {
-        'megate_threshold': 5,
-        'features': proc_config.join_regex(['.*'])},
-        'emodel': proc_config.join_regex(['test1']),
-        'fullmtype': proc_config.join_regex(['test2']),
-        'etype': proc_config.join_regex(['test3'])}
-    ]
+    patterns = [
+        {'megate_feature_threshold':
+         {'megate_threshold': 5, 'features': proc_config.join_regex(
+             ['.*'])}, 'emodel': proc_config.join_regex(['test1']),
+         'fullmtype': proc_config.join_regex(['test2']), 'etype':
+         proc_config.join_regex(['test3'])}]
     ret = table_processing.row_threshold_transform(row, patterns)
     nt.assert_dict_equal(ret['megate_feature_threshold'][0],
                          patterns[0]['megate_feature_threshold'])
