@@ -260,7 +260,7 @@ def create_mm_sqlite(
     # Prepend exemplar rows to full_map
     full_map = pandas.concat([exemplar_rows, full_map], ignore_index=True)
 
-    # Writing full table to sqlite
+    # Write full table to sqlite database
     with sqlite3.connect(output_filename) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
 

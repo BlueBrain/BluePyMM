@@ -29,6 +29,8 @@ clean:
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf docs/build
 	rm -rf build
+	
+	rm -rf bluepymm/tests/tmp/*.sqlite
 codingstyle: pep8
 pep8: clean venv install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
