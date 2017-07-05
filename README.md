@@ -11,6 +11,11 @@ This process is called Model Management (MM). It takes as input a morphology rel
 Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination.
 Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.
 
+News
+====
+
+* 2017/07: BluePyMM is getting prepared to be open sourced
+
 Requirements
 ============
 
@@ -23,6 +28,13 @@ Requirements
 * [pandas](http://pandas.pydata.org/) (automatically installed by pip)
 * [matplotlib](https://matplotlib.org/) (automatically installed by pip)
 * [sh](https://pypi.python.org/pypi/sh) (automatically installed by pip)
+
+Installation
+============
+
+```bash
+pip install bluepymm
+```
 
 Quick Start
 ===========

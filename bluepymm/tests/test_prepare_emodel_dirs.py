@@ -1,3 +1,24 @@
+"""Test prepare_emodel_dirs"""
+
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 import os
 import shutil
 
@@ -12,6 +33,7 @@ TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 def _clear_dirs(dir_list):
+    """Clear dirs"""
     for unwanted in dir_list:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
@@ -37,6 +59,7 @@ def test_check_emodels_in_repo():
 
 
 def _test_convert_emodel_input(test_dir, emodels_in_repo, conf_dict, continu):
+    """Test convert_emodel_input"""
     with tools.cd(test_dir):
         _clear_dirs([conf_dict['tmp_dir']])
         ret_dir = prepare_emodel_dirs.convert_emodel_input(emodels_in_repo,
@@ -54,8 +77,7 @@ def test_convert_emodel_input_dir():
     conf_dict = {'emodels_dir': './data/emodels_dir',
                  'emodel_etype_map_path': 'subdir/emodel_etype_map.json',
                  'final_json_path': 'subdir/final.json',
-                 'tmp_dir': './tmp',
-                 }
+                 'tmp_dir': './tmp', }
     emodels_in_repo = False
     continu = False
     _test_convert_emodel_input(TEST_DIR, emodels_in_repo, conf_dict, continu)
@@ -87,36 +109,37 @@ def test_get_emodel_dicts():
     final_json_path = 'subdir/final.json'
     emodel_etype_map_path = 'subdir/emodel_etype_map.json'
 
-    expected_final_dict = {'emodel1': {'main_path': '.',
-                                       'seed': 2,
-                                       'rank': 0,
-                                       'notes': '',
-                                       'branch': 'emodel1',
-                                       'params': {'cm': 1.0},
-                                       'fitness': {'Step1.SpikeCount': 20.0},
-                                       'score': 104.72906197480131,
-                                       'morph_path': 'morphologies/morph1.asc'
-                                       },
-                           'emodel2': {'main_path': '.',
-                                       'seed': 2,
-                                       'rank': 0,
-                                       'notes': '',
-                                       'branch': 'emodel2',
-                                       'params': {'cm': 0.5},
-                                       'fitness': {'Step1.SpikeCount': 20.0},
-                                       'score': 104.72906197480131,
-                                       'morph_path': 'morphologies/morph2.asc'
-                                       }
-                           }
+    expected_final_dict = {
+        'emodel1': {
+            'main_path': '.',
+            'seed': 2,
+            'rank': 0,
+            'notes': '',
+            'branch': 'emodel1',
+            'params': {
+                'cm': 1.0},
+            'fitness': {
+                'Step1.SpikeCount': 20.0},
+            'score': 104.72906197480131,
+            'morph_path': 'morphologies/morph1.asc'},
+        'emodel2': {
+            'main_path': '.',
+            'seed': 2,
+            'rank': 0,
+            'notes': '',
+            'branch': 'emodel2',
+            'params': {
+                'cm': 0.5},
+            'fitness': {
+                'Step1.SpikeCount': 20.0},
+            'score': 104.72906197480131,
+            'morph_path': 'morphologies/morph2.asc'}}
     expected_emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel1',
                                              'etype': 'etype1',
-                                             'layer': ['1', 'str1']
-                                             },
+                                             'layer': ['1', 'str1']},
                                  'emodel2': {'mm_recipe': 'emodel2',
                                              'etype': 'etype2',
-                                             'layer': ['1', '2']
-                                             }
-                                 }
+                                             'layer': ['1', '2']}}
     expected_dict_dir = os.path.dirname(os.path.join(emodels_dir,
                                                      final_json_path))
 
@@ -137,6 +160,7 @@ def _test_create_and_write_hoc_file(test_dir,
                                     template,
                                     morph_path,
                                     model_name):
+    """Test create_and_write_hoc_files"""
     with tools.cd(test_dir):
         _clear_dirs([hoc_dir])
         tools.makedirs(hoc_dir)
@@ -203,8 +227,7 @@ def test_prepare_emodel_dir():
                    'params': {'cm': 1.0},
                    'fitness': {'Step1.SpikeCount': 20.0},
                    'score': 104.72906197480131,
-                   'morph_path': 'morphologies/morph1.asc'
-                   }
+                   'morph_path': 'morphologies/morph1.asc'}
     emodels_dir = './tmp/emodels/'
     opt_dir = './tmp/emodels_repo/'
     hoc_dir = './output/emodels_hoc/'
@@ -245,8 +268,7 @@ def test_prepare_emodel_dirs():
                               'params': {'cm': 1.0},
                               'fitness': {'Step1.SpikeCount': 20.0},
                               'score': 104.72906197480131,
-                              'morph_path': 'morphologies/morph1.asc'
-                              },
+                              'morph_path': 'morphologies/morph1.asc'},
                   'emodel2': {'main_path': '.',
                               'seed': 2,
                               'rank': 0,
@@ -255,18 +277,13 @@ def test_prepare_emodel_dirs():
                               'params': {'cm': 0.5},
                               'fitness': {'Step1.SpikeCount': 20.0},
                               'score': 104.72906197480131,
-                              'morph_path': 'morphologies/morph2.asc'
-                              }
-                  }
+                              'morph_path': 'morphologies/morph2.asc'}}
     emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel1',
                                     'etype': 'etype1',
-                                    'layer': ['1', 'str1']
-                                    },
+                                    'layer': ['1', 'str1']},
                         'emodel2': {'mm_recipe': 'emodel2',
                                     'etype': 'etype2',
-                                    'layer': ['1', '2']
-                                    }
-                        }
+                                    'layer': ['1', '2']}}
     emodels_in_repo = False
     continu = False
 

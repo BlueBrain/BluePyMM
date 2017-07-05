@@ -1,3 +1,26 @@
+"""Test parse_files"""
+
+
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
+
 import nose.tools as nt
 from nose.plugins.attrib import attr
 
@@ -9,6 +32,7 @@ from bluepymm.prepare_combos import parse_files
 
 @attr('unit')
 def test_verify_no_zero_percentage_no_zero():
+    """bluepymm.prepare_combos.parse_files: test nonzero perc in recipe"""
     tree_string = """
         <tree>
             <element percentage="10.0"/>
@@ -21,13 +45,14 @@ def test_verify_no_zero_percentage_no_zero():
     try:
         ret = parse_files.verify_no_zero_percentage(children)
         nt.assert_true(ret)
-    except ValueError as e:
+    except ValueError:
         throws_exception = True
     nt.assert_false(throws_exception)
 
 
 @attr('unit')
 def test_verify_no_zero_percentage_zero():
+    """bluepymm.prepare_combos.parse_files: test zero perc in recipe"""
     tree_string = """
         <tree>
             <element percentage="0.0"/>
@@ -68,8 +93,7 @@ def test_read_recipe_records():
     expected_records = [("1", "mtype1", "etype1"),
                         ("1", "mtype1", "etype2"),
                         ("1", "mtype2", "etype1"),
-                        ("two", "mtype1", "etype2"),
-                        ]
+                        ("two", "mtype1", "etype2"), ]
     recipe_tree = ET.fromstring(tree_string)
     records = [r for r in parse_files.read_recipe_records(recipe_tree)]
     nt.assert_list_equal(records, expected_records)
@@ -84,8 +108,7 @@ def test_read_mm_recipe():
     expected_records = [("1", "mtype1", "etype1"),
                         ("1", "mtype1", "etype2"),
                         ("1", "mtype2", "etype1"),
-                        ("2", "mtype1", "etype2"),
-                        ]
+                        ("2", "mtype1", "etype2"), ]
     expected_df = pandas.DataFrame(expected_records,
                                    columns=["layer", "fullmtype", "etype"])
     df = parse_files.read_mm_recipe(recipe_filename)
@@ -121,8 +144,7 @@ def test_read_morph_records():
     """
     expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
                         ("morph2", "mtype2:subtype2", "mtype2", "subtype2",
-                         "layer2")
-                        ]
+                         "layer2")]
     morph_tree = ET.fromstring(tree_string)
     records = [r for r in parse_files.read_morph_records(morph_tree)]
     nt.assert_list_equal(records, expected_records)
@@ -135,8 +157,7 @@ def test_read_mtype_morph_map():
     """
     neurondb_filename = "examples/simple1/data/morphs/neuronDB.xml"
     expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
-                        ("morph2", "mtype2", "mtype2", "", "1")
-                        ]
+                        ("morph2", "mtype2", "mtype2", "", "1")]
     expected_df = pandas.DataFrame(expected_records,
                                    columns=["morph_name", "fullmtype", "mtype",
                                             "submtype", "layer"])
@@ -146,6 +167,7 @@ def test_read_mtype_morph_map():
 
 def _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
                                    layers):
+    """test convert emodel etype map"""
     df = parse_files.convert_emodel_etype_map(emodel_etype_map, fullmtypes,
                                               etypes)
     nt.assert_equal(len(df.index), len(fullmtypes) * len(layers))
@@ -162,6 +184,7 @@ def _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
 
 @attr('unit')
 def test_convert_emodel_etype_map_no_regex():
+    """prepare_combos.parse_files: test emodel etype map convert w/ regex"""
     layers = ["layer1", "2"]
     emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
                                     "layer": layers}}
@@ -173,6 +196,7 @@ def test_convert_emodel_etype_map_no_regex():
 
 @attr('unit')
 def test_convert_emodel_etype_map_etype_regex():
+    """prepare_combos.parse_files: test emodeletype map convert mtype regex"""
     layers = ["layer1", "2"]
     emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
                                     "etype": ".*",
@@ -185,6 +209,8 @@ def test_convert_emodel_etype_map_etype_regex():
 
 @attr('unit')
 def test_convert_emodel_etype_map_mtype_regex():
+    """prepare_combos.parse_files: test emodel etype map convert etype regex"""
+
     layers = ["layer1", "2"]
     emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
                                     "mtype": ".*",
@@ -197,6 +223,8 @@ def test_convert_emodel_etype_map_mtype_regex():
 
 @attr('unit')
 def test_convert_emodel_etype_map_morph_name_regex():
+    """prepare_combos.parse_files: test emodel etype map convert morph regex"""
+
     layers = ["layer1", "2"]
     emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
                                     "morph_name": ".*",

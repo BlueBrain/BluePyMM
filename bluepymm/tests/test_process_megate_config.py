@@ -1,3 +1,25 @@
+"""Test process_megate_config"""
+
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
+
 import re
 
 import nose.tools as nt
@@ -15,15 +37,17 @@ def test_join_regex():
     nt.assert_equal(ret, re.compile(joined_list))
 
 
+def _test_read_to_skip_features(skip_features, conf_dict):
+    """Test read_to_skip_features helper function"""
+    r_patterns, r_features = proc_config.read_to_skip_features(conf_dict)
+    nt.assert_equal(skip_features, r_features)
+    exp_patterns = [re.compile(f) for f in skip_features]
+    nt.assert_equal(exp_patterns, r_patterns)
+
+
 @attr('unit')
 def test_read_to_skip_features():
     """select_combos.process_megate_config: test read_to_skip_features"""
-
-    def _test_read_to_skip_features(skip_features, conf_dict):
-        r_patterns, r_features = proc_config.read_to_skip_features(conf_dict)
-        nt.assert_equal(skip_features, r_features)
-        exp_patterns = [re.compile(f) for f in skip_features]
-        nt.assert_equal(exp_patterns, r_patterns)
 
     skip_features = []
     conf_dict = {'to_skip_features': skip_features}
@@ -49,17 +73,15 @@ def test_read_megate_thresholds():
     # all keys present
     test_dict = {'megate_thresholds': [
         {'emodel': ['test1'], 'fullmtype': ['test2'], 'etype': ['test3'],
-         'features': ['.*'], 'megate_threshold': 5}]
-    }
+         'features': ['.*'], 'megate_threshold': 5}]}
     ret_patterns, ret_thresholds = proc_config.read_megate_thresholds(
         test_dict)
-    expected_patterns = [{'megate_feature_threshold': {
-        'megate_threshold': 5,
-        'features': proc_config.join_regex(['.*'])},
-        'emodel': proc_config.join_regex(['test1']),
-        'fullmtype': proc_config.join_regex(['test2']),
-        'etype': proc_config.join_regex(['test3'])}
-    ]
+    expected_patterns = [
+        {'megate_feature_threshold':
+         {'megate_threshold': 5, 'features': proc_config.join_regex(['.*'])},
+         'emodel': proc_config.join_regex(['test1']), 'fullmtype':
+         proc_config.join_regex(['test2']), 'etype': proc_config.join_regex(
+             ['test3'])}]
     nt.assert_list_equal(ret_thresholds, test_dict['megate_thresholds'])
     nt.assert_equal(len(ret_patterns), len(expected_patterns))
     nt.assert_dict_equal(ret_patterns[0], expected_patterns[0])
@@ -67,17 +89,14 @@ def test_read_megate_thresholds():
     # key 'fullmtype' not present
     test_dict = {'megate_thresholds': [
         {'emodel': ['test1'], 'etype': ['test3'], 'features': ['.*'],
-         'megate_threshold': 5}]
-    }
+         'megate_threshold': 5}]}
     ret_patterns, ret_thresholds = proc_config.read_megate_thresholds(
         test_dict)
-    expected_patterns = [{'megate_feature_threshold': {
-        'megate_threshold': 5,
-        'features': proc_config.join_regex(['.*'])},
-        'emodel': proc_config.join_regex(['test1']),
-        'fullmtype': re.compile('.*'),
-        'etype': proc_config.join_regex(['test3'])}
-    ]
+    expected_patterns = [
+        {'megate_feature_threshold':
+         {'megate_threshold': 5, 'features': proc_config.join_regex(['.*'])},
+         'emodel': proc_config.join_regex(['test1']), 'fullmtype':
+         re.compile('.*'), 'etype': proc_config.join_regex(['test3'])}]
     nt.assert_list_equal(ret_thresholds, test_dict['megate_thresholds'])
     nt.assert_equal(len(ret_patterns), len(expected_patterns))
     nt.assert_dict_equal(ret_patterns[0], expected_patterns[0])
