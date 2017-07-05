@@ -1,6 +1,7 @@
 import os
 import pandas
 import sqlite3
+import json
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
@@ -135,3 +136,46 @@ def test_create_arg_list_exception():
 
     # remove database
     os.remove(filename)
+
+
+def _dict_factory(cursor, row):
+    """Helper function to create dictionaries from database rows."""
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+@attr('unit')
+def test_save_scores():
+    # create test database with single entry 'row'
+    filename = 'test.sqlite'
+    row = {'scores': None,
+           'extra_values': None,
+           'exception': None,
+           'to_run': True}
+    _write_test_scores_database(row, filename)
+
+    # process database
+    uid = 0
+    scores = {'score': 1}
+    extra_values = {'extra': 2}
+    exception = 'exception'
+    calculate_scores.save_scores(filename, uid, scores, extra_values,
+                                 exception)
+
+    # verify database
+    expected_db_row = {'index': uid,
+                       'scores': json.dumps(scores),
+                       'extra_values': json.dumps(extra_values),
+                       'exception': exception,
+                       'to_run': 0}  # False
+    with sqlite3.connect(filename) as scores_db:
+        scores_db.row_factory = _dict_factory
+        scores_cursor = scores_db.execute('SELECT * FROM scores')
+        db_row = scores_cursor.fetchall()[0]
+        nt.assert_dict_equal(db_row, expected_db_row)
+
+    # value already updated -> error
+    nt.assert_raises(ValueError, calculate_scores.save_scores, filename, uid,
+                     scores, extra_values, exception)

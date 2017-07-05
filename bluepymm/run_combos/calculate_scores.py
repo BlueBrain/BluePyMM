@@ -169,14 +169,23 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
     return arg_list
 
 
-def save_scores(
-        scores_db_filename,
-        uid,
-        scores,
-        extra_values,
-        exception,
-        float_representation='.17g'):
-    """Save scores in db"""
+def save_scores(scores_db_filename, uid, scores, extra_values, exception,
+                float_representation='.17g'):
+    """Update a specific entry in a given database with scores and related
+    parameters.
+
+    Args:
+        scores_db_filename: path to .sqlite database
+        uid: unique identifier of database entry
+        scores: scores dict to be added to entry as a json string
+        extra_values: dict to be added to entry as a json string
+        exception: description of exception that may have happened during score
+            calculation
+        float_representation: use for json encoding. Default is '.17g'.
+
+    Returns:
+        ValueError if entry has already been updated.
+    """
 
     json.encoder.FLOAT_REPR = lambda x: format(x, float_representation)
 
@@ -188,7 +197,7 @@ def save_scores(
                     'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
                     (uid, False))
                 if scores_cursor.fetchone() is None:
-                    # Update row with calculate scores
+                    # Update row with calculated scores and related values
                     scores_db.execute(
                         'UPDATE scores SET '
                         'scores=?, '
@@ -203,13 +212,12 @@ def save_scores(
                          uid))
                     break
                 else:
-                    raise Exception(
-                        'save_scores: trying to update scores in row that '
-                        'was already executed: %d' %
-                        uid)
+                    raise ValueError(
+                        'save_scores: trying to update scores in a row that '
+                        'was already executed: %d' % uid)
                     break
         except sqlite3.OperationalError:
-            # Keep retrying is something if database is locked
+            # Keep retrying if database is locked
             pass
 
 
