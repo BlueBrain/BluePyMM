@@ -1,7 +1,24 @@
 """Python Model Management"""
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 
 # pylint: disable=C0325, W0223, R0914, E1121, E1123
 
@@ -14,18 +31,6 @@ import multiprocessing
 import tarfile
 
 from bluepymm import tools
-
-
-def _get_neuron_compliant_template_name(emodel, model_name,
-                                        make_template_name_compatible):
-    template_name = model_name or emodel
-    if not tools.check_compliance_with_neuron(template_name):
-        if make_template_name_compatible:
-            return tools.get_neuron_compliant_template_name(template_name)
-        else:
-            raise ValueError('Template name "{}" not compliant with'
-                             ' NEURON'.format(template_name))
-    return template_name
 
 
 def check_emodels_in_repo(conf_dict):
@@ -115,8 +120,7 @@ def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
 
 def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                               template, template_dir=None, morph_path=None,
-                              model_name=None,
-                              make_template_name_compatible=False):
+                              model_name=None):
     """Create .hoc code for a given e-model based on code from
     '<emodel_dir>/setup', e-model parameters and a given template, and write
     out the result to a file named <hoc_dir>/<model_name or emodel>.hoc.
@@ -135,10 +139,6 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                     morphology of an e-model. Default is None.
         model_name: used to name the .hoc file. If None, the e-model name is
                     used. Default is None.
-        make_template_name_compatible: True if the template name needs to be
-            made NEURON-compatible, False otherwise. In the latter case, an
-            exception is thrown if the template name is not NEURON-compatible.
-            Default value is False.
     """
     setup = tools.load_module('setup', emodel_dir)
 
@@ -153,8 +153,7 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                 evaluator.cell_model.morphology.morphology_path = morph_path
 
             # set template name
-            template_name = _get_neuron_compliant_template_name(
-                emodel, model_name, make_template_name_compatible)
+            template_name = model_name or emodel
             evaluator.cell_model.name = template_name
             evaluator.cell_model.check_name()
         finally:
@@ -188,14 +187,12 @@ def prepare_emodel_dir(input_args):
                 are organized into separate subdirectories.
             - continu: True if this BluePyMM run builds on a previous run,
                 False otherwise
-            - make_template_name_compatible: True if the template name needs to
-                be made NEURON-compatible, False otherwise.
 
     Returns:
         A dict mapping the e-model and the original e-model to the e-model dir
     """
     original_emodel, emodel, emodel_dict, emodels_dir, \
-        opt_dir, hoc_dir, emodels_in_repo, continu, templ_compat = input_args
+        opt_dir, hoc_dir, emodels_in_repo, continu = input_args
 
     try:
         print('Preparing: %s' % emodel)
@@ -233,8 +230,7 @@ def prepare_emodel_dir(input_args):
 
                     create_and_write_hoc_file(
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
-                        'cell_template.jinja2',
-                        make_template_name_compatible=templ_compat)
+                        'cell_template.jinja2')
 
     except:
         raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
@@ -249,8 +245,7 @@ def prepare_emodel_dirs(
         opt_dir,
         emodels_hoc_dir,
         emodels_in_repo,
-        continu=False,
-        make_template_name_compatible=False):
+        continu=False):
     """Prepare the directories for the emodels.
 
     Args:
@@ -267,8 +262,6 @@ def prepare_emodel_dirs(
             into separate subdirectories.
         continu: True if this BluePyMM run builds on a previous run, False
             otherwise. Default is False.
-        make_template_name_compatible: True if the template name needs to be
-            made NEURON-compatible, False otherwise. Default is False.
 
     Return:
         A dict mapping e-models to prepared e-model directories.
@@ -288,8 +281,7 @@ def prepare_emodel_dirs(
              opt_dir,
              emodels_hoc_dir,
              emodels_in_repo,
-             continu,
-             make_template_name_compatible))
+             continu))
 
     print('Parallelising preparation of e-model directories')
     pool = multiprocessing.Pool(maxtasksperchild=1)

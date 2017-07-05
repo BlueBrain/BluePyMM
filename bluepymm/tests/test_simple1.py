@@ -1,7 +1,25 @@
 """Test simple1 example"""
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+from __future__ import print_function
+
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
 
 import os
 import shutil
@@ -17,13 +35,24 @@ TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 def _clear_output():
+    """Clear output"""
     for unwanted in ['tmp', 'output']:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
 
+def _verify_emodel_json(filename, output_dir, nb_emodels):
+    """Verify emodel json"""
+    data_json = os.path.join(output_dir, filename)
+    nt.assert_true(os.path.isfile(data_json))
+    data = tools.load_json(data_json)
+    nt.assert_equal(len(data), nb_emodels)
+    return data
+
+
 def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
                                   nb_emodels):
+    """Verify output prepare combos"""
     # TODO: test database contents
     nt.assert_true(os.path.isfile(scores_db))
 
@@ -33,20 +62,17 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
     for hoc_file in hoc_files:
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
-    def _verify_emodel_json(filename):
-        data_json = os.path.join(output_dir, filename)
-        nt.assert_true(os.path.isfile(data_json))
-        data = tools.load_json(data_json)
-        nt.assert_equal(len(data), nb_emodels)
-        return data
-
-    _verify_emodel_json('final_dict.json')
-    emodel_dirs = _verify_emodel_json('emodel_dirs.json')
+    _verify_emodel_json('final_dict.json', output_dir, nb_emodels)
+    emodel_dirs = _verify_emodel_json(
+        'emodel_dirs.json',
+        output_dir,
+        nb_emodels)
     for emodel in emodel_dirs:
         nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
 
 
 def _verify_run_combos_output(scores_db):
+    """Verify output run combos"""
     nt.assert_true(os.path.isfile(scores_db))
 
     # TODO: test database contents
@@ -72,9 +98,10 @@ def _verify_run_combos_output(scores_db):
 
 
 def _verify_select_combos_output():
+    """Verify output select combos"""
     matches = filecmp.cmpfiles(
         'output_megate_expected', 'output_megate',
-        ['combo_model.csv', 'extNeuronDB.dat'])
+        ['mecombo_emodel.tsv', 'extNeuronDB.dat'])
 
     if len(matches[0]) != 2:
         print('Mismatch in files: %s' % matches[1])
@@ -84,6 +111,7 @@ def _verify_select_combos_output():
 
 def _test_simple1(test_dir, prepare_config_json, run_config_json,
                   select_config_json, nb_emodels):
+    """Test simple1"""
     with tools.cd(test_dir):
         # Make sure the output directories are clean
         _clear_output()

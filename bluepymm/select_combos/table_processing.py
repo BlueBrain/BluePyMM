@@ -1,13 +1,31 @@
 """Functions to process tables produced by BluePyMM."""
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
 
 # pylint: disable=R0914, C0325, W0640
 
 
 import json
 import pandas
+
+from bluepymm import tools
 
 
 def convert_extra_values(row):
@@ -215,3 +233,22 @@ def process_emodel(emodel,
         del emodel_ext_neurondb['extra_values']
 
     return emodel_ext_neurondb, megate_scores, emodel_score_values, mtypes
+
+
+def process_combo_name(data, log_filename):
+    """Make value corresponding to key 'combo_name' compliant with NEURON rules
+    for template names. A log file is written out in csv format.
+
+    Args:
+        data: pandas.DataFrame with key 'combo_name'
+        log_filename: path to log file
+    """
+    log_data = pandas.DataFrame()
+    log_data['original_combo_name'] = data['combo_name'].copy()
+
+    data['combo_name'] = data.apply(
+        lambda x: tools.get_neuron_compliant_template_name(x['combo_name']),
+        axis=1)
+
+    log_data['neuron_compliant_combo_name'] = data['combo_name'].copy()
+    log_data.to_csv(log_filename, index=False)

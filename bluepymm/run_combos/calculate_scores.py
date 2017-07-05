@@ -1,7 +1,24 @@
 """Python Model Management"""
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 
 # pylint: disable=C0325, W0223
 
@@ -17,10 +34,22 @@ import traceback
 from bluepymm import tools
 
 
-def run_emodel_morph_isolated(input):
-    """Run emodel in isolated environment"""
+def run_emodel_morph_isolated(input_args):
+    """Run e-model morphology combination in isolated environment.
 
-    uid, emodel, emodel_dir, emodel_params, morph_path = input
+    Args:
+        input_args: tuple
+        - uid: unique identifier of the e-model morphology combination
+        - emodel: e-model name
+        - emodel_dir: directory containing e-model files
+        - emodel_params: dict that maps e-model parameters to their values
+        - morph_path: path to morphology
+
+    Returns:
+        Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
+    """
+
+    uid, emodel, emodel_dir, emodel_params, morph_path = input_args
 
     return_dict = {}
     return_dict['uid'] = uid
@@ -34,9 +63,8 @@ def run_emodel_morph_isolated(input):
     except:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
-        return_dict['exception'] = "".join(
-            traceback.format_exception(
-                *sys.exc_info()))
+        return_dict['exception'] = "".join(traceback.format_exception(
+                                           *sys.exc_info()))
 
     pool.terminate()
     pool.join()
@@ -68,17 +96,28 @@ class NestedPool(multiprocessing.pool.Pool):
 
 
 def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
-    """Run emodel morph combo"""
+    """Run e-model morphology combination.
+
+    Args:
+        emodel: e-model name
+        emodel_dir: directory containing e-model files
+        emodel_params: dict that maps e-model parameters to their values
+        morph_path: path to morphology
+
+    Returns:
+        tuple:
+            - dict that maps features to scores
+            - dict with extra values: 'holding_current' and 'threshold_current'
+    """
 
     try:
         sys.stdout = open('/dev/null', 'w')
-        print('Running emodel %s on morph %s in %s' %
+        print('Running e-model %s on morphology %s in %s' %
               (emodel, morph_path, emodel_dir))
 
         setup = tools.load_module('setup', emodel_dir)
 
         print("Changing path to %s" % emodel_dir)
-
         with tools.cd(emodel_dir):
             evaluator = setup.evaluator.create(etype='%s' % emodel)
             evaluator.cell_model.morphology.morphology_path = morph_path
@@ -86,14 +125,13 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
             responses = evaluator.run_protocols(
                 evaluator.fitness_protocols.values(),
                 emodel_params)
+            scores = evaluator.fitness_calculator.calculate_scores(responses)
 
             extra_values = {}
             extra_values['holding_current'] = \
                 responses.get('bpo_holding_current', None)
             extra_values['threshold_current'] = \
                 responses.get('bpo_threshold_current', None)
-
-            scores = evaluator.fitness_calculator.calculate_scores(responses)
 
         return scores, extra_values
     except:
@@ -103,39 +141,44 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
 
 def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
-    """Create arguments for map function"""
+    """Create list of argument tuples to be used as an input for
+    run_emodel_morph.
 
+    Args:
+        scores_db_filename: path to .sqlite database
+        emodel_dirs: a dict mapping e-models to the directories with e-model
+            input files
+        final_dict: a dict mapping e-models to dicts with e-model parameters
+
+    Raises:
+        ValueError, if one of the database entries contains has value None for
+        the key 'emodel'.
+    """
     arg_list = []
 
     with sqlite3.connect(scores_db_filename) as scores_db:
-
         scores_db.row_factory = sqlite3.Row
-
         scores_cursor = scores_db.execute('SELECT * FROM scores')
 
         for row in scores_cursor.fetchall():
             index = row['index']
             morph_name = row['morph_name']
             morph_filename = '%s.asc' % morph_name
-            morph_path = os.path.abspath(
-                os.path.join(
-                    row['morph_dir'],
-                    morph_filename))
+            morph_path = os.path.abspath(os.path.join(row['morph_dir'],
+                                                      morph_filename))
             if row['to_run'] == 1:
                 emodel = row['emodel']
                 original_emodel = row['original_emodel']
                 if emodel is None:
-                    raise Exception(
-                        'scores db row %s for morph %s, etype %s, mtype %s, '
-                        'layer %s,'
-                        'doesnt have an emodel assigned to it' %
+                    raise ValueError(
+                        "scores db row %s for morph %s, etype %s, mtype %s, "
+                        "layer %s doesn't have an e-model assigned to it" %
                         (index, morph_name, row['etype'], row['mtype'],
-                            row['layer']))
+                         row['layer']))
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
                         morph_path)
-
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))
@@ -143,14 +186,23 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
     return arg_list
 
 
-def save_scores(
-        scores_db_filename,
-        uid,
-        scores,
-        extra_values,
-        exception,
-        float_representation='.17g'):
-    """Save scores in db"""
+def save_scores(scores_db_filename, uid, scores, extra_values, exception,
+                float_representation='.17g'):
+    """Update a specific entry in a given database with scores and related
+    parameters.
+
+    Args:
+        scores_db_filename: path to .sqlite database
+        uid: unique identifier of database entry
+        scores: scores dict to be added to entry as a json string
+        extra_values: dict to be added to entry as a json string
+        exception: description of exception that may have happened during score
+            calculation
+        float_representation: use for json encoding. Default is '.17g'.
+
+    Returns:
+        ValueError if entry has already been updated.
+    """
 
     json.encoder.FLOAT_REPR = lambda x: format(x, float_representation)
 
@@ -162,7 +214,7 @@ def save_scores(
                     'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
                     (uid, False))
                 if scores_cursor.fetchone() is None:
-                    # Update row with calculate scores
+                    # Update row with calculated scores and related values
                     scores_db.execute(
                         'UPDATE scores SET '
                         'scores=?, '
@@ -177,23 +229,30 @@ def save_scores(
                          uid))
                     break
                 else:
-                    raise Exception(
-                        'save_scores: trying to update scores in row that '
-                        'was already executed: %d' %
-                        uid)
+                    raise ValueError(
+                        'save_scores: trying to update scores in a row that '
+                        'was already executed: %d' % uid)
                     break
         except sqlite3.OperationalError:
-            # Keep retrying is something if database is locked
+            # Keep retrying if database is locked
             pass
 
 
-def calculate_scores(
-        final_dict,
-        emodel_dirs,
-        scores_db_filename,
-        use_ipyp=None,
-        ipyp_profile=None):
-    """Calculate scores"""
+def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
+                     use_ipyp=False, ipyp_profile=None):
+    """Calculate scores of e-model morphology combinations and update the
+    database accordingly.
+
+    Args:
+        scores_db_filename: path to .sqlite database with e-model morphology
+            combinations
+        final_dict: a dict mapping e-models to dicts with e-model parameters
+        emodel_dirs: a dict mapping e-models to the directories with e-model
+            input files
+        use_ipyp: bool indicating whether ipyparallel is used. Default is
+            False.
+        ipyp_profile: path to ipyparallel profile. Default is None.
+    """
 
     print('Creating argument list for parallelisation')
     arg_list = create_arg_list(scores_db_filename, emodel_dirs, final_dict)

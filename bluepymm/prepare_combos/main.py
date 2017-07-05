@@ -2,6 +2,26 @@
 
 from __future__ import print_function
 
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
+
 import os
 
 from bluepymm import tools
@@ -29,12 +49,10 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
 
     print('Preparing emodels in %s' % emodels_dir)
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
-    templ_compatible = conf_dict.get('make_template_name_compatible', False)
     # Clone the emodels repo and prepare the dirs for all the emodels
     emodel_dirs = prepare_dirs.prepare_emodel_dirs(
         final_dict, emodel_etype_map, emodels_dir, opt_dir, emodels_hoc_dir,
-        emodels_in_repo, continu=continu,
-        make_template_name_compatible=templ_compatible)
+        emodels_in_repo, continu=continu)
 
     if not continu:
         print('Creating sqlite db at %s' % scores_db_path)

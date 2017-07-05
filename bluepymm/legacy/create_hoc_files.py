@@ -1,15 +1,38 @@
+"""Create hoc files"""
+
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 import os
 import argparse
 import multiprocessing
+import csv
 
-import utils
 
-from bluepymm.prepare_combos.prepare_emodel_dirs import (
-    create_and_write_hoc_file
-)
+import bluepymm.tools as tools
+
+import bluepymm.prepare_combos.prepare_emodel_dirs as prepare_emodel_dirs
 
 
 def parse_arguments():
+    """Parse commandline arguments"""
+
     parser = argparse.ArgumentParser(description="Create legacy .hoc files")
     parser.add_argument("config_filename")
     return parser.parse_args()
@@ -31,11 +54,18 @@ def add_full_paths(config, directory):
 
 
 def load_combinations_dict(megate_config_file):
-    megate_config = utils.load_json(megate_config_file)
+    """Load combinations dict"""
+
+    # path to mecombo_emodel_filename
+    megate_config = tools.load_json(megate_config_file)
     megate_config_dir = os.path.dirname(megate_config_file)
     combinations_csv = os.path.join(megate_config_dir,
-                                    megate_config["combo_emodel_filename"])
-    return utils.load_csv_to_dict(combinations_csv)
+                                    megate_config["mecombo_emodel_filename"])
+    # read and return combinations
+    with open(combinations_csv) as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        combinations_dict = {row['combo_name']: row for row in reader}
+    return combinations_dict
 
 
 def extract_mm_parameters(mm_config_file):
@@ -45,7 +75,7 @@ def extract_mm_parameters(mm_config_file):
     Args:
         mm_config_file: Path to .json file
     """
-    mm_config = utils.load_json(mm_config_file)
+    mm_config = tools.load_json(mm_config_file)
     mm_config_dir = os.path.abspath(os.path.dirname(mm_config_file))
     mm_config_full_paths = add_full_paths(mm_config, mm_config_dir)
 
@@ -53,7 +83,7 @@ def extract_mm_parameters(mm_config_file):
         emodels_path = mm_config_full_paths["emodels_dir"]
     else:
         emodels_path = mm_config_full_paths["emodels_repo"]
-    final_dict = utils.load_json(
+    final_dict = tools.load_json(
         os.path.join(mm_config_dir,
                      emodels_path,
                      mm_config_full_paths["final_json_path"]))
@@ -63,22 +93,21 @@ def extract_mm_parameters(mm_config_file):
 
 def run_create_and_write_hoc_file((emodel, setup_dir, hoc_dir, emodel_params,
                                    template, template_dir, morph_path,
-                                   model_name, make_template_name_compatible)):
+                                   model_name)):
     """Run create_and_write_hoc_file in isolated environment.
 
     Args:
         See create_and_write_hoc_file.
     """
     pool = multiprocessing.pool.Pool(1, maxtasksperchild=1)
-    pool.apply(create_and_write_hoc_file, (emodel,
-                                           setup_dir,
-                                           hoc_dir,
-                                           emodel_params,
-                                           template,
-                                           template_dir,
-                                           morph_path,
-                                           model_name,
-                                           make_template_name_compatible))
+    pool.apply(prepare_emodel_dirs.create_and_write_hoc_file, (emodel,
+                                                               setup_dir,
+                                                               hoc_dir,
+                                                               emodel_params,
+                                                               template,
+                                                               template_dir,
+                                                               morph_path,
+                                                               model_name))
     pool.terminate()
     pool.join()
     del pool
@@ -102,7 +131,6 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
         setup_dir = os.path.join(emodels_dir, emodel)
         morph_path = "{}.asc".format(comb_data["morph_name"])
         emodel_params = final_dict[emodel]["params"]
-        make_template_name_compatible = True
 
         run_create_and_write_hoc_file((emodel,
                                        setup_dir,
@@ -111,21 +139,22 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
                                        os.path.basename(template),
                                        os.path.dirname(template),
                                        morph_path,
-                                       combination,
-                                       make_template_name_compatible))
+                                       combination))
 
 
 def main():
+    """Main"""
+
     # Parse and process arguments
     args = parse_arguments()
-    config = utils.load_json(args.config_filename)
+    config = tools.load_json(args.config_filename)
     config_dir = os.path.abspath(os.path.dirname(args.config_filename))
     config = add_full_paths(config, config_dir)
     combinations_dict = load_combinations_dict(config["megate_config"])
     emodels_dir, final_dict = extract_mm_parameters(config["mm_config"])
 
     # Create output directory for .hoc files
-    utils.makedirs(config["hoc_output_dir"])
+    tools.makedirs(config["hoc_output_dir"])
 
     # Create hoc files
     create_hoc_files(combinations_dict, emodels_dir, final_dict,
