@@ -2,8 +2,24 @@
 
 from __future__ import print_function
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
 
 """Some code based on BrainBuilder and morph repair code"""
 
@@ -143,6 +159,7 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     morph_name_regexs_cache = {}
 
     def read_records():
+        """Read records"""
         for original_emodel, etype_map in emodel_etype_map.items():
             etype_regex = re.compile(etype_map.get('etype', '.*'))
             mtype_regex = re.compile(etype_map.get('mtype', '.*'))
@@ -162,10 +179,8 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
                                        fullmtype,
                                        etype,
                                        morph_name_regex,
-                                       original_emodel,
-                                       )
+                                       original_emodel,)
 
     columns = ['emodel', 'layer', 'fullmtype', 'etype', 'morph_regex',
-               'original_emodel',
-               ]
+               'original_emodel']
     return pandas.DataFrame(read_records(), columns=columns)

@@ -1,7 +1,23 @@
 """BluePyMM tools"""
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
+
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
 
 import contextlib
 import errno
@@ -25,11 +41,13 @@ def cd(dir_name):
 
 
 def load_json(path):
+    """Load json file"""
     with open(path) as f:
         return json.load(f)
 
 
 def write_json(output_dir, output_name, config):
+    """Write json file"""
     path = os.path.join(output_dir, output_name)
     with open(path, 'w') as fd:
         json.dump(config, fd, indent=2, sort_keys=True)
@@ -37,6 +55,7 @@ def write_json(output_dir, output_name, config):
 
 
 def makedirs(path):
+    """mkdir but don't fail when dir exists"""
     try:
         os.makedirs(path)
     except OSError as exception:

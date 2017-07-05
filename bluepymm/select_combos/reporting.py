@@ -1,9 +1,26 @@
 """Functions for BluePyMM reporting."""
 
-# Copyright BBP/EPFL 2017; All rights reserved.
-# Do not distribute without further notice.
+"""
+Copyright (c) 2017, EPFL/Blue Brain Project
 
-# pylint: disable=R0914, C0325, W0640
+ This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License version 3.0 as published
+ by the Free Software Foundation.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
+
+# pylint: disable=R0914, C0325, W0640, W0633
 
 import pandas
 import os
@@ -31,12 +48,14 @@ def pdf_file(pdf_filename):
 
 
 def add_plot_to_report(pp, plot_function, *args):
+    """Add a plot to the report"""
     fig = plot_function(*args)
     pp.savefig(fig, bbox_inches='tight')
     plt.close()
 
 
 def plot_dict(dict_data, title):
+    """Plot a dictionary"""
     fig = plt.figure(figsize=FIGSIZE)
     plt.axis('off')
     if dict_data:
@@ -167,6 +186,7 @@ def create_final_db_and_write_report(pdf_filename,
                                      scores,
                                      score_values,
                                      enable_plot_emodels_per_morphology):
+    """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
 
     with pdf_file(pdf_filename) as pp:
@@ -179,10 +199,15 @@ def create_final_db_and_write_report(pdf_filename,
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
         for emodel in emodels:
-            emodel_ext_neurondb_rows, megate_scores, emodel_score_values,\
-                mtypes = table_processing.process_emodel(
-                    emodel, scores, score_values, to_skip_patterns,
-                    megate_patterns, skip_repaired_exemplar, check_opt_scores)
+            emodel_ext_neurondb_rows, megate_scores, \
+                emodel_score_values, mtypes = table_processing.process_emodel(
+                    emodel,
+                    scores,
+                    score_values,
+                    to_skip_patterns,
+                    megate_patterns,
+                    skip_repaired_exemplar,
+                    check_opt_scores)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
             # Reporting per e-model
