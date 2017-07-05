@@ -31,6 +31,7 @@ from nose.plugins.attrib import attr
 import nose.tools as nt
 
 import bluepymm.run_combos as run_combos
+from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -218,3 +219,59 @@ def test_save_scores():
         scores,
         extra_values,
         exception)
+
+
+@attr('unit')
+def test_calculate_scores():
+    """run_combos.calculate_scores: test calculate_scores"""
+    # write database
+    test_db_filename = os.path.join(TMP_DIR, 'test4.sqlite')
+    morph_name = 'morph1'
+    morph_dir = './data/morphs'
+    mtype = 'mtype1'
+    etype = 'etype1'
+    layer = 1
+    emodel = 'emodel1'
+    exception = None
+    row = {'morph_name': morph_name,
+           'morph_dir': morph_dir,
+           'mtype': mtype,
+           'etype': etype,
+           'layer': layer,
+           'emodel': emodel,
+           'original_emodel': emodel,
+           'to_run': 1,
+           'scores': None,
+           'extra_values': None,
+           'exception': exception}
+    _write_test_scores_database(row, test_db_filename)
+
+    # calculate scores
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_dirs = {emodel: emodel_dir}
+    final_dict_path = os.path.join(emodel_dir, 'final.json')
+    final_dict = tools.load_json(final_dict_path)
+    with tools.cd(TEST_DIR):
+        run_combos.calculate_scores.calculate_scores(final_dict, emodel_dirs,
+                                                     test_db_filename)
+
+    # verify database
+    scores = {'Step1.SpikeCount': 20.0}
+    extra_values = {'holding_current': None, 'threshold_current': None}
+    expected_db_row = {'index': 0,
+                       'morph_name': morph_name,
+                       'morph_dir': morph_dir,
+                       'mtype': mtype,
+                       'etype': etype,
+                       'layer': layer,
+                       'emodel': emodel,
+                       'original_emodel': emodel,
+                       'to_run': 0,
+                       'scores': json.dumps(scores),
+                       'extra_values': json.dumps(extra_values),
+                       'exception': exception}
+    with sqlite3.connect(test_db_filename) as scores_db:
+        scores_db.row_factory = _dict_factory
+        scores_cursor = scores_db.execute('SELECT * FROM scores')
+        db_row = scores_cursor.fetchall()[0]
+        nt.assert_dict_equal(db_row, expected_db_row)
