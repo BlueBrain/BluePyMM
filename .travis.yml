@@ -6,7 +6,7 @@ install:
     - pip install pip --upgrade
     - pip install virtualenv --upgrade
     - pip install tox-travis
-script: make test
+script: make tox
 cache:
     pip: true 
     directories:
