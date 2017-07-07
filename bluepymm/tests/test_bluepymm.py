@@ -25,5 +25,5 @@ from nose.plugins.attrib import attr
 
 @attr('unit')
 def test_import():
-    """bluepyopt: test importing bluepyopt"""
+    """bluepymm: test importing bluepymm"""
     import bluepymm  # NOQA

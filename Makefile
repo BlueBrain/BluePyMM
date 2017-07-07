@@ -31,8 +31,9 @@ clean:
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf docs/build
 	rm -rf build
+
+	mkdir bluepymm/tests/tmp
 	
-	rm -rf bluepymm/tests/tmp/*.sqlite
 tox: clean
 	tox
 codingstyle: pep8
