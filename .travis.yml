@@ -5,6 +5,7 @@ python:
 install: 
     - pip install pip --upgrade
     - pip install virtualenv --upgrade
+    - pip install nose --upgrade
     - pip install tox --upgrade
 script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 cache:
