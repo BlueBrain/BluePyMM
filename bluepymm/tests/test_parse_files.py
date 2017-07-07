@@ -20,6 +20,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+import os
 
 import nose.tools as nt
 from nose.plugins.attrib import attr
@@ -28,6 +29,8 @@ import pandas
 import xml.etree.ElementTree as ET
 
 from bluepymm.prepare_combos import parse_files
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 @attr('unit')
@@ -104,7 +107,9 @@ def test_read_mm_recipe():
     """bluepymm.prepare_combos.parse_files: test read_mm_recipe with recipe
     from test example "simple1".
     """
-    recipe_filename = './examples/simple1/data/simple1_recipe.xml'
+    recipe_filename = os.path.join(
+        BASE_DIR,
+        'examples/simple1/data/simple1_recipe.xml')
     expected_records = [("1", "mtype1", "etype1"),
                         ("1", "mtype1", "etype2"),
                         ("1", "mtype2", "etype1"),
@@ -155,7 +160,9 @@ def test_read_mtype_morph_map():
     """bluepymm.prepare_combos.parse_files: test read_mtype_morph_map with
     morphology database from test example "simple1".
     """
-    neurondb_filename = "examples/simple1/data/morphs/neuronDB.xml"
+    neurondb_filename = os.path.join(
+        BASE_DIR,
+        "examples/simple1/data/morphs/neuronDB.xml")
     expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
                         ("morph2", "mtype2", "mtype2", "", "1")]
     expected_df = pandas.DataFrame(expected_records,
