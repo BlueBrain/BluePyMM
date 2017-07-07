@@ -1,4 +1,4 @@
-"""Init prepare combos"""
+"""Create legacy .hoc files"""
 
 """
 Copyright (c) 2017, EPFL/Blue Brain Project
@@ -19,4 +19,5 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from .main import prepare_combos, add_parser  # NOQA
+
+from .create_hoc_files import main  # NOQA

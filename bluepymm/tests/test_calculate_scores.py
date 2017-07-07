@@ -31,6 +31,7 @@ from nose.plugins.attrib import attr
 import nose.tools as nt
 
 import bluepymm.run_combos as run_combos
+from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -59,6 +60,32 @@ def test_run_emodel_morph_isolated():
 
 
 @attr('unit')
+def test_run_emodel_morph_isolated_exception():
+    """run_combos.calculate_scores: test run_emodel_morph_isolated exception.
+    """
+    # input parameters
+    uid = 0
+    emodel = 'emodel_doesnt_exist'
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_params = {'cm': 1.0}
+    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+
+    # function call
+    input_args = (uid, emodel, emodel_dir, emodel_params, morph_path)
+    ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
+
+    # verify output: exception thrown because of non-existing e-model
+    expected_ret = {'exception': 'this_is_a_placeholder',
+                    'extra_values': None,
+                    'scores': None,
+                    'uid': 0}
+    nt.assert_list_equal(sorted(ret.keys()), sorted(expected_ret.keys()))
+    for k in ['extra_values', 'scores', 'uid']:
+        nt.assert_equal(ret[k], expected_ret[k])
+    nt.assert_true(emodel in ret['exception'])
+
+
+@attr('unit')
 def test_run_emodel_morph():
     """run_combos.calculate_scores: test run_emodel_morph."""
     emodel = 'emodel1'
@@ -77,6 +104,18 @@ def test_run_emodel_morph():
                              'threshold_current': None}
     nt.assert_dict_equal(ret[0], expected_scores)
     nt.assert_dict_equal(ret[1], expected_extra_values)
+
+
+@attr('unit')
+def test_run_emodel_morph_exception():
+    """run_combos.calculate_scores: test run_emodel_morph exception."""
+    emodel = 'emodel_doesnt_exist'
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_params = {'cm': 1.0}
+    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+
+    nt.assert_raises(Exception, run_combos.calculate_scores.run_emodel_morph,
+                     emodel, emodel_dir, emodel_params, morph_path)
 
 
 def _write_test_scores_database(row, testsqlite_filename):
@@ -218,3 +257,59 @@ def test_save_scores():
         scores,
         extra_values,
         exception)
+
+
+@attr('unit')
+def test_calculate_scores():
+    """run_combos.calculate_scores: test calculate_scores"""
+    # write database
+    test_db_filename = os.path.join(TMP_DIR, 'test4.sqlite')
+    morph_name = 'morph1'
+    morph_dir = './data/morphs'
+    mtype = 'mtype1'
+    etype = 'etype1'
+    layer = 1
+    emodel = 'emodel1'
+    exception = None
+    row = {'morph_name': morph_name,
+           'morph_dir': morph_dir,
+           'mtype': mtype,
+           'etype': etype,
+           'layer': layer,
+           'emodel': emodel,
+           'original_emodel': emodel,
+           'to_run': 1,
+           'scores': None,
+           'extra_values': None,
+           'exception': exception}
+    _write_test_scores_database(row, test_db_filename)
+
+    # calculate scores
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_dirs = {emodel: emodel_dir}
+    final_dict_path = os.path.join(emodel_dir, 'final.json')
+    final_dict = tools.load_json(final_dict_path)
+    with tools.cd(TEST_DIR):
+        run_combos.calculate_scores.calculate_scores(final_dict, emodel_dirs,
+                                                     test_db_filename)
+
+    # verify database
+    scores = {'Step1.SpikeCount': 20.0}
+    extra_values = {'holding_current': None, 'threshold_current': None}
+    expected_db_row = {'index': 0,
+                       'morph_name': morph_name,
+                       'morph_dir': morph_dir,
+                       'mtype': mtype,
+                       'etype': etype,
+                       'layer': layer,
+                       'emodel': emodel,
+                       'original_emodel': emodel,
+                       'to_run': 0,
+                       'scores': json.dumps(scores),
+                       'extra_values': json.dumps(extra_values),
+                       'exception': exception}
+    with sqlite3.connect(test_db_filename) as scores_db:
+        scores_db.row_factory = _dict_factory
+        scores_cursor = scores_db.execute('SELECT * FROM scores')
+        db_row = scores_cursor.fetchall()[0]
+        nt.assert_dict_equal(db_row, expected_db_row)
