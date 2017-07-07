@@ -31,15 +31,21 @@ from . import process_megate_config as proc_config
 
 
 def select_combos(conf_filename):
+    """Parse conf file and run select combos"""
+    # Parse configuration file
+    conf_dict = tools.load_json(conf_filename)
+
+    select_combos_from_conf(conf_dict)
+
+
+def select_combos_from_conf(conf_dict):
     """Compare scores of me-combinations to thresholds, select successful
     combinations, and write results out to file.
 
     Args:
         conf_filename: filename of configuration (.json file)
     """
-    # Parse configuration file
-    conf_dict = tools.load_json(conf_filename)
-    mm_run_path = conf_dict['mm_run_path']
+    scores_db_filename = conf_dict['scores_db']
     pdf_filename = conf_dict['pdf_filename']
     extneurondb_filename = conf_dict['extneurondb_filename']
     mecombo_emodel_filename = conf_dict['mecombo_emodel_filename']
@@ -53,9 +59,8 @@ def select_combos(conf_filename):
         conf_dict)
 
     # Read score tables
-    scores_sqlite_filename = os.path.join(mm_run_path, 'output/scores.sqlite')
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
-        scores_sqlite_filename)
+        scores_db_filename)
 
     # Create final database and write report
     ext_neurondb = reporting.create_final_db_and_write_report(

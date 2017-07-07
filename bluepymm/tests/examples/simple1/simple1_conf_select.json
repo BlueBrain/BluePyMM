@@ -1,6 +1,6 @@
 {
    "version": "1.0",
-   "mm_run_path": ".",
+   "scores_db": "./output/scores.sqlite",
    "to_skip_features": [],
    "pdf_filename": "output_megate/megating.pdf",
    "megate_thresholds": [

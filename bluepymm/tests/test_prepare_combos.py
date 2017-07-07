@@ -57,7 +57,7 @@ def _verify_main_output(scores_db, emodels_hoc_dir, output_dir, nb_emodels):
     for hoc_file in hoc_files:
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
-    _verify_emodel_json('final_dict.json', output_dir, nb_emodels)
+    _verify_emodel_json('final.json', output_dir, nb_emodels)
     emodel_dirs = _verify_emodel_json(
         'emodel_dirs.json',
         output_dir,

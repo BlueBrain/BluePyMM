@@ -1,0 +1,32 @@
+{
+  "emodel1": {
+    "branch": "emodel1", 
+    "fitness": {
+      "Step1.SpikeCount": 20
+    }, 
+    "main_path": ".", 
+    "morph_path": "morphologies/morph1.asc", 
+    "notes": "", 
+    "params": {
+      "cm": 1
+    }, 
+    "rank": 0, 
+    "score": 104.72906197480131, 
+    "seed": 2
+  }, 
+  "emodel2": {
+    "branch": "emodel2", 
+    "fitness": {
+      "Step1.SpikeCount": 20
+    }, 
+    "main_path": ".", 
+    "morph_path": "morphologies/morph2.asc", 
+    "notes": "", 
+    "params": {
+      "cm": 0.5
+    }, 
+    "rank": 0, 
+    "score": 104.72906197480131, 
+    "seed": 2
+  }
+}

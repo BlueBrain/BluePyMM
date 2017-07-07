@@ -27,7 +27,8 @@ import filecmp
 
 import nose.tools as nt
 
-from bluepymm import tools, main
+import bluepymm
+from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -62,7 +63,7 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
     for hoc_file in hoc_files:
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
-    _verify_emodel_json('final_dict.json', output_dir, nb_emodels)
+    _verify_emodel_json('final.json', output_dir, nb_emodels)
     emodel_dirs = _verify_emodel_json(
         'emodel_dirs.json',
         output_dir,
@@ -118,7 +119,7 @@ def _test_simple1(test_dir, prepare_config_json, run_config_json,
 
         # Prepare combinations
         args_list = ['prepare', prepare_config_json]
-        main(args_list)
+        bluepymm.main.run(args_list)
 
         # Verify prepared combinations
         prepare_config = tools.load_json(prepare_config_json)
@@ -128,7 +129,7 @@ def _test_simple1(test_dir, prepare_config_json, run_config_json,
 
         # Run combinations
         args_list = ['run', run_config_json]
-        main(args_list)
+        bluepymm.main.run(args_list)
 
         # Verify ran combinations
         run_config = tools.load_json(run_config_json)
@@ -136,7 +137,7 @@ def _test_simple1(test_dir, prepare_config_json, run_config_json,
 
         # Select combinations
         args_list = ['select', select_config_json]
-        main(args_list)
+        bluepymm.main.run(args_list)
 
         # Test selection output
         _verify_select_combos_output()

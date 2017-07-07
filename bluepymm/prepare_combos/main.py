@@ -87,7 +87,7 @@ def prepare_combos(conf_filename, continu):
     # TODO: gather all output business here?
     output_dir = conf_dict['output_dir']
     tools.makedirs(output_dir)
-    tools.write_json(output_dir, 'final_dict.json', final_dict)
+    tools.write_json(output_dir, 'final.json', final_dict)
     tools.write_json(output_dir, 'emodel_dirs.json', emodel_dirs)
 
 

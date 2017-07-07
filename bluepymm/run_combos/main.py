@@ -41,15 +41,17 @@ def add_parser(action):
                         help='Path to ipyparallel profile')
 
 
-def run_combos(conf_filename, ipyp, ipyp_profile):
-    """Run combos"""
-
-    print('Reading configuration at %s' % conf_filename)
-    conf_dict = tools.load_json(conf_filename)
-
+def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None):
+    """Run combos from conf dictionary"""
     output_dir = conf_dict['output_dir']
-    final_dict = tools.load_json(os.path.join(output_dir, 'final_dict.json'))
-    emodel_dirs = tools.load_json(os.path.join(output_dir, 'emodel_dirs.json'))
+    final_dict = tools.load_json(
+        os.path.join(
+            output_dir,
+            'final.json'))
+    emodel_dirs = tools.load_json(
+        os.path.join(
+            output_dir,
+            'emodel_dirs.json'))
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
     print('Calculating scores')
@@ -59,3 +61,12 @@ def run_combos(conf_filename, ipyp, ipyp_profile):
         scores_db_path,
         use_ipyp=ipyp,
         ipyp_profile=ipyp_profile)
+
+
+def run_combos(conf_filename, ipyp=None, ipyp_profile=None):
+    """Run combos"""
+
+    print('Reading configuration at %s' % conf_filename)
+    conf_dict = tools.load_json(conf_filename)
+
+    run_combos_from_conf(conf_dict, ipyp, ipyp_profile)
