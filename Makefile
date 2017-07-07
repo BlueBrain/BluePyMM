@@ -36,8 +36,12 @@ clean:
 	
 	mkdir bluepymm/tests/tmp
 	
-tox: clean
+tox:
 	tox
+tox27:
+	tox -e py27
+tox36:
+	tox -e py36
 codingstyle: pep8
 pep8: clean venv install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
