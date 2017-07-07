@@ -25,7 +25,8 @@ import csv
 
 import nose.tools as nt
 
-from bluepymm import tools, prepare_combos, legacy
+import bluepymm
+from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -33,13 +34,14 @@ TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 def _clear_directories(dirs):
+    """Clear directories"""
     for unwanted in dirs:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
 
 def test_create_hoc_files():
-    """Test creation of legacy .hoc files for example simple1"""
+    """bluepymm.legacy: Test creation legacy .hoc files for example simple1"""
     prepare_config_filename = 'simple1_conf_prepare.json'
     hoc_config_filename = 'simple1_conf_hoc.json'
     with tools.cd(TEST_DIR):
@@ -52,10 +54,10 @@ def test_create_hoc_files():
                             hoc_config['hoc_output_dir']])
 
         # Run combination preparation
-        prepare_combos.main.prepare_combos(
+        bluepymm.prepare_combos.main.prepare_combos(
             conf_filename=prepare_config_filename, continu=False)
 
-        legacy.create_hoc_files.main(hoc_config)
+        bluepymm.legacy.create_hoc_files.main(hoc_config)
 
         # Verify .hoc-files existence - TODO: content
         nt.assert_true(os.path.isdir(hoc_config['hoc_output_dir']))

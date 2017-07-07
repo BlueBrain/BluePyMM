@@ -24,14 +24,16 @@ clean:
 	rm -rf venv
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
+	rm -rf bluepymm/tests/examples/simple1/tmp_git
 	rm -rf bluepymm/tests/examples/simple1/output
 	rm -rf bluepymm/tests/examples/simple1/output_megate
+	rm -rf bluepymm/tests/examples/simple1/hoc
 	rm -rf bluepymm/tests/tmp
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf docs/build
 	rm -rf build
-
+	
 	mkdir bluepymm/tests/tmp
 	
 tox: clean
@@ -48,7 +50,7 @@ functional: clean venv install_in_venv install_test_requirements simple1_git
 	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 simple1_git:
-	$(VENV) cd bluepymm/tests/examples/simple1; python build_git.py
+	cd bluepymm/tests/examples/simple1; python build_git.py
 autopep8: clean venv
 	$(VENV) pip install autopep8
 	$(VENV) find bluepymm -name '*.py' -exec autopep8 -i '{}' \;

@@ -1,5 +1,7 @@
 """Test bluepymm/prepare_combos"""
 
+from __future__ import print_function
+
 """
 Copyright (c) 2017, EPFL/Blue Brain Project
 
@@ -75,6 +77,7 @@ def _test_main(test_dir, test_config, nb_emodels):
         _clear_main_output(config["tmp_dir"],
                            config["output_dir"])
 
+        print("HERE %s" % os.getcwd())
         # Run combination preparation
         prepare_combos.main.prepare_combos(conf_filename=test_config,
                                            continu=False)
