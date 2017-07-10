@@ -21,8 +21,6 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-# Disabling until these test run in their own dir
-'''
 import os
 import shutil
 import filecmp
@@ -32,17 +30,20 @@ import nose.tools as nt
 from bluepymm import tools, select_combos
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-
-def _clear_main_output(output_dir):
-    """Clear main output"""
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/select_combos')
 
 
-def _verify_main_output(benchmark_dir, output_dir):
-    """Verify main output"""
-    files = ['mecombo_emodel.tsv', 'extNeuronDB.dat']
+def _clear_dir(unwanted):
+    """Helper function to clear directory"""
+    if os.path.exists(unwanted):
+        shutil.rmtree(unwanted)
+
+
+def _verify_output(benchmark_dir, output_dir, config):
+    """Helper function to verify output of combination selection"""
+    files = [os.path.basename(f) for f in [config['mecombo_emodel_filename'],
+                                           config['extneurondb_filename']]]
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
 
     if len(matches[0]) != len(files):
@@ -50,37 +51,53 @@ def _verify_main_output(benchmark_dir, output_dir):
     nt.assert_equal(len(matches[0]), len(files))
 
 
-def _test_main(test_dir, test_config, benchmark_dir, output_dir):
-    """General test main"""
-    with tools.cd(test_dir):
-        # Make sure the output directory is clean
-        _clear_main_output("output_megate")
+def _config_select_combos(config_template_path, tmp_dir):
+    """Helper function to prepare input data for select_combos"""
+    # copy input data
+    shutil.copytree("output_expected", tmp_dir)
 
-        # Run combination selection
-        select_combos.select_combos(test_config)
+    # set configuration dict
+    config = tools.load_json(config_template_path)
+    config['scores_db'] = os.path.join(tmp_dir, 'scores.sqlite')
+    config['pdf_filename'] = os.path.join(tmp_dir, 'megating.pdf')
+    config['extneurondb_filename'] = os.path.join(tmp_dir, 'extNeuronDB.dat')
+    config['mecombo_emodel_filename'] = os.path.join(tmp_dir,
+                                                     'mecombo_emodel.tsv')
+    return config
 
-        # Test output
-        _verify_main_output(benchmark_dir, output_dir)
+
+def _test_select_combos(test_data_dir, config_template_path, benchmark_dir):
+    """Helper function to perform functional test of select_combos"""
+    with tools.cd(test_data_dir):
+        # make sure the output directory is clean
+        _clear_dir(TMP_DIR)
+
+        # prepare input data
+        config = _config_select_combos(config_template_path, TMP_DIR)
+
+        # run combination selection
+        select_combos.main.select_combos_from_conf(config)
+
+        # verify output
+        _verify_output(benchmark_dir, TMP_DIR, config)
 
 
-def test_select_main():
-    """Test main select combos"""
-    test_config = 'simple1_conf_select.json'
+def test_select_combos():
+    """bluepymm.select_combos: test select_combos based on example simple1"""
+    config_template_path = 'simple1_conf_select.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
-    output_dir = "output_megate"
 
-    _test_main(TEST_DIR, test_config, benchmark_dir, output_dir)
+    _test_select_combos(TEST_DATA_DIR, config_template_path, benchmark_dir)
 
 
-def test_select_main_2():
-    """Test main select combos 2"""
-    test_config = 'simple1_conf_select_2.json'
+def test_select_combos_2():
+    """bluepymm.select_combos: test select_combos based on example simple1 bis
+    """
+    config_template_path = 'simple1_conf_select_2.json'
     benchmark_dir = "output_megate_expected"
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
-    output_dir = "output_megate"
 
-    _test_main(TEST_DIR, test_config, benchmark_dir, output_dir)
-'''
+    _test_select_combos(TEST_DATA_DIR, config_template_path, benchmark_dir)
