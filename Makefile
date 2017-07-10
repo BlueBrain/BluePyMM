@@ -35,12 +35,13 @@ clean:
 	rm -rf build
 	
 	mkdir bluepymm/tests/tmp
-	
-tox:
+install_tox:
+	pip install tox
+tox: install_tox
 	tox
-tox27:
+tox27: install_tox
 	tox -e py27
-tox36:
+tox36: install_tox
 	tox -e py36
 codingstyle: pep8
 pep8: clean venv install_test_requirements
