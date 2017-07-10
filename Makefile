@@ -24,14 +24,25 @@ clean:
 	rm -rf venv
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
+	rm -rf bluepymm/tests/examples/simple1/tmp_git
 	rm -rf bluepymm/tests/examples/simple1/output
 	rm -rf bluepymm/tests/examples/simple1/output_megate
+	rm -rf bluepymm/tests/examples/simple1/hoc
+	rm -rf bluepymm/tests/tmp
 	rm -rf bluepymm/tests/.coverage
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf docs/build
 	rm -rf build
 	
-	rm -rf bluepymm/tests/tmp/*.sqlite
+	mkdir bluepymm/tests/tmp
+install_tox:
+	pip install tox
+tox: install_tox
+	tox
+tox27: install_tox
+	tox -e py27
+tox36: install_tox
+	tox -e py36
 codingstyle: pep8
 pep8: clean venv install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
@@ -44,7 +55,7 @@ functional: clean venv install_in_venv install_test_requirements simple1_git
 	$(VENV) cd bluepymm/tests; nosetests -a '!unit' -v -x --with-coverage --cover-xml \
 		--cover-package bluepymm
 simple1_git:
-	$(VENV) cd bluepymm/tests/examples/simple1; python build_git.py
+	cd bluepymm/tests/examples/simple1; python build_git.py
 autopep8: clean venv
 	$(VENV) pip install autopep8
 	$(VENV) find bluepymm -name '*.py' -exec autopep8 -i '{}' \;

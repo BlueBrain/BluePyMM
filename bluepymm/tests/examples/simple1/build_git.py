@@ -26,6 +26,8 @@ import contextlib
 
 import sh
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 @contextlib.contextmanager
 def cd(dir_name):
@@ -41,9 +43,9 @@ def cd(dir_name):
 def main():
     """Main"""
 
-    tmp_git_dir = 'tmp_git'
+    tmp_git_dir = os.path.join(BASE_DIR, 'tmp_git')
     git_subdir = 'subdir'
-    orig_dir = '../../data/emodels_dir'
+    orig_dir = os.path.join(BASE_DIR, 'data/emodels_dir')
 
     if os.path.exists(tmp_git_dir):
         shutil.rmtree(tmp_git_dir)

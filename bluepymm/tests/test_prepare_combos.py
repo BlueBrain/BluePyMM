@@ -1,5 +1,7 @@
 """Test bluepymm/prepare_combos"""
 
+from __future__ import print_function
+
 """
 Copyright (c) 2017, EPFL/Blue Brain Project
 
@@ -57,7 +59,7 @@ def _verify_main_output(scores_db, emodels_hoc_dir, output_dir, nb_emodels):
     for hoc_file in hoc_files:
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
-    _verify_emodel_json('final_dict.json', output_dir, nb_emodels)
+    _verify_emodel_json('final.json', output_dir, nb_emodels)
     emodel_dirs = _verify_emodel_json(
         'emodel_dirs.json',
         output_dir,
@@ -75,6 +77,7 @@ def _test_main(test_dir, test_config, nb_emodels):
         _clear_main_output(config["tmp_dir"],
                            config["output_dir"])
 
+        print("HERE %s" % os.getcwd())
         # Run combination preparation
         prepare_combos.main.prepare_combos(conf_filename=test_config,
                                            continu=False)

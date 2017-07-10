@@ -39,8 +39,8 @@ def get_parser():
     return parser
 
 
-def main(arg_list):
-    """Main"""
+def run(arg_list):
+    """Run BluePyMM"""
 
     print('\n######################################')
     print('# Blue Brain Python Model Management #')
