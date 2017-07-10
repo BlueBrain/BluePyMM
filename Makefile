@@ -1,23 +1,19 @@
-TEST_REQUIREMENTS=nose coverage pep8 pylint
-VENV=. ./venv/bin/activate;
-
 all: install
-venv:
-	virtualenv --system-site-packages venv
-	$(VENV) pip install pip --upgrade
-venv3:
-	python3 -m venv venv
-	$(VENV) pip install pip --upgrade
 install: clean
 	python -c 'import sys, pip; if map(int, pip.__version__.split(".")) <= [9, 0, 0]: sys.exit("Need pip version >= 9")'
 	python setup.py sdist
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
-install_in_venv:
-	$(VENV) python setup.py sdist bdist_wheel
-	$(VENV) pip install `ls dist/bluepymm-*.tar.gz` --upgrade
-install_test_requirements:
-	$(VENV) pip install -q $(TEST_REQUIREMENTS) -I --upgrade
-test: codingstyle unit functional
+test: tox
+tox: install_tox
+	tox
+tox27: install_tox
+	tox -e py27
+tox36: install_tox
+	tox -e py36
+install_tox:
+	pip install tox
+tox_clean:
+	rm -rf .tox	
 clean:
 	rm -rf bluepymm.egg-info
 	rm -rf dist
@@ -35,14 +31,29 @@ clean:
 	rm -rf build
 	
 	mkdir bluepymm/tests/tmp
-install_tox:
-	pip install tox
-tox: install_tox
-	tox
-tox27: install_tox
-	tox -e py27
-tox36: install_tox
-	tox -e py36
+
+
+
+
+
+
+
+# Deprecated
+TEST_REQUIREMENTS=nose coverage pep8 pylint
+VENV=. ./venv/bin/activate;
+
+install_in_venv:
+	$(VENV) python setup.py sdist bdist_wheel
+	$(VENV) pip install `ls dist/bluepymm-*.tar.gz` --upgrade
+install_test_requirements:
+	$(VENV) pip install -q $(TEST_REQUIREMENTS) -I --upgrade
+
+venv:
+	virtualenv --system-site-packages venv
+	$(VENV) pip install pip --upgrade
+venv3:
+	python3 -m venv venv
+	$(VENV) pip install pip --upgrade
 codingstyle: pep8
 pep8: clean venv install_test_requirements
 	$(VENV) pep8 --ignore=E402 bluepymm
