@@ -11,6 +11,6 @@ script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 cache:
     pip: true 
     directories:
-      - .tox
+      - $TRAVIS_BUILD_DIR/.tox
 git:
   depth: 2147483647
