@@ -11,13 +11,6 @@ script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 cache:
     pip: true 
     directories:
-      - $HOME/local
-      - $HOME/src
+      - $TRAVIS_BUILD_DIR/.tox
 git:
   depth: 2147483647
-before_script:
-      - SRC_DIR=$HOME/local/src
-      - NRN_INSTALL_DIR=$HOME/local/nrn
-      - ./.travis_install_neuron.sh ${SRC_DIR} ${NRN_INSTALL_DIR}
-      - export PATH=$PATH:${NRN_INSTALL_DIR}/x86_64/bin
-      - export PYTHONPATH=$PYTHONPATH:${NRN_INSTALL_DIR}/lib/python
