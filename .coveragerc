@@ -1,0 +1,2 @@
+[run]
+omit=bluepymm/_version.py
