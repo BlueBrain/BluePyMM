@@ -29,6 +29,8 @@ clean:
 	rm -rf bluepymm/tests/coverage.xml
 	rm -rf docs/build
 	rm -rf build
+	rm -rf cover
+	rm -rf coverage.xml
 	
 	mkdir bluepymm/tests/tmp
 
