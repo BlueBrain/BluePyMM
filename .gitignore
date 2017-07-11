@@ -7,3 +7,5 @@
 .noseids
 /build
 /.tox
+.coverage
+coverage.xml
