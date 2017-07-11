@@ -28,13 +28,14 @@ import nose.tools as nt
 
 from bluepymm import tools, prepare_combos
 
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
-def _clear_main_output(tmp_dir, output_dir):
-    """Clear output before main execution"""
-    for unwanted in [tmp_dir, output_dir]:
+def _clear_dirs(dirs):
+    """Helper function to clear directories"""
+    for unwanted in dirs:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
@@ -48,8 +49,9 @@ def _verify_emodel_json(filename, output_dir, nb_emodels):
     return data
 
 
-def _verify_main_output(scores_db, emodels_hoc_dir, output_dir, nb_emodels):
-    """Verify output of main execution"""
+def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
+                                  nb_emodels):
+    """Verify output of prepare combos"""
     # TODO: test database contents
     nt.assert_true(os.path.isfile(scores_db))
 
@@ -61,43 +63,42 @@ def _verify_main_output(scores_db, emodels_hoc_dir, output_dir, nb_emodels):
 
     _verify_emodel_json('final.json', output_dir, nb_emodels)
     emodel_dirs = _verify_emodel_json(
-        'emodel_dirs.json',
-        output_dir,
-        nb_emodels)
+        'emodel_dirs.json', output_dir, nb_emodels)
     for emodel in emodel_dirs:
         nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
 
 
-def _test_main(test_dir, test_config, nb_emodels):
-    """Test prepare_combos main"""
+def _test_prepare_combos(test_dir, config_path, nb_emodels):
+    """Helper function to perform functional test prepare_combos"""
     with tools.cd(test_dir):
-        config = tools.load_json(test_config)
+        config = tools.load_json(config_path)
 
-        # Make sure the output directories are clean
-        _clear_main_output(config["tmp_dir"],
-                           config["output_dir"])
+        # make sure the output directories are clean
+        _clear_dirs([config['tmp_dir'], config['output_dir']])
 
-        print("HERE %s" % os.getcwd())
-        # Run combination preparation
-        prepare_combos.main.prepare_combos(conf_filename=test_config,
+        # run combination preparation
+        prepare_combos.main.prepare_combos(conf_filename=config_path,
                                            continu=False)
 
-        # Test output
-        _verify_main_output(config["scores_db"], config["emodels_hoc_dir"],
-                            config["output_dir"], nb_emodels)
+        # test output
+        _verify_prepare_combos_output(config['scores_db'],
+                                      config['emodels_hoc_dir'],
+                                      config['output_dir'], nb_emodels)
 
 
-def test_main_from_dir():
-    """prepare_combos: test main with plain dir input"""
-    test_config = 'simple1_conf_prepare.json'
+def test_prepare_combos_from_dir():
+    """bluepymm.prepare_combos: test prepare_combos based on example simple1
+    with plain dir input"""
+    config_path = 'simple1_conf_prepare.json'
     nb_emodels = 2
 
-    _test_main(TEST_DIR, test_config, nb_emodels)
+    _test_prepare_combos(TEST_DATA_DIR, config_path, nb_emodels)
 
 
-def test_main_from_git_repo():
-    """prepare_combos: test main with git repo input"""
-    test_config = 'simple1_conf_prepare_git.json'
+def test_prepare_combos_from_git_repo():
+    """bluepymm.prepare_combos: test prepare_combos based on example simple1
+    with git repo input"""
+    config_path = 'simple1_conf_prepare_git.json'
     nb_emodels = 2
 
-    _test_main(TEST_DIR, test_config, nb_emodels)
+    _test_prepare_combos(TEST_DATA_DIR, config_path, nb_emodels)
