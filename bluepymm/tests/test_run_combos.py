@@ -19,8 +19,6 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-# Disabling until test runs independently
-'''
 import os
 import shutil
 
@@ -28,27 +26,40 @@ import nose.tools as nt
 
 from bluepymm import tools, run_combos
 
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-TMP_DIR = os.path.join(BASE_DIR, 'examples/tmp')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/run_combos')
 
-def test_main():
-    """run_combos: test main"""
-    test_config = 'simple1_conf_run.json'
+
+def _clear_dir(unwanted):
+    """Helper function to clear directory"""
+    if os.path.exists(unwanted):
+        shutil.rmtree(unwanted)
+
+
+def _verify_run_combos_output(scores_db):
+    """Helper function to verify output run combos"""
+    # TODO: test database contents
+    nt.assert_true(os.path.isfile(scores_db))
+
+
+def test_run_combos():
+    """bluepymm.run_combos: test run_combos based on example simple1"""
+    config_template_path = 'simple1_conf_run.json'
 
     with tools.cd(TEST_DIR):
-        shutil.copytree(
-            'output_expected',
-            os.path.join(
-                TMP_DIR,
-                'output_run_unit'))
+        # make sure the output directory is clean
+        _clear_dir(TMP_DIR)
 
-        # Run combination preparation
-        run_combos.run_combos(conf_filename=test_config,
-                              ipyp=False,
-                              ipyp_profile=None)
+        # prepare input data
+        shutil.copytree('output_expected', TMP_DIR)
+        config = tools.load_json(config_template_path)
+        config['scores_db'] = os.path.join(TMP_DIR, 'scores.sqlite')
+        config['output_dir'] = TMP_DIR
 
-        # TODO: test database contents
-        config = tools.load_json(test_config)
-        nt.assert_true(os.path.isfile(config["scores_db"]))
-'''
+        # run combination preparation
+        run_combos.main.run_combos_from_conf(config)
+
+        # verify output
+        _verify_run_combos_output(config['scores_db'])

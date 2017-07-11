@@ -1,4 +1,4 @@
-"""Test bluepymm/main"""
+"""Test bluepymm main interface"""
 
 from __future__ import print_function
 
@@ -21,29 +21,28 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-
-import filecmp
 import os
 import shutil
+import filecmp
 
 import nose.tools as nt
-
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-TMP_DIR = os.path.join(BASE_DIR, 'tmp')
 
 import bluepymm
 
 
-def _clear_output_directories(directories):
-    """Clear output directories"""
-    for unwanted in directories:
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+
+
+def _clear_dirs(dirs):
+    """Helper function to clear directories"""
+    for unwanted in dirs:
         if os.path.exists(unwanted):
             shutil.rmtree(unwanted)
 
 
 def _verify_emodel_json(filename, output_dir, nb_emodels):
-    """Very emodel json"""
+    """Helper function to verify the emodel json file"""
     data_json = os.path.join(output_dir, filename)
     nt.assert_true(os.path.isfile(data_json))
     data = bluepymm.tools.load_json(data_json)
@@ -53,7 +52,7 @@ def _verify_emodel_json(filename, output_dir, nb_emodels):
 
 def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
                                   nb_emodels):
-    """Verify output of prepare combos"""
+    """Helper function to verify the output of the prepare combos step"""
     # TODO: test database contents
     nt.assert_true(os.path.isfile(scores_db))
 
@@ -73,79 +72,95 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
 
 
 def _verify_run_combos_output(scores_db):
-    """Verify output run combos"""
-    # TODO: test database contents
+    """Helper function to verify the output of the run combos step"""
     nt.assert_true(os.path.isfile(scores_db))
 
+    # TODO: test database contents
+    # Disabled for now, there are absolute paths in db
+    """
+    import pandas
+    import sqlite3
 
-def _verify_select_combos_output(benchmark_dir, output_dir):
-    """Verify output select combobs"""
-    files = ['mecombo_emodel.tsv', 'extNeuronDB.dat']
-    matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
+    scores_sqlite_filename = 'output/scores.sqlite'
+    exp_scores_sqlite_filename = 'output_expected/scores.sqlite'
+    with sqlite3.connect(scores_sqlite_filename) as conn:
+        scores = pandas.read_sql('SELECT * FROM scores', conn)
 
-    if len(matches[0]) != len(files):
-        print('Mismatch in files: {}'.format(matches[1]))
-    nt.assert_equal(len(matches[0]), len(files))
+    with sqlite3.connect(exp_scores_sqlite_filename) as conn:
+        exp_scores = pandas.read_sql('SELECT * FROM scores', conn)
+
+    if not scores.equals(exp_scores):
+        print "Resulting scores db: ", scores
+        print "Expected scored db:", exp_scores
+
+    nt.assert_true(scores.equals(exp_scores))
+    """
 
 
-def test_prepare_combos():
-    """bluepymm.main: Test prepare_combos"""
-    test_config = 'simple1_conf_prepare.json'
+def _verify_select_combos_output():
+    """Helper function to verify the output of the select combos step"""
+    matches = filecmp.cmpfiles(
+        'output_megate_expected', 'output_megate',
+        ['mecombo_emodel.tsv', 'extNeuronDB.dat'])
+
+    if len(matches[0]) != 2:
+        print('Mismatch in files: %s' % matches[1])
+
+    nt.assert_equal(len(matches[0]), 2)
+
+
+def _test_main(test_dir, prepare_config_json, run_config_json,
+               select_config_json, nb_emodels):
+    """Helper function to test complete BluePyMM workflow"""
+    with bluepymm.tools.cd(test_dir):
+        # Make sure the output directories are clean
+        _clear_dirs(['tmp', 'output', 'output_megate'])
+
+        # Prepare combinations
+        args_list = ['prepare', prepare_config_json]
+        bluepymm.main.run(args_list)
+
+        # Verify prepared combinations
+        prepare_config = bluepymm.tools.load_json(prepare_config_json)
+        _verify_prepare_combos_output(prepare_config['scores_db'],
+                                      prepare_config['emodels_hoc_dir'],
+                                      prepare_config['output_dir'], nb_emodels)
+
+        # Run combinations
+        args_list = ['run', run_config_json]
+        bluepymm.main.run(args_list)
+
+        # Verify run combinations
+        run_config = bluepymm.tools.load_json(run_config_json)
+        _verify_run_combos_output(run_config['scores_db'])
+
+        # Select combinations
+        args_list = ['select', select_config_json]
+        bluepymm.main.run(args_list)
+
+        # Test selection output
+        _verify_select_combos_output()
+
+
+def test_main_from_dir():
+    """bluepymm.main: test complete BluePyMM workflow on for example simple1
+    with input directories"""
+    prepare_config_json = 'simple1_conf_prepare.json'
+    run_config_json = 'simple1_conf_run.json'
+    select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
 
-    with bluepymm.tools.cd(TEST_DIR):
-        config = bluepymm.tools.load_json(test_config)
-
-        # Make sure the output directories are clean
-        _clear_output_directories([config["tmp_dir"], config["output_dir"]])
-
-        # Run combination preparation
-        args_list = ['prepare', test_config]
-        bluepymm.run(args_list)  # pylint: disable=E1121
-
-        # Test output
-        _verify_prepare_combos_output(config["scores_db"],
-                                      config["emodels_hoc_dir"],
-                                      config["output_dir"], nb_emodels)
+    _test_main(TEST_DIR, prepare_config_json, run_config_json,
+               select_config_json, nb_emodels)
 
 
-def test_run_combos():
-    """bluepymm.main: Test run_combos"""
-    test_config = 'simple1_conf_run.json'
+def test_main_from_git_repo():
+    """bluepymm.main: test complete BluePyMM workflow on for example simple1
+    with input directories"""
+    prepare_config_json = 'simple1_conf_prepare_git.json'
+    run_config_json = 'simple1_conf_run.json'
+    select_config_json = 'simple1_conf_select.json'
+    nb_emodels = 2
 
-    with bluepymm.tools.cd(TEST_DIR):
-        output_dir = os.path.join(TMP_DIR, 'output_run')
-        shutil.copytree('output_expected', output_dir)
-        config = bluepymm.tools.load_json(test_config)
-        config['scores_db'] = os.path.join(output_dir, 'scores.sqlite')
-        config['output_dir'] = output_dir
-
-        # Run combination preparation
-        bluepymm.run_combos.main.run_combos_from_conf(config)
-
-        # Test output
-        _verify_run_combos_output(config["scores_db"])
-
-
-def test_select_combos():
-    """bluepymm.main: Test select_combos"""
-    test_config = 'simple1_conf_select.json'
-    benchmark_dir = "output_megate_expected"
-    # TODO: add field "output_dir" to conf.json and remove too specific fields,
-    # e.g. extneurondb_filename
-    output_dir = "output_megate"
-
-    with bluepymm.tools.cd(TEST_DIR):
-        input_dir = os.path.join(TMP_DIR, 'input_megate')
-        shutil.copytree('output_expected', input_dir)
-
-        config = bluepymm.tools.load_json(test_config)
-        config['scores_db'] = os.path.join(input_dir, 'scores.sqlite')
-
-        # Make sure the output directory is clean
-        _clear_output_directories([output_dir])
-
-        bluepymm.select_combos.main.select_combos_from_conf(config)
-
-        # Test output
-        _verify_select_combos_output(benchmark_dir, output_dir)
+    _test_main(TEST_DIR, prepare_config_json, run_config_json,
+               select_config_json, nb_emodels)
