@@ -33,6 +33,10 @@ import tarfile
 from bluepymm import tools
 
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, '../templates')
+
+
 def check_emodels_in_repo(conf_dict):
     """Check whether input e-models are organized in branches of a repository.
 
@@ -129,13 +133,13 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
     Args:
         emodel: e-model name
         emodel_dir: the directory containing a module 'setup', which describes
-            the e-model
+                    the e-model
         hoc_dir: the directory to which the resulting .hoc file will be written
                  out.
         emodel_params: a dict with e-model parameters
         template: template file used for the creation of the .hoc file
         template_dir: directory that contains the template. If None, a template
-                      provided by BluePyOpt is used. Default is None.
+                      provided by BluePyMM is used. Default is None.
         morph_path: path to morphology file, used to overwrite the original
                     morphology of an e-model. Default is None.
         model_name: used to name the .hoc file. If None, the e-model name is
@@ -161,6 +165,8 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
             sys.stdout = old_stdout
 
     # create hoc code
+    if template_dir is None:
+        template_dir = TEMPLATE_DIR
     hoc = evaluator.cell_model.create_hoc(emodel_params, template=template,
                                           template_dir=template_dir)
 
