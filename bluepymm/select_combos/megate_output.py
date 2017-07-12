@@ -45,18 +45,18 @@ def _write_extneurondbdat(extneurondb, filename):
 
 def save_megate_results(extneurondb, extneurondbdat_filename,
                         mecombo_emodel_filename, sort_key=None):
-    """Write results of megating to two files:
-    - a 'pure' database: the columns of this file are ordered as
-    'morphology name', 'layer', 'm-type', 'e-type', 'combination name'. Values
-    are separated by a space.
-    - emodel-ecombo mapping
+    """Write results of megating to two files.
 
     Args:
         extneurondb (pandas dataframe): result of me-gating
-        extneurondbdat_filename (str): path to extneurondb.dat file
-        mecombo_emodel_filename (str): path to ecomb_emodel file
+        extneurondbdat_filename (str): path to extneurondb.dat file. The
+            columns of this file are ordered as 'morph_name', 'layer',
+            'fullmtype', 'etype', 'combo_name'. Values are separated by a
+            space.
+        mecombo_emodel_filename (str): path to mecombo_emodel file. Values are
+            separated with a tab.
         sort_key: key to sort database in ascending order before writing out to
-                  file. Default is None.
+            file. Default is None.
     """
     tools.makedirs(os.path.dirname(extneurondbdat_filename))
     tools.makedirs(os.path.dirname(mecombo_emodel_filename))
