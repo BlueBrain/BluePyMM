@@ -38,28 +38,31 @@ def _write_extneurondbdat(extneurondb, filename):
     if 'emodel' in pure_extneuron_db:
         del pure_extneuron_db['emodel']
 
-    column_order = ["morph_name", "layer", "fullmtype", "etype", "combo_name"]
+    column_order = ['morph_name', 'layer', 'fullmtype', 'etype', 'combo_name']
     pure_extneuron_db = pure_extneuron_db[column_order]
     pure_extneuron_db.to_csv(filename, sep=' ', index=False, header=False)
 
 
 def save_megate_results(extneurondb, extneurondbdat_filename,
-                        mecombo_emodel_filename):
+                        mecombo_emodel_filename, sort_key=None):
     """Write results of megating to two files:
     - a 'pure' database: the columns of this file are ordered as
     'morphology name', 'layer', 'm-type', 'e-type', 'combination name'. Values
     are separated by a space.
     - emodel-ecombo mapping
-    The extended neuron database is first sorted along the first axis.
 
     Args:
         extneurondb (pandas dataframe): result of me-gating
         extneurondbdat_filename (str): path to extneurondb.dat file
         mecombo_emodel_filename (str): path to ecomb_emodel file
+        sort_key: key to sort database in ascending order before writing out to
+                  file. Default is None.
     """
     tools.makedirs(os.path.dirname(extneurondbdat_filename))
-    tools.makedirs(os.path.dirname(extneurondbdat_filename))
-    extneurondb = extneurondb.sort_index()
+    tools.makedirs(os.path.dirname(mecombo_emodel_filename))
+
+    if sort_key is not None:
+        extneurondb = extneurondb.sort_values(sort_key).reset_index(drop=True)
 
     _write_extneurondbdat(extneurondb, extneurondbdat_filename)
 
