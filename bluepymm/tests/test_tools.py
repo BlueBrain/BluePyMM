@@ -30,6 +30,7 @@ from bluepymm import tools
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 EXAMPLES = os.path.join(BASE_DIR, 'examples')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/tools')
 
 
 @attr('unit')
@@ -41,6 +42,33 @@ def test_cd():
         nt.assert_equal(os.getcwd(), EXAMPLES)
 
     nt.assert_equal(old_cwd, os.getcwd())
+
+
+@attr('unit')
+def test_json():
+    """bluepymm.tools: test load_json and write_json"""
+    output_dir = TMP_DIR
+    output_name = 'tmp.json'
+    config = {'test': ['1', 'two']}
+
+    os.makedirs(output_dir)
+    ret_path = tools.write_json(output_dir, output_name, config)
+    nt.assert_equal(os.path.join(output_dir, output_name), ret_path)
+    ret = tools.load_json(ret_path)
+    nt.assert_dict_equal(config, ret)
+
+
+@attr('unit')
+def test_makedirs():
+    """bluepymm.tools: test makedirs"""
+    make_dir = os.path.join(TMP_DIR, 'make_dir')
+    tools.makedirs(make_dir)
+    nt.assert_true(os.path.isdir(make_dir))
+
+    # try again -> no error
+    make_dir = os.path.join(TMP_DIR, 'make_dir')
+    tools.makedirs(make_dir)
+    nt.assert_true(os.path.isdir(make_dir))
 
 
 @attr('unit')
@@ -68,6 +96,17 @@ def test_check_no_null_nan_values_none():
     """bluepymm.tools: test check_no_null_nan_values with None"""
     data = pandas.DataFrame([[1, 2], [None, 4]], columns=list('AB'))
     nt.assert_raises(ValueError, tools.check_no_null_nan_values, data, 'test')
+
+
+@attr('unit')
+def test_load_module():
+    """bluepymm.tools: test load_module"""
+    # load module
+    module_dir = os.path.join(EXAMPLES, 'simple1/data/emodels_dir/subdir/')
+    setup = tools.load_module('setup', module_dir)
+
+    # try and execute something from loaded module
+    ret = setup.evaluator.create('emodel1')
 
 
 @attr('unit')
