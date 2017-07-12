@@ -79,11 +79,12 @@ def select_combos_from_conf(conf_dict):
     if conf_dict.get('make_template_name_compatible', False):
         log_filename = os.path.join(os.path.dirname(extneurondb_filename),
                                     'log_make_template_name_compatible.csv')
-        table_processing.process_combo_name(
-            ext_neurondb, log_filename)
+        table_processing.process_combo_name(ext_neurondb, log_filename)
+
     megate_output.save_megate_results(ext_neurondb,
                                       extneurondb_filename,
-                                      mecombo_emodel_filename)
+                                      mecombo_emodel_filename,
+                                      'combo_name')
     print('Wrote extneurondb.dat to %s' % extneurondb_filename)
     print('Wrote mecombo_emodel.tsv to %s' % mecombo_emodel_filename)
 
