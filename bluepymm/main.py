@@ -28,7 +28,7 @@ from bluepymm import prepare_combos, run_combos, select_combos
 
 
 def get_parser():
-    '''return he argument parser'''
+    """Return the argument parser"""
     parser = argparse.ArgumentParser()
     actions = parser.add_subparsers(help='actions', dest='action')
 
