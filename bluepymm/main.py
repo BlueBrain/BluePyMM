@@ -21,14 +21,14 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-
+import sys
 import argparse
 
 from bluepymm import prepare_combos, run_combos, select_combos
 
 
 def get_parser():
-    '''return the argument parser'''
+    '''return he argument parser'''
     parser = argparse.ArgumentParser()
     actions = parser.add_subparsers(help='actions', dest='action')
 
@@ -57,3 +57,8 @@ def run(arg_list):
                               ipyp_profile=args.ipyp_profile)
     elif args.action == "select":
         select_combos.select_combos(conf_filename=args.conf_filename)
+
+
+def main():
+    """Main"""
+    run(sys.argv[1:])

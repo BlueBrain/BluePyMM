@@ -21,9 +21,19 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 from nose.plugins.attrib import attr
+import nose.tools as nt
+
+import sh
 
 
 @attr('unit')
 def test_import():
     """bluepymm: test importing bluepymm"""
     import bluepymm  # NOQA
+
+
+@attr('unit')
+def test_shell():
+    """bluepymm: test running bluepymm from shell"""
+    bluepymm_h_output = sh.bluepymm('-h')
+    nt.assert_in('usage: bluepymm', bluepymm_h_output)
