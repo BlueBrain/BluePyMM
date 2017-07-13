@@ -1,6 +1,6 @@
 all: install
 install: clean
-	python -c 'import sys, pip; if map(int, pip.__version__.split(".")) <= [9, 0, 0]: sys.exit("Need pip version >= 9")'
+	python -c "exec(\"import sys, pip\\nif map(int, pip.__version__.split('.')) <= [9, 0, 0]: sys.exit('Need pip version >= 9')\")"
 	python setup.py sdist
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 test: tox
@@ -13,7 +13,7 @@ tox36: install_tox
 install_tox:
 	pip install tox
 tox_clean:
-	rm -rf .tox	
+	rm -rf .tox
 clean:
 	rm -rf bluepymm.egg-info
 	rm -rf dist
@@ -31,7 +31,7 @@ clean:
 	rm -rf build
 	rm -rf cover
 	rm -rf coverage.xml
-	
+
 	mkdir bluepymm/tests/tmp
 
 

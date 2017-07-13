@@ -28,4 +28,4 @@ from bluepymm import main
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main.run(sys.argv[1:])
