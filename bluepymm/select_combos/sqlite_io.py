@@ -1,4 +1,4 @@
-"""BluePyMM sqlite input, output, and processing"""
+"""BluePyMM select_combos sqlite input"""
 
 """
 Copyright (c) 2017, EPFL/Blue Brain Project
@@ -27,7 +27,20 @@ import sqlite3
 
 
 def read_and_process_sqlite_score_tables(scores_sqlite_filename):
-    """Read score and score values tables from score sqlite dabatase."""
+    """Read score and score values tables from score sqlite dabatase.
+
+    Args:
+        scores_sqlite_filename: path to sqlite database
+
+    Returns:
+        A tuple of two pandas.DataFrames, as loaded from the tables 'scores'
+        and 'score_values' respectively, If present, the column 'index' is
+        dropped from score_values.
+
+    Raises:
+        Exception if the number of rows in the 'scores' table does not equal
+        the number of rows in the 'score_values' table.
+    """
 
     print('Reading scores and score values from {} ...'.format(
         scores_sqlite_filename))
@@ -39,7 +52,7 @@ def read_and_process_sqlite_score_tables(scores_sqlite_filename):
         raise Exception("Score and score values tables don't have same number"
                         " of entries!")
 
-    # Every column should correspond to a score.
+    # every column should correspond to a score.
     if 'index' in score_values.columns.values:
         score_values.drop(labels=['index'], axis=1, inplace=True)
 
