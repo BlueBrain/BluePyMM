@@ -30,6 +30,7 @@ import multiprocessing.pool
 import ipyparallel
 import sqlite3
 import traceback
+import pandas
 
 from bluepymm import tools
 
@@ -238,6 +239,23 @@ def save_scores(scores_db_filename, uid, scores, extra_values, exception,
             pass
 
 
+def convert_score_json_to_values(scores_sqlite_filename):
+    """Read scores from sqlite table and expand, and store in new table
+    'score_values'."""
+    with sqlite3.connect(scores_sqlite_filename) as conn:
+        scores = pandas.read_sql('SELECT * FROM scores', conn)
+
+    score_values = scores['scores'].apply(
+        lambda json_str: pandas.Series
+        (json.loads(json_str)) if json_str else pandas.Series())
+
+    with sqlite3.connect(scores_sqlite_filename) as conn:
+        score_values.to_sql('score_values', conn, if_exists='replace',
+                            index=False)
+
+    return score_values
+
+
 def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
                      use_ipyp=False, ipyp_profile=None):
     """Calculate scores of e-model morphology combinations and update the
@@ -292,3 +310,6 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
               (uid, uids_received, len(arg_list),
                'with exception' if exception else ''))
         sys.stdout.flush()
+
+    print('Converting score json strings to scores values ...')
+    convert_score_json_to_values(scores_db_filename)
