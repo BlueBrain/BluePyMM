@@ -47,7 +47,7 @@ setuptools.setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities',
         'License :: Other/Proprietary License'],
-    scripts=['bin/bluepymm'],
+    entry_points={'console_scripts': ['bluepymm=bluepymm.main:main'], },
     package_data={
         'bluepymm': ['templates/cell_template.jinja2'],
     }

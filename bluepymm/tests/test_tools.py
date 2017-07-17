@@ -70,6 +70,9 @@ def test_makedirs():
     tools.makedirs(make_dir)
     nt.assert_true(os.path.isdir(make_dir))
 
+    # causes error that is not caught
+    nt.assert_raises(OSError, tools.makedirs, '')
+
 
 @attr('unit')
 def test_check_no_null_nan_values():
@@ -104,9 +107,13 @@ def test_load_module():
     # load module
     module_dir = os.path.join(EXAMPLES, 'simple1/data/emodels_dir/subdir/')
     setup = tools.load_module('setup', module_dir)
-
     # try and execute something from loaded module
     ret = setup.evaluator.create('emodel1')
+
+    # load as file
+    setup_dir = os.path.join(module_dir, 'setup')
+    evaluator = tools.load_module('evaluator', setup_dir)
+    ret = evaluator.create('emodel1')
 
 
 @attr('unit')
