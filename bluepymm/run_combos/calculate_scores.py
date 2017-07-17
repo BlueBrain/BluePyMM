@@ -239,9 +239,14 @@ def save_scores(scores_db_filename, uid, scores, extra_values, exception,
             pass
 
 
-def convert_score_json_to_values(scores_sqlite_filename):
-    """Read scores from sqlite table and expand, and store in new table
-    'score_values'."""
+def expand_scores_to_score_values_table(scores_sqlite_filename):
+    """Read scores from sqlite table, expand to dataframe, and store in new
+    table 'score_values'. Each column of the new table corresponds to a
+    single score.
+
+    Args:
+        scores_sqlite_filename: path to sqlite database
+    """
     with sqlite3.connect(scores_sqlite_filename) as conn:
         scores = pandas.read_sql('SELECT * FROM scores', conn)
 
@@ -252,8 +257,6 @@ def convert_score_json_to_values(scores_sqlite_filename):
     with sqlite3.connect(scores_sqlite_filename) as conn:
         score_values.to_sql('score_values', conn, if_exists='replace',
                             index=False)
-
-    return score_values
 
 
 def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
@@ -288,10 +291,10 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         pool = NestedPool()
         results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
-    # Keep track of the number of received results
+    # keep track of the number of received results
     uids_received = 0
 
-    # Every time a result comes in, save the score in the database
+    # every time a result comes in, save the score in the database
     for result in results:
         uid = result['uid']
         scores = result['scores']
@@ -299,12 +302,7 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         exception = result['exception']
         uids_received += 1
 
-        save_scores(
-            scores_db_filename,
-            uid,
-            scores,
-            extra_values,
-            exception)
+        save_scores(scores_db_filename, uid, scores, extra_values, exception)
 
         print('Saved scores for uid %s (%d out of %d) %s' %
               (uid, uids_received, len(arg_list),
@@ -312,4 +310,4 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         sys.stdout.flush()
 
     print('Converting score json strings to scores values ...')
-    convert_score_json_to_values(scores_db_filename)
+    expand_scores_to_score_values_table(scores_db_filename)
