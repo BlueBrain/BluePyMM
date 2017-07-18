@@ -42,7 +42,14 @@ FIGSIZE = (15, 10)
 
 
 def pdf_file(pdf_filename):
-    """Return object that start pdf file"""
+    """Create and return a PDF file.
+
+    Args:
+        pdf_filename: path to PDF file
+
+    Returns:
+        A multi-page PDF file.
+    """
     tools.makedirs(os.path.dirname(pdf_filename))
     return PdfPages(pdf_filename)
 
