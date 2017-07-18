@@ -55,14 +55,28 @@ def pdf_file(pdf_filename):
 
 
 def add_plot_to_report(pp, plot_function, *args):
-    """Add a plot to the report"""
+    """Add a plot to a given report.
+
+    Args:
+        pp: pdf file
+        plot_function: function that returns figure
+        args: arguments to plot_function
+    """
     fig = plot_function(*args)
     pp.savefig(fig, bbox_inches='tight')
     plt.close()
 
 
 def plot_dict(dict_data, title):
-    """Plot a dictionary"""
+    """Plot a dictionary.
+
+    Args:
+        dict_data: a dictionary
+        title: string with plot title
+
+    Returns:
+        Figure with plotted dictionary
+    """
     fig = plt.figure(figsize=FIGSIZE)
     plt.axis('off')
     if dict_data:
@@ -75,7 +89,18 @@ def plot_dict(dict_data, title):
 
 
 def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
-    """Plot stacked bars"""
+    """Plot stacked bars.
+
+    Args:
+        data: a pandas.DataFrame
+        xlabel: string with label for x-axis
+        ylabel: string with label for y-axis
+        title: string with plot title
+        color_map: list of colors
+
+    Returns:
+        Figure with plot of stacked bars
+    """
     ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=color_map)
     ax.get_xaxis().set_major_locator(
         matplotlib.ticker.MaxNLocator(integer=True))
@@ -89,8 +114,19 @@ def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
 
 def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
                                        emodel_score_values):
-    """Display number of morphs matches per feature for a given emodel"""
+    """Display number of tested morphologies per feature for a given e-model.
 
+    Args:
+        emodel: string representing e-model, used for plot title
+        megate_scores: pandas.DataFrame with megate scores, one entry per run
+                       combo
+        emodel_score_values: pandas.DataFrame with score values, one entry per
+                             run combo
+
+    Returns:
+        Figure with plot of stacked bars, passed and failed simulations are
+        colored blue and red, respectively.
+    """
     sums = pandas.DataFrame()
     sums['passed'] = megate_scores.sum(axis=0)
     sums['failed'] = len(emodel_score_values) - sums['passed']
