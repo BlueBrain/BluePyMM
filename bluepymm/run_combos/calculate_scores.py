@@ -249,7 +249,7 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
                                 'to_run'
 
     Raises:
-        ValueError, if the scores table contains at least one entry where the
+        Exception, if the scores table contains at least one entry where the
         value of 'to_run' is True.
     """
     with sqlite3.connect(scores_sqlite_filename) as conn:

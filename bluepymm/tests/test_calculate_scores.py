@@ -294,7 +294,7 @@ def test_expand_scores_to_score_values_table_error():
 
     # process database
     nt.assert_raises(
-        ValueError,
+        Exception,
         run_combos.calculate_scores.expand_scores_to_score_values_table,
         db_path)
 

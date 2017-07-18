@@ -71,10 +71,10 @@ def check_no_null_nan_values(data, description):
         bool: True if successful.
 
     Raises:
-        ValueError: if `data` contains at least one None or NaN value.
+        Exception: if `data` contains at least one None or NaN value.
     """
     if data.isnull().values.any():
-        raise ValueError('{} contains None/NaN values.'.format(description))
+        raise Exception('{} contains None/NaN values.'.format(description))
     return True
 
 
@@ -89,12 +89,12 @@ def check_all_combos_have_run(database, description):
         True if the value of 'to_run' is False for all rows.
 
     Raises:
-        ValueError, if the database contains at least one entry where the value
+        Exception, if the database contains at least one entry where the value
         of 'to_run' is True.
     """
     if database['to_run'].any():
-        raise ValueError('At least one me-combination of database "{}" has not'
-                         ' been run'.format(description))
+        raise Exception('At least one me-combination of database "{}" has not'
+                        ' been run'.format(description))
     return True
 
 

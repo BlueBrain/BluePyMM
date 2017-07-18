@@ -82,7 +82,7 @@ def test_check_no_null_nan_values():
     try:
         ret = tools.check_no_null_nan_values(data, 'test')
         nt.assert_true(ret)
-    except ValueError:
+    except Exception:
         throws_exception = True
     nt.assert_false(throws_exception)
 
@@ -91,14 +91,14 @@ def test_check_no_null_nan_values():
 def test_check_no_null_nan_values_nan():
     """bluepymm.tools: test check_no_null_nan_values with nan"""
     data = pandas.DataFrame([[1, float('nan')], [3, 4]], columns=list('AB'))
-    nt.assert_raises(ValueError, tools.check_no_null_nan_values, data, 'test')
+    nt.assert_raises(Exception, tools.check_no_null_nan_values, data, 'test')
 
 
 @attr('unit')
 def test_check_no_null_nan_values_none():
     """bluepymm.tools: test check_no_null_nan_values with None"""
     data = pandas.DataFrame([[1, 2], [None, 4]], columns=list('AB'))
-    nt.assert_raises(ValueError, tools.check_no_null_nan_values, data, 'test')
+    nt.assert_raises(Exception, tools.check_no_null_nan_values, data, 'test')
 
 
 @attr('unit')
@@ -109,11 +109,11 @@ def test_check_all_combos_have_run():
 
     data = pandas.DataFrame({'to_run': [True, True, True],
                              'field': [1, 2, 3]})
-    nt.assert_raises(ValueError, tools.check_all_combos_have_run, data, 'test')
+    nt.assert_raises(Exception, tools.check_all_combos_have_run, data, 'test')
 
     data = pandas.DataFrame({'to_run': [False, True, False],
                              'field': [1, 2, 3]})
-    nt.assert_raises(ValueError, tools.check_all_combos_have_run, data, 'test')
+    nt.assert_raises(Exception, tools.check_all_combos_have_run, data, 'test')
 
 
 @attr('unit')
