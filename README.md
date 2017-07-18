@@ -20,7 +20,7 @@ Requirements
 ============
 
 * [Python 2.7+](https://www.python.org/download/releases/2.7/) or [Python 3.6+](https://www.python.org/downloads/release/python-360/)
-* [pip](https://pip.pypa.io) (installed by default in newer versions of Python)
+* [pip 9.0+](https://pip.pypa.io) (installed by default in newer versions of Python, make sure you upgrade pip to a version 9.0+)
 * [Neuron 7.4](http://neuron.yale.edu/) (compiled with Python support)
 * [eFEL eFeature Extraction Library](https://github.com/BlueBrain/eFEL) (automatically installed by pip)
 * [BluePyOpt](https://github.com/BlueBrain/BluePyOpt) (automatically installed by pip)
@@ -35,6 +35,7 @@ Installation
 ```bash
 pip install bluepymm
 ```
+NOTE: Make sure you are using the latest version of pip (at least >9.0). Otherwise the ipython dependency will fail to install correctly.
 
 Quick Start
 ===========

@@ -260,6 +260,46 @@ def test_save_scores():
 
 
 @attr('unit')
+def test_expand_scores_to_score_values_table():
+    """run_combos.calculate_scores: test expand_scores_to_score_values_table"""
+    # create database
+    db_path = os.path.join(TMP_DIR, 'test_expand_scores.sqlite')
+    score_key = 'Step1.SpikeCount'
+    score_value = 20.0
+    scores = '{"%s": %s}' % (score_key, score_value)
+    row = {'scores': scores, 'to_run': False}
+    _write_test_scores_database(row, db_path)
+
+    # process database
+    run_combos.calculate_scores.expand_scores_to_score_values_table(db_path)
+
+    # verify database
+    expected_df = pandas.DataFrame(data=json.loads(scores), index=[0])
+    with sqlite3.connect(db_path) as conn:
+        score_values = pandas.read_sql('SELECT * FROM score_values', conn)
+    pandas.util.testing.assert_frame_equal(score_values, expected_df)
+
+
+@attr('unit')
+def test_expand_scores_to_score_values_table_error():
+    """run_combos.calculate_scores: test expand_scores_to_score_values_table 2
+    """
+    # create database
+    db_path = os.path.join(TMP_DIR, 'test_expand_scores_error.sqlite')
+    score_key = 'Step1.SpikeCount'
+    score_value = 20.0
+    scores = '{"%s": %s}' % (score_key, score_value)
+    row = {'scores': scores, 'to_run': True}
+    _write_test_scores_database(row, db_path)
+
+    # process database
+    nt.assert_raises(
+        Exception,
+        run_combos.calculate_scores.expand_scores_to_score_values_table,
+        db_path)
+
+
+@attr('unit')
 def test_calculate_scores():
     """run_combos.calculate_scores: test calculate_scores"""
     # write database

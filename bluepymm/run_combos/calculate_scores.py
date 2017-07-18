@@ -30,6 +30,7 @@ import multiprocessing.pool
 import ipyparallel
 import sqlite3
 import traceback
+import pandas
 
 from bluepymm import tools
 
@@ -238,6 +239,32 @@ def save_scores(scores_db_filename, uid, scores, extra_values, exception,
             pass
 
 
+def expand_scores_to_score_values_table(scores_sqlite_filename):
+    """Read scores from sqlite table, expand to dataframe, and store in new
+    table 'score_values'. Each column of the new table corresponds to a
+    single score.
+
+    Args:
+        scores_sqlite_filename: path to sqlite database with keys 'scores' and
+                                'to_run'
+
+    Raises:
+        Exception, if the scores table contains at least one entry where the
+        value of 'to_run' is True.
+    """
+    with sqlite3.connect(scores_sqlite_filename) as conn:
+        scores = pandas.read_sql('SELECT * FROM scores', conn)
+        tools.check_all_combos_have_run(scores, 'scores')
+
+    score_values = scores['scores'].apply(
+        lambda json_str: pandas.Series
+        (json.loads(json_str)) if json_str else pandas.Series())
+
+    with sqlite3.connect(scores_sqlite_filename) as conn:
+        score_values.to_sql('score_values', conn, if_exists='replace',
+                            index=False)
+
+
 def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
                      use_ipyp=False, ipyp_profile=None):
     """Calculate scores of e-model morphology combinations and update the
@@ -270,10 +297,10 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         pool = NestedPool()
         results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
-    # Keep track of the number of received results
+    # keep track of the number of received results
     uids_received = 0
 
-    # Every time a result comes in, save the score in the database
+    # every time a result comes in, save the score in the database
     for result in results:
         uid = result['uid']
         scores = result['scores']
@@ -281,14 +308,12 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         exception = result['exception']
         uids_received += 1
 
-        save_scores(
-            scores_db_filename,
-            uid,
-            scores,
-            extra_values,
-            exception)
+        save_scores(scores_db_filename, uid, scores, extra_values, exception)
 
         print('Saved scores for uid %s (%d out of %d) %s' %
               (uid, uids_received, len(arg_list),
                'with exception' if exception else ''))
         sys.stdout.flush()
+
+    print('Converting score json strings to scores values ...')
+    expand_scores_to_score_values_table(scores_db_filename)
