@@ -6,7 +6,7 @@ before_install:
     - pip install tox --upgrade
     - pip install codecov
 script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
-after_install:
+after_success:
     - codecov
 cache:
     pip: true 
