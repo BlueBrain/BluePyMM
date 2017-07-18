@@ -61,6 +61,7 @@ def select_combos_from_conf(conf_dict):
     # Read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_db_filename)
+    tools.check_all_combos_have_run(scores, scores_db_filename)
 
     # Create final database and write report
     ext_neurondb = reporting.create_final_db_and_write_report(

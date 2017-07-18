@@ -245,10 +245,16 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
     single score.
 
     Args:
-        scores_sqlite_filename: path to sqlite database
+        scores_sqlite_filename: path to sqlite database with keys 'scores' and
+                                'to_run'
+
+    Raises:
+        ValueError, if the scores table contains at least one entry where the
+        value of 'to_run' is True.
     """
     with sqlite3.connect(scores_sqlite_filename) as conn:
         scores = pandas.read_sql('SELECT * FROM scores', conn)
+        tools.check_all_combos_have_run(scores, 'scores')
 
     score_values = scores['scores'].apply(
         lambda json_str: pandas.Series

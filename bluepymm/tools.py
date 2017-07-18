@@ -78,6 +78,26 @@ def check_no_null_nan_values(data, description):
     return True
 
 
+def check_all_combos_have_run(database, description):
+    """Verify that all entries of a given database have run.
+
+    Args:
+        database: a pandas.DataFrame with a column 'to_run'
+        description: string that contains description of database
+
+    Returns:
+        True if the value of 'to_run' is False for all rows.
+
+    Raises:
+        ValueError, if the database contains at least one entry where the value
+        of 'to_run' is True.
+    """
+    if database['to_run'].any():
+        raise ValueError('At least one me-combination of database "{}" has not'
+                         ' been run'.format(description))
+    return True
+
+
 def load_module(name, path):
     """Try and load module `name` but *only* in `path`
 

@@ -102,6 +102,21 @@ def test_check_no_null_nan_values_none():
 
 
 @attr('unit')
+def test_check_all_combos_have_run():
+    data = pandas.DataFrame({'to_run': [False, False, False],
+                             'field': [1, 2, 3]})
+    nt.assert_true(tools.check_all_combos_have_run(data, 'test'))
+
+    data = pandas.DataFrame({'to_run': [True, True, True],
+                             'field': [1, 2, 3]})
+    nt.assert_raises(ValueError, tools.check_all_combos_have_run, data, 'test')
+
+    data = pandas.DataFrame({'to_run': [False, True, False],
+                             'field': [1, 2, 3]})
+    nt.assert_raises(ValueError, tools.check_all_combos_have_run, data, 'test')
+
+
+@attr('unit')
 def test_load_module():
     """bluepymm.tools: test load_module"""
     # load module
