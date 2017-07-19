@@ -111,8 +111,9 @@ def test_plot_morphs_per_feature_for_emodel():
 def test_plot_morphs_per_mtype_for_emodel():
     """select_combos.reporting: test plot_morphs_per_mtype_for_emodel"""
     emodel = 'emodel1'
-    mtypes = pandas.Series(['mtype1', 'mtype2'])
-    test_scores = pandas.DataFrame({'Passed all': [True, False, True]})
+    mtypes = pandas.DataFrame({'mtypes': ['mtype1', 'mtype2', 'mtype1']})
+    test_scores = pandas.DataFrame({'Passed all': [True, False, True],
+                                    'mtypes': ['mtype1', 'mtype2', 'mtype1']})
     fig = select_combos.reporting.plot_morphs_per_mtype_for_emodel(
-        emodel, mtypes, test_scores)
+        emodel, mtypes['mtypes'], test_scores)
     nt.assert_true(emodel in fig.get_axes()[0].get_title())

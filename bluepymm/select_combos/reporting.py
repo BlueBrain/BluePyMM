@@ -142,7 +142,7 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
 
     Args:
         emodel: string representing e-model, used for plot title
-        mtypes: set of m-types
+        mtypes: pandas.DataFrame with m-types, one entry per run combo
         megate_scores: pandas.DataFrame with megate scores, one entry per run
                        combo
 
