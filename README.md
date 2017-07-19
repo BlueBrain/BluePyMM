@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/BlueBrain/BluePyMM.svg?token=qGLyK2mzb6sRBefZBJw1&branch=master)](https://travis-ci.com/BlueBrain/BluePyMM)
+[![codecov](https://codecov.io/gh/BlueBrain/BluePyMM/branch/master/graph/badge.svg?token=G2d5ZWJbyY)](https://codecov.io/gh/BlueBrain/BluePyMM)
 
 Introduction
 ============
