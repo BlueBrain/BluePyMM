@@ -117,3 +117,14 @@ def test_plot_morphs_per_mtype_for_emodel():
     fig = select_combos.reporting.plot_morphs_per_mtype_for_emodel(
         emodel, mtypes['mtypes'], test_scores)
     nt.assert_true(emodel in fig.get_axes()[0].get_title())
+
+
+@attr('unit')
+def test_create_morphology_label():
+    """select_combos.reporting: test create_morphology_label"""
+    data = pandas.DataFrame({'morph_name': ['morph1', 'morph2'],
+                             'fullmtype': ['mtype1', 'mtype2'],
+                             'etype': ['etype1', 'etype2']})
+    ret = select_combos.reporting.create_morphology_label(data)
+    expected_ret = 'morph1 (mtype1, etype1)'
+    nt.assert_equal(ret, expected_ret)

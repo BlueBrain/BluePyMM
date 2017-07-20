@@ -165,7 +165,16 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
 
 
 def create_morphology_label(data_frame):
-    """Create label for morphology"""
+    """Create label for morphology.
+
+    Args:
+        data_frame: pandas.DataFrame with columns 'morph_name', 'fullmtype',
+                    and 'etype'
+
+    Returns:
+        A label (string), based on the contents of the first row of
+        `data_frame`: <morph_name> (<fullmtype>, <etype>).
+    """
     morph = data_frame.iloc[0]['morph_name']
     mtype = data_frame.iloc[0]['fullmtype']
     etype = data_frame.iloc[0]['etype']
