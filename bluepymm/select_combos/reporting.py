@@ -182,7 +182,16 @@ def create_morphology_label(data_frame):
 
 
 def plot_emodels_per_morphology(data, final_db):
-    """Display result of tested e-models for each morphology"""
+    """Display result of tested e-models for each morphology.
+
+    Args:
+        data: pandas.DataFrame with data on run combos
+        final_db: pandas.DataFrame with data on selected combos
+
+    Returns:
+        Figure with plot of stacked bars. Simulations that passed, threw an
+        error, and failed are colored blue, yellow and red, respectively.
+    """
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
     for morph_name in non_exemplars['morph_name'].unique():
