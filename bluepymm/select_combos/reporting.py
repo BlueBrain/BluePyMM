@@ -124,7 +124,7 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
                              run combo
 
     Returns:
-        Figure with plot of stacked bars, passed and failed simulations are
+        Figure with plot of stacked bars. Passed and failed simulations are
         colored blue and red, respectively.
     """
     sums = pandas.DataFrame()
@@ -138,8 +138,18 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
 
 
 def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
-    """Display number of morphs matches per mtype for a given emodel"""
+    """Display number of tested morphologies per m-type for a given e-model.
 
+    Args:
+        emodel: string representing e-model, used for plot title
+        mtypes: pandas.DataFrame with m-types, one entry per run combo
+        megate_scores: pandas.DataFrame with megate scores, one entry per run
+                       combo
+
+    Returns:
+        Figure with plot of stacked bars. Passed and failed simulations are
+        colored blue and red, respectively.
+    """
     sums = pandas.DataFrame()
     for mtype in mtypes.unique():
         megate_scores_mtype = megate_scores[mtypes == mtype]
