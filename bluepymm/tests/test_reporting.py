@@ -135,7 +135,19 @@ def test_plot_emodels_per_morphology():
     """select_combos.reporting: test plot_emodels_per_morphology"""
     data = pandas.DataFrame({'is_exemplar': False, 'morph_name': 'morph1',
                              'exception': None, 'fullmtype': 'mtype1',
-                             'etype': 'etyp1'}, index=[0])
+                             'etype': 'etype1'}, index=[0])
     final_db = pandas.DataFrame({'morph_name': 'morph1'}, index=[0])
     fig = select_combos.reporting.plot_emodels_per_morphology(data, final_db)
     nt.assert_true('morphology' in fig.get_axes()[0].get_title())
+
+
+@attr('unit')
+def test_plot_emodels_per_metype():
+    """select_combos.reporting: test plot_emodels_per_metype"""
+    data = pandas.DataFrame({'is_exemplar': False, 'morph_name': 'morph1',
+                             'exception': None, 'fullmtype': 'mtype1',
+                             'etype': 'etype1'}, index=[0])
+    final_db = pandas.DataFrame({'morph_name': 'morph1', 'fullmtype': 'mtype1',
+                                 'etype': 'etype1'}, index=[0])
+    fig = select_combos.reporting.plot_emodels_per_metype(data, final_db)
+    nt.assert_true('me-type' in fig.get_axes()[0].get_title())

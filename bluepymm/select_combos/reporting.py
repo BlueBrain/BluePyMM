@@ -214,8 +214,15 @@ def plot_emodels_per_morphology(data, final_db):
 
 def plot_emodels_per_metype(data, final_db):
     """Display result of tested e-model / morphology combinations per me-type.
-    """
 
+    Args:
+        data: pandas.DataFrame with data on run combos
+        final_db: pandas.DataFrame with data on selected combos
+
+    Returns:
+        Figure with plot of stacked bars. Simulations that passed, threw an
+        error, and failed are colored blue, yellow and red, respectively.
+    """
     # Add helper column 'metype'
     def create_metype(x):
         """Create me-type from m-type and e-type"""
