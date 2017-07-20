@@ -165,7 +165,16 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
 
 
 def create_morphology_label(data_frame):
-    """Create label for morphology"""
+    """Create label for morphology.
+
+    Args:
+        data_frame: pandas.DataFrame with columns 'morph_name', 'fullmtype',
+                    and 'etype'
+
+    Returns:
+        A label (string), based on the contents of the first row of
+        `data_frame`: <morph_name> (<fullmtype>, <etype>).
+    """
     morph = data_frame.iloc[0]['morph_name']
     mtype = data_frame.iloc[0]['fullmtype']
     etype = data_frame.iloc[0]['etype']
@@ -173,7 +182,16 @@ def create_morphology_label(data_frame):
 
 
 def plot_emodels_per_morphology(data, final_db):
-    """Display result of tested e-models for each morphology"""
+    """Display result of tested e-models for each morphology.
+
+    Args:
+        data: pandas.DataFrame with data on run combos
+        final_db: pandas.DataFrame with data on selected combos
+
+    Returns:
+        Figure with plot of stacked bars. Simulations that passed, threw an
+        error, and failed are colored blue, yellow and red, respectively.
+    """
     sums = pandas.DataFrame()
     non_exemplars = data[data['is_exemplar'] == 0]
     for morph_name in non_exemplars['morph_name'].unique():
@@ -196,8 +214,15 @@ def plot_emodels_per_morphology(data, final_db):
 
 def plot_emodels_per_metype(data, final_db):
     """Display result of tested e-model / morphology combinations per me-type.
-    """
 
+    Args:
+        data: pandas.DataFrame with data on run combos
+        final_db: pandas.DataFrame with data on selected combos
+
+    Returns:
+        Figure with plot of stacked bars. Simulations that passed, threw an
+        error, and failed are colored blue, yellow and red, respectively.
+    """
     # Add helper column 'metype'
     def create_metype(x):
         """Create me-type from m-type and e-type"""
