@@ -3,7 +3,10 @@ coverage:
     
   status:
     project:
-      default:
-        target: "80%" 
-        threshold: "5%"
-    patch: false
+      default: off
+      unit:
+        target: 80%  
+        flags: unit
+      functional:
+        target: 90%
+        flags: functional
