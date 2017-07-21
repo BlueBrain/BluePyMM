@@ -7,3 +7,12 @@ coverage:
         target: "80%" 
         threshold: "5%"
     patch: false
+
+  flags:
+      unit:
+          paths:
+              - cov_reports/unit/xml
+      functional:
+          paths:
+              - cov_reports/functional/xml 
+

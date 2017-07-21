@@ -51,7 +51,7 @@ def test_json():
     output_name = 'tmp.json'
     config = {'test': ['1', 'two']}
 
-    os.makedirs(output_dir)
+    tools.makedirs(output_dir)
     ret_path = tools.write_json(output_dir, output_name, config)
     nt.assert_equal(os.path.join(output_dir, output_name), ret_path)
     ret = tools.load_json(ret_path)

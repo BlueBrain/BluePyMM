@@ -85,7 +85,7 @@ def _test_prepare_combos(test_dir, config_path, nb_emodels):
                                       config['emodels_hoc_dir'],
                                       config['output_dir'], nb_emodels)
 
-
+'''
 def test_prepare_combos_from_dir():
     """bluepymm.prepare_combos: test prepare_combos based on example simple1
     with plain dir input"""
@@ -102,3 +102,4 @@ def test_prepare_combos_from_git_repo():
     nb_emodels = 2
 
     _test_prepare_combos(TEST_DATA_DIR, config_path, nb_emodels)
+'''

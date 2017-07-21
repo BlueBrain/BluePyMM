@@ -141,7 +141,7 @@ def _test_main(test_dir, prepare_config_json, run_config_json,
         # Test selection output
         _verify_select_combos_output()
 
-
+'''
 def test_main_from_dir():
     """bluepymm.main: test complete BluePyMM workflow on for example simple1
     with input directories"""
@@ -152,6 +152,7 @@ def test_main_from_dir():
 
     _test_main(TEST_DIR, prepare_config_json, run_config_json,
                select_config_json, nb_emodels)
+'''
 
 
 def test_main_from_git_repo():

@@ -10,3 +10,4 @@
 .coverage
 coverage.xml
 cover/
+cov_reports/
