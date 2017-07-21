@@ -6,9 +6,9 @@ install: clean
 test: install_tox
 	tox
 test2: install_tox
-	tox -e py27
+	tox -e py27-unit-functional
 test3: install_tox
-	tox -e py3
+	tox -e py3-unit-functional
 unit2: install_tox
 	tox -e py27-unit
 unit3: install_tox
