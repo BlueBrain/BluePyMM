@@ -10,11 +10,3 @@ coverage:
       functional:
         target: 90%
         flags: functional
-
-  flags:
-      unit:
-          paths:
-              - cov_reports/unit.coverage.xml
-      functional:
-          paths:
-              - cov_reports/functional.coverage.xml

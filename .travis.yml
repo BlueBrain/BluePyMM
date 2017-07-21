@@ -7,7 +7,8 @@ before_install:
     - pip install codecov
 script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
 after_success:
-    - codecov -F unit functional
+    - codecov -F unit -f cov_reports/unit.coverage.xml
+    - codecov -F functional -f cov_reports/functional.coverage.xml
 cache:
     pip: true 
     directories:
