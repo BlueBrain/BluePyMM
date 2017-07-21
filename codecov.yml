@@ -14,8 +14,7 @@ coverage:
   flags:
       unit:
           paths:
-              - cov_reports/unit/xml
+              - cov_reports/unit.coverage.xml
       functional:
           paths:
-              - cov_reports/functional/xml 
-
+              - cov_reports/functional.coverage.xml
