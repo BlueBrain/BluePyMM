@@ -28,6 +28,32 @@ import pandas
 from bluepymm import tools
 
 
+def _row_transform(row, exemplar_row, to_skip_patterns,
+                   skip_repaired_exemplar):
+    """Transform row values (scores) to booleans, where True means that a
+    feature did not exceed the corresponding feature threshold, or can be
+    ignored.
+    """
+    for column in row.index[1:]:
+        # set all values that can be ignored to True
+        for pattern in to_skip_patterns:
+            if pattern.match(column):
+                row[column] = True
+
+        # find the appropriate threshold
+        for megate_feature_threshold in row['megate_feature_threshold']:
+            if megate_feature_threshold['features'].match(column):
+                megate_threshold = megate_feature_threshold['megate_threshold']
+
+        # transform score
+        if skip_repaired_exemplar:
+            row[column] = row[column] <= megate_threshold
+        else:
+            row[column] = row[column] <= max(
+                megate_threshold, megate_threshold * exemplar_row[column])
+    return row
+
+
 def convert_extra_values(row):
     """Convert value of key 'extra_values' to new key, value pairs and add them
     to given data.
@@ -48,27 +74,6 @@ def convert_extra_values(row):
             for field in ['threshold_current', 'holding_current']:
                 if field in extra_values:
                     row[field] = extra_values[field]
-    return row
-
-
-def row_transform(row, exemplar_row, to_skip_patterns, skip_repaired_exemplar):
-    """Transform row based on MEGate rule"""
-
-    for column in row.index[1:]:
-        for pattern in to_skip_patterns:
-            if pattern.match(column):
-                row[column] = True
-
-        for megate_feature_threshold in row['megate_feature_threshold']:
-            if megate_feature_threshold['features'].match(column):
-                megate_threshold = megate_feature_threshold['megate_threshold']
-
-        if skip_repaired_exemplar:
-            row[column] = row[column] <= megate_threshold
-        else:
-            row[column] = row[column] <= max(
-                megate_threshold, megate_threshold * exemplar_row[column])
-
     return row
 
 
@@ -103,8 +108,19 @@ def row_threshold_transform(row, megate_patterns):
 
 
 def check_opt_scores(emodel, scores):
-    """Check if opt_scores match with unrepaired exemplar runs"""
+    """Check if opt_scores match with unrepaired exemplar runs.
 
+    Args:
+        emodel: e-model name
+        scores: pandas.DataFrame with scores
+
+    Raises:
+        Exception:
+            - if the keys of the opt_scores do not match the unrepaired
+              exemplar runs,
+            - if the scores values of the opt_scores do not match the scores
+              of the unrepaired exemplar runs.
+    """
     test_rows = scores[(scores.emodel == emodel) &
                        (scores.is_exemplar == 1) &
                        (scores.is_repaired == 0)]
@@ -194,10 +210,10 @@ def process_emodel(emodel,
     megate_scores = pandas.concat(
         [emodel_mtype_etype_thresholds['megate_feature_threshold'],
          emodel_score_values],
-        axis=1).apply(lambda row: row_transform(row,
-                                                exemplar_row,
-                                                to_skip_patterns,
-                                                skip_repaired_exemplar),
+        axis=1).apply(lambda row: _row_transform(row,
+                                                 exemplar_row,
+                                                 to_skip_patterns,
+                                                 skip_repaired_exemplar),
                       axis=1)
 
     del megate_scores['megate_feature_threshold']

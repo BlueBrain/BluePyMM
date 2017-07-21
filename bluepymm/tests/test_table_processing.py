@@ -85,6 +85,37 @@ def test_row_threshold_transform():
 
 
 @attr('unit')
+def test_check_opt_scores():
+    """select_combos.table_processing: test check_opt_scores"""
+    # everything OK
+    emodel = 'emodel1'
+    scores_dict = {'emodel': [emodel], 'is_exemplar': [1], 'is_repaired': [0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 20.0})],
+                   'scores': [json.dumps({'Step1.SpikeCount': 20.0})],
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    table_processing.check_opt_scores(emodel, scores)
+
+    # different keys
+    scores_dict = {'emodel': [emodel], 'is_exemplar': [1], 'is_repaired': [0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 20.0})],
+                   'scores': [json.dumps({'Step2.SpikeCount': 20.0})],
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    nt.assert_raises(Exception, table_processing.check_opt_scores, emodel,
+                     scores)
+
+    # different score values
+    scores_dict = {'emodel': [emodel], 'is_exemplar': [1], 'is_repaired': [0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 20.0})],
+                   'scores': [json.dumps({'Step1.SpikeCount': 10.0})],
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    nt.assert_raises(Exception, table_processing.check_opt_scores, emodel,
+                     scores)
+
+
+@attr('unit')
 def test_process_combo_name():
     """select_combos.table_processing: test process_combo_name"""
     combo_names = [
