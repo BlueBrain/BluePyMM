@@ -34,12 +34,6 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/select_combos')
 
 
-def _clear_dir(unwanted):
-    """Helper function to clear directory"""
-    if os.path.exists(unwanted):
-        shutil.rmtree(unwanted)
-
-
 def _verify_output(benchmark_dir, output_dir, config):
     """Helper function to verify output of combination selection"""
     files = [os.path.basename(f) for f in [config['mecombo_emodel_filename'],
@@ -66,30 +60,30 @@ def _config_select_combos(config_template_path, tmp_dir):
     return config
 
 
-def _test_select_combos(test_data_dir, config_template_path, benchmark_dir):
+def _test_select_combos(test_data_dir, config_template_path, benchmark_dir,
+                        test_dir):
     """Helper function to perform functional test of select_combos"""
     with tools.cd(test_data_dir):
-        # make sure the output directory is clean
-        _clear_dir(TMP_DIR)
-
         # prepare input data
-        config = _config_select_combos(config_template_path, TMP_DIR)
+        config = _config_select_combos(config_template_path, test_dir)
 
         # run combination selection
         select_combos.main.select_combos_from_conf(config)
 
         # verify output
-        _verify_output(benchmark_dir, TMP_DIR, config)
+        _verify_output(benchmark_dir, test_dir, config)
 
 
 def test_select_combos():
     """bluepymm.select_combos: test select_combos based on example simple1"""
     config_template_path = 'simple1_conf_select.json'
     benchmark_dir = "output_megate_expected"
+    test_dir = os.path.join(TMP_DIR, 'test_select_combos')
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
 
-    _test_select_combos(TEST_DATA_DIR, config_template_path, benchmark_dir)
+    _test_select_combos(TEST_DATA_DIR, config_template_path, benchmark_dir,
+                        test_dir)
 
 
 def test_select_combos_2():
@@ -97,7 +91,9 @@ def test_select_combos_2():
     """
     config_template_path = 'simple1_conf_select_2.json'
     benchmark_dir = "output_megate_expected"
+    test_dir = os.path.join(TMP_DIR, 'test_select_combos_2')
     # TODO: add field "output_dir" to conf.json and remove too specific fields,
     # e.g. extneurondb_filename
 
-    _test_select_combos(TEST_DATA_DIR, config_template_path, benchmark_dir)
+    _test_select_combos(TEST_DATA_DIR, config_template_path, benchmark_dir,
+                        test_dir)

@@ -28,14 +28,8 @@ from bluepymm import tools, run_combos
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/run_combos')
-
-
-def _clear_dir(unwanted):
-    """Helper function to clear directory"""
-    if os.path.exists(unwanted):
-        shutil.rmtree(unwanted)
 
 
 def _verify_run_combos_output(scores_db):
@@ -48,10 +42,7 @@ def test_run_combos():
     """bluepymm.run_combos: test run_combos based on example simple1"""
     config_template_path = 'simple1_conf_run.json'
 
-    with tools.cd(TEST_DIR):
-        # make sure the output directory is clean
-        _clear_dir(TMP_DIR)
-
+    with tools.cd(TEST_DATA_DIR):
         # prepare input data
         shutil.copytree('output_expected', TMP_DIR)
         config = tools.load_json(config_template_path)

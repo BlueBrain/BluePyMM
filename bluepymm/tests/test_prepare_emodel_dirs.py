@@ -29,14 +29,8 @@ from bluepymm.prepare_combos import prepare_emodel_dirs
 from bluepymm import tools
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-
-
-def _clear_dirs(dir_list):
-    """Clear dirs"""
-    for unwanted in dir_list:
-        if os.path.exists(unwanted):
-            shutil.rmtree(unwanted)
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/prepare_emodel_dirs')
 
 
 @attr('unit')
@@ -59,9 +53,8 @@ def test_check_emodels_in_repo():
 
 
 def _test_convert_emodel_input(test_dir, emodels_in_repo, conf_dict, continu):
-    """Test convert_emodel_input"""
+    """Helper function to test convert_emodel_input"""
     with tools.cd(test_dir):
-        _clear_dirs([conf_dict['tmp_dir']])
         ret_dir = prepare_emodel_dirs.convert_emodel_input(emodels_in_repo,
                                                            conf_dict, continu)
         nt.assert_true(os.path.isdir(ret_dir))
@@ -77,10 +70,12 @@ def test_convert_emodel_input_dir():
     conf_dict = {'emodels_dir': './data/emodels_dir',
                  'emodel_etype_map_path': 'subdir/emodel_etype_map.json',
                  'final_json_path': 'subdir/final.json',
-                 'tmp_dir': './tmp', }
+                 'tmp_dir': os.path.join(
+                     TMP_DIR, 'test_convert_emodel_input_dir'), }
     emodels_in_repo = False
     continu = False
-    _test_convert_emodel_input(TEST_DIR, emodels_in_repo, conf_dict, continu)
+    _test_convert_emodel_input(TEST_DATA_DIR, emodels_in_repo, conf_dict,
+                               continu)
 
 
 # TODO : how to do the test below?
@@ -93,11 +88,13 @@ def test_convert_emodel_input_dir():
 #                  'emodels_githash': 'master',
 #                  'emodel_etype_map_path': 'subdir/emodel_etype_map.json',
 #                  'final_json_path': 'subdir/final.json',
-#                  'tmp_dir': './tmp',
+#                  'tmp_dir': os.path.join(
+#                      TMP_DIR, 'test_convert_emodel_input_dir'), }
 #                  }
 #     emodels_in_repo = True
 #     continu = False
-#     _test_convert_emodel_input(TEST_DIR, emodels_in_repo, conf_dict, continu)
+#     _test_convert_emodel_input(TEST_DATA_DIR, emodels_in_repo, conf_dict,
+#                                continu)
 
 
 @attr('unit')
@@ -143,7 +140,7 @@ def test_get_emodel_dicts():
     expected_dict_dir = os.path.dirname(os.path.join(emodels_dir,
                                                      final_json_path))
 
-    with tools.cd(TEST_DIR):
+    with tools.cd(TEST_DATA_DIR):
         final, ee_map, dict_dir = prepare_emodel_dirs.get_emodel_dicts(
             emodels_dir, final_json_path, emodel_etype_map_path)
 
@@ -162,7 +159,6 @@ def _test_create_and_write_hoc_file(test_dir,
                                     model_name):
     """Test create_and_write_hoc_files"""
     with tools.cd(test_dir):
-        _clear_dirs([hoc_dir])
         tools.makedirs(hoc_dir)
 
         prepare_emodel_dirs.create_and_write_hoc_file(
@@ -189,7 +185,7 @@ def test_create_and_write_hoc_file_none():
     morph_path = None
     model_name = None
 
-    _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
+    _test_create_and_write_hoc_file(TEST_DATA_DIR, emodel, emodel_dir, hoc_dir,
                                     emodel_parameters, template, morph_path,
                                     model_name)
 
@@ -207,7 +203,7 @@ def test_create_and_write_hoc_file_morph_path_model_name():
     morph_path = 'morph.asc'
     model_name = 'test'
 
-    _test_create_and_write_hoc_file(TEST_DIR, emodel, emodel_dir, hoc_dir,
+    _test_create_and_write_hoc_file(TEST_DATA_DIR, emodel, emodel_dir, hoc_dir,
                                     emodel_parameters, template, morph_path,
                                     model_name)
 
@@ -228,14 +224,14 @@ def test_prepare_emodel_dir():
                    'fitness': {'Step1.SpikeCount': 20.0},
                    'score': 104.72906197480131,
                    'morph_path': 'morphologies/morph1.asc'}
-    emodels_dir = './tmp/emodels/'
-    opt_dir = './tmp/emodels_repo/'
-    hoc_dir = './output/emodels_hoc/'
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dir')
+    emodels_dir = os.path.join(test_dir, './tmp/emodels/')
+    opt_dir = os.path.join(test_dir, './tmp/emodels_repo/')
+    hoc_dir = os.path.join(test_dir, './output/emodels_hoc/')
     emodels_in_repo = False
     continu = False
 
-    with tools.cd(TEST_DIR):
-        _clear_dirs(['./tmp', './output'])
+    with tools.cd(TEST_DATA_DIR):
         for path in [emodels_dir, opt_dir, hoc_dir]:
             tools.makedirs(path)
 
@@ -286,17 +282,17 @@ def test_prepare_emodel_dirs():
                                     'layer': ['1', '2']}}
     emodels_in_repo = False
     continu = False
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dirs')
 
-    with tools.cd(TEST_DIR):
-        emodels_dir = os.path.abspath('./tmp/emodels/')
-        opt_dir = './tmp/emodels_repo'
-        emodels_hoc_dir = os.path.abspath('./output/emodels_hoc/')
+    with tools.cd(TEST_DATA_DIR):
+        emodels_dir = os.path.abspath(os.path.join(test_dir, './tmp/emodels/'))
+        opt_dir = os.path.join(test_dir, './tmp/emodels_repo')
+        tools.makedirs(opt_dir)
+        emodels_hoc_dir = os.path.abspath(
+            os.path.join(test_dir, './output/emodels_hoc/'))
 
         expected_ret = {emodel: os.path.join(
             emodels_dir, emodel) for emodel in final_dict}
-
-        _clear_dirs(['./tmp', './output'])
-        tools.makedirs(opt_dir)
 
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
