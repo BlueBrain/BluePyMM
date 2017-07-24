@@ -1,12 +1,11 @@
 /tmp
 *.pyc
-.*.swp
+/.*.swp
 /bluepymm.egg-info
 /dist/
 /venv
-.noseids
+/.noseids
 /build
 /.tox
-.coverage
-coverage.xml
-cover/
+/.coverage
+/cov_reports/

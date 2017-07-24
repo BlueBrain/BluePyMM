@@ -33,9 +33,8 @@ clean:
 	rm -rf bluepymm/tests/tmp
 	rm -rf docs/build
 	rm -rf build
-	rm -rf cover
-	rm -rf coverage.xml
 	rm -rf .coverage
+	rm -rf cov_reports
 
 	mkdir bluepymm/tests/tmp
 
