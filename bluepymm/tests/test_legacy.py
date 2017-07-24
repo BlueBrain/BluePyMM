@@ -125,7 +125,8 @@ def test_run_create_and_write_hoc_file():
     """bluepymm.legacy: test run_create_and_write_hoc_file"""
     emodel = 'emodel1'
     emodel_dir = './data/emodels_dir/subdir/'
-    hoc_dir = './output/emodels_hoc'
+    hoc_dir = os.path.join(TMP_DIR, 'test_run_create_and_write_hoc_file',
+                           'emodels_hoc')
     emodel_parameters = {'cm': 1.0}
     template = 'cell_template.jinja2'
     template_dir = '.'
@@ -139,9 +140,55 @@ def test_run_create_and_write_hoc_file():
             emodel, emodel_dir, hoc_dir, emodel_parameters, template,
             template_dir, morph_path, model_name)
 
-        # TODO: test hoc file contents
-        template_name = model_name or emodel
-        hoc_filename = '{}.hoc'.format(template_name)
+        # verify output directory. TODO: test hoc file contents
+        expected_nb_files = 1
+        list_of_files = os.listdir(hoc_dir)
+        nt.assert_equal(len(list_of_files), expected_nb_files)
+        hoc_filename = '{}.hoc'.format(model_name)
+        hoc_path = os.path.join(hoc_dir, hoc_filename)
+        nt.assert_true(os.path.isfile(hoc_path))
+
+
+@attr('unit')
+def test_create_hoc_files():
+    """bluepymm.legacy: test create_hoc_files"""
+    model_name = 'combo1'
+    combo_dict = {model_name: {'morph_name': 'morph1',
+                               'layer': '1',
+                               'fullmtype': 'mtype1',
+                               'etype': 'etype1',
+                               'emodel': 'emodel1',
+                               'combo_name': 'combo1',
+                               'threshold_current': '',
+                               'holding_current': '',
+                               },
+                  }
+    emodels_dir = './data/emodels_dir/subdir/'
+    final_dict = {'emodel1': {'main_path': '.',
+                              'seed': 2,
+                              'rank': 0,
+                              'notes': '',
+                              'branch': 'emodel1',
+                              'params': {'cm': 1.0},
+                              'fitness': {'Step1.SpikeCount': 20.0},
+                              'score': 104.72906197480131,
+                              'morph_path': 'morphologies/morph1.asc',
+                              },
+                  }
+    template = 'cell_template.jinja2'
+    hoc_dir = os.path.join(TMP_DIR, 'test_create_hoc_files', 'emodels_hoc')
+
+    with tools.cd(TEST_DATA_DIR):
+        tools.makedirs(hoc_dir)
+
+        bluepymm.legacy.create_hoc_files.create_hoc_files(
+            combo_dict, emodels_dir, final_dict, template, hoc_dir)
+
+        # verify output directory. TODO: test hoc file contents
+        expected_nb_files = 1
+        list_of_files = os.listdir(hoc_dir)
+        nt.assert_equal(len(list_of_files), expected_nb_files)
+        hoc_filename = '{}.hoc'.format(model_name)
         hoc_path = os.path.join(hoc_dir, hoc_filename)
         nt.assert_true(os.path.isfile(hoc_path))
 
@@ -160,7 +207,7 @@ def _verify_output(hoc_config_path):
             nt.assert_true(os.path.isfile(hoc_path))
 
 
-def test_create_hoc_files():
+def test_main():
     """bluepymm.legacy: test creation legacy .hoc files for example simple1"""
     prepare_config_template_filename = 'simple1_conf_prepare.json'
     hoc_config_template_filename = 'simple1_conf_hoc.json'
