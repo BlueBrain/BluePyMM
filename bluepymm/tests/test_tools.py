@@ -51,7 +51,7 @@ def test_json():
     output_name = 'tmp.json'
     config = {'test': ['1', 'two']}
 
-    os.makedirs(output_dir)
+    tools.makedirs(output_dir)
     ret_path = tools.write_json(output_dir, output_name, config)
     nt.assert_equal(os.path.join(output_dir, output_name), ret_path)
     ret = tools.load_json(ret_path)
@@ -78,13 +78,7 @@ def test_makedirs():
 def test_check_no_null_nan_values():
     """bluepymm.tools: test check_no_null_nan_values"""
     data = pandas.DataFrame([[1, 2], [3, 4]], columns=list('AB'))
-    throws_exception = False
-    try:
-        ret = tools.check_no_null_nan_values(data, 'test')
-        nt.assert_true(ret)
-    except Exception:
-        throws_exception = True
-    nt.assert_false(throws_exception)
+    nt.assert_true(tools.check_no_null_nan_values(data, 'test'))
 
 
 @attr('unit')
@@ -103,6 +97,7 @@ def test_check_no_null_nan_values_none():
 
 @attr('unit')
 def test_check_all_combos_have_run():
+    """bluepymm.tools: test check_all_combos_have_run"""
     data = pandas.DataFrame({'to_run': [False, False, False],
                              'field': [1, 2, 3]})
     nt.assert_true(tools.check_all_combos_have_run(data, 'test'))
@@ -123,12 +118,12 @@ def test_load_module():
     module_dir = os.path.join(EXAMPLES, 'simple1/data/emodels_dir/subdir/')
     setup = tools.load_module('setup', module_dir)
     # try and execute something from loaded module
-    ret = setup.evaluator.create('emodel1')
+    setup.evaluator.create('emodel1')
 
     # load as file
     setup_dir = os.path.join(module_dir, 'setup')
     evaluator = tools.load_module('evaluator', setup_dir)
-    ret = evaluator.create('emodel1')
+    evaluator.create('emodel1')
 
 
 @attr('unit')
