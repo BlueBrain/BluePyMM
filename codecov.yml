@@ -10,4 +10,4 @@ coverage:
       functional:
           target: 90%
           flags: functional
-      patch: false
+    patch: off
