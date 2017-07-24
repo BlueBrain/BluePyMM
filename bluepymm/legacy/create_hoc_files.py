@@ -19,6 +19,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+import sys
 import os
 import argparse
 import multiprocessing
@@ -28,12 +29,12 @@ import csv
 from bluepymm import tools, prepare_combos
 
 
-def parse_arguments():
-    """Parse commandline arguments"""
-
+def get_parser():
+    """Return the argument parser"""
     parser = argparse.ArgumentParser(description='Create legacy .hoc files')
-    parser.add_argument('config_filename')
-    return parser.parse_args()
+    parser.add_argument('conf_filename')
+
+    return parser
 
 
 def add_full_paths(config, directory):
@@ -41,19 +42,31 @@ def add_full_paths(config, directory):
     resulting path is valid.
 
     Args:
-        config: Dictionary
+        config: dictionary
+        directory: string used to complete paths
+
+    Returns:
+        The dictionary with completed paths.
     """
     for k, v in config.items():
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             test_path = os.path.join(directory, v)
+            print(test_path)
             if os.path.isdir(test_path) or os.path.isfile(test_path):
                 config[k] = test_path
     return config
 
 
-def load_combinations_dict(mecombo_emodel_filename):
-    """Load combinations dict"""
-    with open(mecombo_emodel_filename) as f:
+def load_combinations_dict(mecombo_emodel_path):
+    """Load combinations dictionary.
+
+    Args:
+        mecombo_emodel_path: path to file with me-combo data
+
+    Returns:
+        A dictionary
+    """
+    with open(mecombo_emodel_path) as f:
         reader = csv.DictReader(f, delimiter='\t')
         combinations_dict = {row['combo_name']: row for row in reader}
     return combinations_dict
@@ -105,27 +118,28 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
                                       combination)
 
 
-def main(config):
+def main(arg_list):
     """Main"""
-    # Process configuration
+
+    # parse and process arguments
+    args = get_parser().parse_args(arg_list)
+    config = tools.load_json(args.conf_filename)
+    config_dir = os.path.abspath(os.path.dirname(args.conf_filename))
+    config = add_full_paths(config, config_dir)
+
+    # process configuration
     mecombo_emodel_filename = config['mecombo_emodel_filename']
     combinations_dict = load_combinations_dict(mecombo_emodel_filename)
     final_dict = tools.load_json(config['final_json_path'])
     emodels_dir = config['emodels_tmp_dir']
 
-    # Create output directory for .hoc files
+    # create output directory for .hoc files
     tools.makedirs(config['hoc_output_dir'])
 
-    # Create hoc files
+    # create hoc files
     create_hoc_files(combinations_dict, emodels_dir, final_dict,
                      config['template'], config['hoc_output_dir'])
 
 
 if __name__ == '__main__':
-    # Parse and process arguments
-    args = parse_arguments()
-    config = tools.load_json(args.config_filename)
-    config_dir = os.path.abspath(os.path.dirname(args.config_filename))
-    config = add_full_paths(config, config_dir)
-
-    main(config)
+    main(sys.argv[1:])

@@ -23,6 +23,7 @@ import os
 import shutil
 import csv
 
+from nose.plugins.attrib import attr
 import nose.tools as nt
 
 import bluepymm
@@ -36,6 +37,7 @@ TMP_DIR = os.path.join(BASE_DIR, 'tmp/legacy')
 
 def _prepare_config_jsons(prepare_config_template_filename,
                           hoc_config_template_filename):
+    """Helper function to prepare configuration .json files."""
     # load json files
     prepare_config = tools.load_json(prepare_config_template_filename)
     hoc_config = tools.load_json(hoc_config_template_filename)
@@ -59,24 +61,116 @@ def _prepare_config_jsons(prepare_config_template_filename,
     return prepare_config_path, hoc_config_path
 
 
+@attr('unit')
+def test_get_parser():
+    """bluepymm.legacy: test get_parser"""
+    ret = bluepymm.legacy.create_hoc_files.get_parser()
+
+
+@attr('unit')
+def test_add_full_paths():
+    """bluepymm.legacy: test add_full_paths"""
+    test_dict = {'test': 'tmp/legacy', 'int': 1}
+    directory = BASE_DIR
+
+    tools.makedirs(TMP_DIR)
+    expected_ret = {'test': TMP_DIR, 'int': 1}
+    ret = bluepymm.legacy.create_hoc_files.add_full_paths(test_dict, directory)
+    nt.assert_dict_equal(ret, expected_ret)
+
+
+@attr('unit')
+def test_load_combinations_dict():
+    """bluepymm.legacy: test load_combinations_dict"""
+    test_path = os.path.join(TEST_DATA_DIR,
+                             'output_megate_expected/mecombo_emodel.tsv')
+
+    emodel1_mtype1_1_morph1 = {'morph_name': 'morph1',
+                               'layer': '1',
+                               'fullmtype': 'mtype1',
+                               'etype': 'etype1',
+                               'emodel': 'emodel1',
+                               'combo_name': 'emodel1_mtype1_1_morph1',
+                               'threshold_current': '',
+                               'holding_current': '',
+                               }
+    emodel1_mtype2_1_morph2 = {'morph_name': 'morph2',
+                               'layer': '1',
+                               'fullmtype': 'mtype2',
+                               'etype': 'etype1',
+                               'emodel': 'emodel1',
+                               'combo_name': 'emodel1_mtype2_1_morph2',
+                               'threshold_current': '',
+                               'holding_current': '',
+                               }
+    emodel2_mtype1_1_morph1 = {'morph_name': 'morph1',
+                               'layer': '1',
+                               'fullmtype': 'mtype1',
+                               'etype': 'etype2',
+                               'emodel': 'emodel2',
+                               'combo_name': 'emodel2_mtype1_1_morph1',
+                               'threshold_current': '',
+                               'holding_current': ''
+                               }
+    expected_ret = {'emodel1_mtype1_1_morph1': emodel1_mtype1_1_morph1,
+                    'emodel1_mtype2_1_morph2': emodel1_mtype2_1_morph2,
+                    'emodel2_mtype1_1_morph1': emodel2_mtype1_1_morph1,
+                    }
+    ret = bluepymm.legacy.create_hoc_files.load_combinations_dict(test_path)
+    nt.assert_dict_equal(ret, expected_ret)
+
+
+@attr('unit')
+def test_run_create_and_write_hoc_file():
+    """bluepymm.legacy: test run_create_and_write_hoc_file"""
+    emodel = 'emodel1'
+    emodel_dir = './data/emodels_dir/subdir/'
+    hoc_dir = './output/emodels_hoc'
+    emodel_parameters = {'cm': 1.0}
+    template = 'cell_template.jinja2'
+    template_dir = '.'
+    morph_path = 'morph.asc'
+    model_name = 'test'
+
+    with tools.cd(TEST_DATA_DIR):
+        tools.makedirs(hoc_dir)
+
+        bluepymm.legacy.create_hoc_files.run_create_and_write_hoc_file(
+            emodel, emodel_dir, hoc_dir, emodel_parameters, template,
+            template_dir, morph_path, model_name)
+
+        # TODO: test hoc file contents
+        template_name = model_name or emodel
+        hoc_filename = '{}.hoc'.format(template_name)
+        hoc_path = os.path.join(hoc_dir, hoc_filename)
+        nt.assert_true(os.path.isfile(hoc_path))
+
+
+def _verify_output(hoc_config_path):
+    """Helper function to verify output"""
+    hoc_config = tools.load_json(hoc_config_path)
+
+    # verify .hoc-files existence - TODO: verify content
+    nt.assert_true(os.path.isdir(hoc_config['hoc_output_dir']))
+    with open(hoc_config['mecombo_emodel_filename']) as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        for row in reader:
+            hoc_path = os.path.join(hoc_config['hoc_output_dir'],
+                                    '{}.hoc'.format(row['combo_name']))
+            nt.assert_true(os.path.isfile(hoc_path))
+
+
 def test_create_hoc_files():
-    """bluepymm.legacy: Test creation legacy .hoc files for example simple1"""
+    """bluepymm.legacy: test creation legacy .hoc files for example simple1"""
     prepare_config_template_filename = 'simple1_conf_prepare.json'
     hoc_config_template_filename = 'simple1_conf_hoc.json'
     with tools.cd(TEST_DATA_DIR):
         prepare_config_path, hoc_config_path = _prepare_config_jsons(
             prepare_config_template_filename, hoc_config_template_filename)
-        hoc_config = tools.load_json(hoc_config_path)
 
         # run combination preparation and create hoc files
         bluepymm.prepare_combos.main.prepare_combos(prepare_config_path, False)
-        bluepymm.legacy.create_hoc_files.main(hoc_config)
+        bluepymm.legacy.create_hoc_files.main([hoc_config_path])
 
-        # verify .hoc-files existence - TODO: verify content
-        nt.assert_true(os.path.isdir(hoc_config['hoc_output_dir']))
-        with open(hoc_config['mecombo_emodel_filename']) as f:
-            reader = csv.DictReader(f, delimiter='\t')
-            for row in reader:
-                hoc_path = os.path.join(hoc_config['hoc_output_dir'],
-                                        '{}.hoc'.format(row['combo_name']))
-                nt.assert_true(os.path.isfile(hoc_path))
+        # verify output
+        _verify_output(hoc_config_path)
