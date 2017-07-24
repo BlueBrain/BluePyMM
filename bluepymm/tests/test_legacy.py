@@ -30,36 +30,49 @@ from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/legacy')
 
 
-def _clear_directories(dirs):
-    """Clear directories"""
-    for unwanted in dirs:
-        if os.path.exists(unwanted):
-            shutil.rmtree(unwanted)
+def _prepare_config_jsons(prepare_config_template_filename,
+                          hoc_config_template_filename):
+    # load json files
+    prepare_config = tools.load_json(prepare_config_template_filename)
+    hoc_config = tools.load_json(hoc_config_template_filename)
+
+    # use TMP_DIR for output
+    tools.makedirs(TMP_DIR)
+    prepare_config['tmp_dir'] = os.path.abspath(os.path.join(TMP_DIR, 'tmp'))
+    prepare_config['output_dir'] = os.path.abspath(os.path.join(TMP_DIR,
+                                                                'output'))
+    hoc_config['emodels_tmp_dir'] = os.path.join(prepare_config['tmp_dir'],
+                                                 'emodels')
+    hoc_config['hoc_output_dir'] = os.path.abspath(os.path.join(TMP_DIR,
+                                                                'hoc_output'))
+
+    # write out changes to TMP_DIR
+    prepare_config_path = tools.write_json(
+        TMP_DIR, prepare_config_template_filename, prepare_config)
+    hoc_config_path = tools.write_json(
+        TMP_DIR, hoc_config_template_filename, hoc_config)
+
+    return prepare_config_path, hoc_config_path
 
 
 def test_create_hoc_files():
     """bluepymm.legacy: Test creation legacy .hoc files for example simple1"""
-    prepare_config_filename = 'simple1_conf_prepare.json'
-    hoc_config_filename = 'simple1_conf_hoc.json'
-    with tools.cd(TEST_DIR):
-        prepare_config = tools.load_json(prepare_config_filename)
-        hoc_config = tools.load_json(hoc_config_filename)
+    prepare_config_template_filename = 'simple1_conf_prepare.json'
+    hoc_config_template_filename = 'simple1_conf_hoc.json'
+    with tools.cd(TEST_DATA_DIR):
+        prepare_config_path, hoc_config_path = _prepare_config_jsons(
+            prepare_config_template_filename, hoc_config_template_filename)
+        hoc_config = tools.load_json(hoc_config_path)
 
-        # Make sure the output directories are clean
-        _clear_directories([prepare_config['tmp_dir'],
-                            prepare_config['output_dir'],
-                            hoc_config['hoc_output_dir']])
-
-        # Run combination preparation
-        bluepymm.prepare_combos.main.prepare_combos(
-            conf_filename=prepare_config_filename, continu=False)
-
+        # run combination preparation and create hoc files
+        bluepymm.prepare_combos.main.prepare_combos(prepare_config_path, False)
         bluepymm.legacy.create_hoc_files.main(hoc_config)
 
-        # Verify .hoc-files existence - TODO: content
+        # verify .hoc-files existence - TODO: verify content
         nt.assert_true(os.path.isdir(hoc_config['hoc_output_dir']))
         with open(hoc_config['mecombo_emodel_filename']) as f:
             reader = csv.DictReader(f, delimiter='\t')

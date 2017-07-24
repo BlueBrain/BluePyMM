@@ -22,7 +22,6 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 """
 
 import os
-import shutil
 
 import nose.tools as nt
 
@@ -31,17 +30,11 @@ from bluepymm import tools, prepare_combos
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-
-
-def _clear_dirs(dirs):
-    """Helper function to clear directories"""
-    for unwanted in dirs:
-        if os.path.exists(unwanted):
-            shutil.rmtree(unwanted)
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/prepare_combos')
 
 
 def _verify_emodel_json(filename, output_dir, nb_emodels):
-    """Verify emodel json output"""
+    """Helper function to verify emodel json output"""
     data_json = os.path.join(output_dir, filename)
     nt.assert_true(os.path.isfile(data_json))
     data = tools.load_json(data_json)
@@ -51,7 +44,7 @@ def _verify_emodel_json(filename, output_dir, nb_emodels):
 
 def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
                                   nb_emodels):
-    """Verify output of prepare combos"""
+    """Helper function to verify output of prepare combos"""
     # TODO: test database contents
     nt.assert_true(os.path.isfile(scores_db))
 
@@ -62,43 +55,61 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
     _verify_emodel_json('final.json', output_dir, nb_emodels)
-    emodel_dirs = _verify_emodel_json(
-        'emodel_dirs.json', output_dir, nb_emodels)
+    emodel_dirs = _verify_emodel_json('emodel_dirs.json', output_dir,
+                                      nb_emodels)
     for emodel in emodel_dirs:
         nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
 
 
-def _test_prepare_combos(test_dir, config_path, nb_emodels):
-    """Helper function to perform functional test prepare_combos"""
-    with tools.cd(test_dir):
-        config = tools.load_json(config_path)
+def _prepare_config_json(original_filename, test_dir):
+    """Helper function to prepare new configuration file."""
+    config = tools.load_json(original_filename)
+    config['tmp_dir'] = os.path.join(test_dir, 'tmp')
+    config['output_dir'] = os.path.join(test_dir, 'output')
+    config['scores_db'] = os.path.join(config['output_dir'], 'scores.sqlite')
+    config['emodels_hoc_dir'] = os.path.join(config['output_dir'],
+                                             'emodels_hoc')
+    tools.makedirs(test_dir)
+    return tools.write_json(test_dir, 'config.json', config)
 
-        # make sure the output directories are clean
-        _clear_dirs([config['tmp_dir'], config['output_dir']])
+
+def _test_prepare_combos(test_data_dir, config_template_path, nb_emodels,
+                         test_dir):
+    """Helper function to perform functional test prepare_combos"""
+    with tools.cd(test_data_dir):
+        # prepare new configuration file based on test_dir
+        config_path = _prepare_config_json(config_template_path, test_dir)
 
         # run combination preparation
         prepare_combos.main.prepare_combos(conf_filename=config_path,
                                            continu=False)
 
         # test output
+        config = tools.load_json(config_path)
         _verify_prepare_combos_output(config['scores_db'],
                                       config['emodels_hoc_dir'],
                                       config['output_dir'], nb_emodels)
 
 
 def test_prepare_combos_from_dir():
-    """bluepymm.prepare_combos: test prepare_combos based on example simple1
-    with plain dir input"""
-    config_path = 'simple1_conf_prepare.json'
+    """bluepymm.prepare_combos: test prepare_combos with plain directory input
+    based on example simple1
+    """
+    config_template_path = 'simple1_conf_prepare.json'
     nb_emodels = 2
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_combos_from_dir')
 
-    _test_prepare_combos(TEST_DATA_DIR, config_path, nb_emodels)
+    _test_prepare_combos(TEST_DATA_DIR, config_template_path, nb_emodels,
+                         test_dir)
 
 
 def test_prepare_combos_from_git_repo():
-    """bluepymm.prepare_combos: test prepare_combos based on example simple1
-    with git repo input"""
-    config_path = 'simple1_conf_prepare_git.json'
+    """bluepymm.prepare_combos: test prepare_combos with git repo input
+    based on example simple1
+    """
+    config_template_path = 'simple1_conf_prepare_git.json'
     nb_emodels = 2
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_combos_from_git_repo')
 
-    _test_prepare_combos(TEST_DATA_DIR, config_path, nb_emodels)
+    _test_prepare_combos(TEST_DATA_DIR, config_template_path, nb_emodels,
+                         test_dir)

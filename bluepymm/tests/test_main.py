@@ -31,14 +31,8 @@ import bluepymm
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-
-
-def _clear_dirs(dirs):
-    """Helper function to clear directories"""
-    for unwanted in dirs:
-        if os.path.exists(unwanted):
-            shutil.rmtree(unwanted)
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/main')
 
 
 def _verify_emodel_json(filename, output_dir, nb_emodels):
@@ -63,10 +57,8 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
         nt.assert_equal(hoc_file[-4:], '.hoc')
 
     _verify_emodel_json('final.json', output_dir, nb_emodels)
-    emodel_dirs = _verify_emodel_json(
-        'emodel_dirs.json',
-        output_dir,
-        nb_emodels)
+    emodel_dirs = _verify_emodel_json('emodel_dirs.json', output_dir,
+                                      nb_emodels)
     for emodel in emodel_dirs:
         nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
 
@@ -97,70 +89,108 @@ def _verify_run_combos_output(scores_db):
     """
 
 
-def _verify_select_combos_output():
-    """Helper function to verify the output of the select combos step"""
-    matches = filecmp.cmpfiles(
-        'output_megate_expected', 'output_megate',
-        ['mecombo_emodel.tsv', 'extNeuronDB.dat'])
+def _verify_select_combos_output(benchmark_dir, output_dir, config):
+    """Helper function to verify output of combination selection"""
+    files = [os.path.basename(f) for f in [config['mecombo_emodel_filename'],
+                                           config['extneurondb_filename']]]
+    matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
 
-    if len(matches[0]) != 2:
-        print('Mismatch in files: %s' % matches[1])
+    if len(matches[0]) != len(files):
+        print('Mismatch in files: {}'.format(matches[1]))
+    nt.assert_equal(len(matches[0]), len(files))
 
-    nt.assert_equal(len(matches[0]), 2)
+
+def _new_prepare_json(original_filename, test_dir):
+    """Helper function to prepare new configuration file for prepare_combos."""
+    config = bluepymm.tools.load_json(original_filename)
+    config['tmp_dir'] = os.path.join(test_dir, 'tmp')
+    config['output_dir'] = os.path.join(test_dir, 'output')
+    config['scores_db'] = os.path.join(config['output_dir'], 'scores.sqlite')
+    config['emodels_hoc_dir'] = os.path.join(config['output_dir'],
+                                             'emodels_hoc')
+    return bluepymm.tools.write_json(test_dir, original_filename, config)
 
 
-def _test_main(test_dir, prepare_config_json, run_config_json,
-               select_config_json, nb_emodels):
+def _new_run_json(original_filename, test_dir):
+    """Helper function to prepare new configuration file for run_combos."""
+    config = bluepymm.tools.load_json(original_filename)
+    config['output_dir'] = os.path.join(test_dir, 'output')
+    config['scores_db'] = os.path.join(config['output_dir'], 'scores.sqlite')
+    return bluepymm.tools.write_json(test_dir, original_filename, config)
+
+
+def _new_select_json(original_filename, test_dir):
+    """Helper function to prepare new configuration file for select_combos."""
+    config = bluepymm.tools.load_json(original_filename)
+    config['scores_db'] = os.path.join(test_dir, 'output', 'scores.sqlite')
+    config['pdf_filename'] = os.path.join(test_dir, 'megating.pdf')
+    config['extneurondb_filename'] = os.path.join(test_dir, 'extNeuronDB.dat')
+    config['mecombo_emodel_filename'] = os.path.join(test_dir,
+                                                     'mecombo_emodel.tsv')
+    return bluepymm.tools.write_json(test_dir, original_filename, config)
+
+
+def _test_main(test_data_dir, prepare_config_json, run_config_json,
+               select_config_json, nb_emodels, test_dir):
     """Helper function to test complete BluePyMM workflow"""
-    with bluepymm.tools.cd(test_dir):
-        # Make sure the output directories are clean
-        _clear_dirs(['tmp', 'output', 'output_megate'])
 
-        # Prepare combinations
+    bluepymm.tools.makedirs(test_dir)
+
+    with bluepymm.tools.cd(test_data_dir):
+        # prepare new configuration files based on 'test_dir'
+        prepare_config_json = _new_prepare_json(prepare_config_json, test_dir)
+        run_config_json = _new_run_json(run_config_json, test_dir)
+        select_config_json = _new_select_json(select_config_json, test_dir)
+
+        # prepare combinations
         args_list = ['prepare', prepare_config_json]
         bluepymm.main.run(args_list)
 
-        # Verify prepared combinations
+        # verify prepared combinations
         prepare_config = bluepymm.tools.load_json(prepare_config_json)
         _verify_prepare_combos_output(prepare_config['scores_db'],
                                       prepare_config['emodels_hoc_dir'],
                                       prepare_config['output_dir'], nb_emodels)
 
-        # Run combinations
+        # run combinations
         args_list = ['run', run_config_json]
         bluepymm.main.run(args_list)
 
-        # Verify run combinations
+        # verify run combinations
         run_config = bluepymm.tools.load_json(run_config_json)
         _verify_run_combos_output(run_config['scores_db'])
 
-        # Select combinations
+        # select combinations
         args_list = ['select', select_config_json]
         bluepymm.main.run(args_list)
 
-        # Test selection output
-        _verify_select_combos_output()
+        # test selection output
+        _verify_select_combos_output(
+            'output_megate_expected', test_dir,
+            bluepymm.tools.load_json(select_config_json))
 
 
 def test_main_from_dir():
-    """bluepymm.main: test complete BluePyMM workflow on for example simple1
-    with input directories"""
+    """bluepymm.main: test full BluePyMM workflow with plain directory input
+    based on example simple1"""
     prepare_config_json = 'simple1_conf_prepare.json'
     run_config_json = 'simple1_conf_run.json'
     select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
+    test_dir = os.path.join(TMP_DIR, 'test_main_from_dir')
 
-    _test_main(TEST_DIR, prepare_config_json, run_config_json,
-               select_config_json, nb_emodels)
+    _test_main(TEST_DATA_DIR, prepare_config_json, run_config_json,
+               select_config_json, nb_emodels, test_dir)
 
 
 def test_main_from_git_repo():
-    """bluepymm.main: test complete BluePyMM workflow on for example simple1
-    with input directories"""
+    """bluepymm.main: test full BluePyMM workflow with git repo input
+    based on example simple1"""
     prepare_config_json = 'simple1_conf_prepare_git.json'
     run_config_json = 'simple1_conf_run.json'
     select_config_json = 'simple1_conf_select.json'
     nb_emodels = 2
+    test_dir = os.path.join(TMP_DIR, 'test_main_from_git_repo')
 
-    _test_main(TEST_DIR, prepare_config_json, run_config_json,
-               select_config_json, nb_emodels)
+    _test_main(TEST_DATA_DIR, prepare_config_json, run_config_json,
+               select_config_json, nb_emodels, test_dir)
