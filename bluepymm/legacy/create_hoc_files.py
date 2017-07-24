@@ -94,8 +94,8 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
     """Create a .hoc file for every combination in a given database.
 
     Args:
-        combinations_dict: Dictionary with emodel - morphology combinations.
-        emodels_dir: Directory containing all emodel data as used by the
+        combinations_dict: Dictionary with e-model - morphology combinations.
+        emodels_dir: Directory containing all e-model data as used by the
                      application 'bluepymm'.
         final_dict: Dictionary with emodel parameters.
         template: Template to be used to create .hoc files.
