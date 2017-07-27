@@ -29,6 +29,7 @@ from nose.plugins.attrib import attr
 import nose.tools as nt
 
 import bluepymm.select_combos as select_combos
+from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -36,15 +37,15 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/megate_output')
 
 
-def _test_save_megate_results(data, sort_key):
+def _test_save_megate_results(data, sort_key, test_dir):
     # input parameters
     columns = ['morph_name', 'layer', 'fullmtype', 'etype', 'emodel',
                'combo_name', 'threshold_current', 'holding_current']
     df = pandas.DataFrame(data, columns=columns)
     dat_filename = 'extNeuronDB.dat'
     tsv_filename = 'mecombo_emodel.tsv'
-    extneurondbdat = os.path.join(TMP_DIR, dat_filename)
-    mecombo_emodel = os.path.join(TMP_DIR, tsv_filename)
+    extneurondbdat = os.path.join(test_dir, dat_filename)
+    mecombo_emodel = os.path.join(test_dir, tsv_filename)
 
     # save_megate_results
     select_combos.megate_output.save_megate_results(df,
@@ -55,7 +56,7 @@ def _test_save_megate_results(data, sort_key):
     # verify output files
     benchmark_dir = os.path.join(TEST_DATA_DIR, 'output_megate_expected')
     files = [dat_filename, tsv_filename]
-    matches = filecmp.cmpfiles(benchmark_dir, TMP_DIR, files)
+    matches = filecmp.cmpfiles(benchmark_dir, test_dir, files)
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
     nt.assert_equal(len(matches[0]), len(files))
@@ -70,7 +71,9 @@ def test_save_megate_results_no_sort():
              'emodel1_mtype2_1_morph2', '', ''),
             ('morph1', 1, 'mtype1', 'etype2', 'emodel2',
              'emodel2_mtype1_1_morph1', '', '')]
-    _test_save_megate_results(data, None)
+    test_dir = os.path.join(TMP_DIR, 'test_save_megate_results_no_sort')
+    tools.makedirs(test_dir)
+    _test_save_megate_results(data, None, test_dir)
 
 
 @attr('unit')
@@ -82,4 +85,6 @@ def test_save_megate_results_sort():
              'emodel2_mtype1_1_morph1', '', ''),
             ('morph2', 1, 'mtype2', 'etype1', 'emodel1',
              'emodel1_mtype2_1_morph2', '', '')]
-    _test_save_megate_results(data, 'combo_name')
+    test_dir = os.path.join(TMP_DIR, 'test_save_megate_results_sort')
+    tools.makedirs(test_dir)
+    _test_save_megate_results(data, 'combo_name', test_dir)

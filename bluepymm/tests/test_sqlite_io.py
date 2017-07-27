@@ -28,16 +28,16 @@ from nose.plugins.attrib import attr
 import nose.tools as nt
 
 from bluepymm.select_combos import sqlite_io
+from bluepymm import tools
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_sqlite_io')
 
 
-def _create_database(filename, scores, score_values):
+def _create_database(test_dir, filename, scores, score_values):
     """Helper function to create test database."""
-    path = os.path.join(TMP_DIR, filename)
-    if not os.path.exists(TMP_DIR):
-        os.makedirs(TMP_DIR)
+    path = os.path.join(test_dir, filename)
     with sqlite3.connect(path) as conn:
         scores.to_sql('scores', conn, if_exists='replace', index=False)
         score_values.to_sql('score_values', conn, if_exists='replace')
@@ -52,8 +52,11 @@ def test_read_and_process_sqlite_score_tables():
     scores = pandas.DataFrame(scores_row, index=[0])
     score_values_row = {'value': 2}
     score_values = pandas.DataFrame(score_values_row, index=[0])
+    test_dir = os.path.join(
+        TMP_DIR, 'test_read_and_process_sqlite_score_tables')
+    tools.makedirs(test_dir)
     filename = 'test_db.sql'
-    path = _create_database(filename, scores, score_values)
+    path = _create_database(test_dir, filename, scores, score_values)
 
     # read database
     ret_scs, ret_sc_vals = sqlite_io.read_and_process_sqlite_score_tables(path)
@@ -74,8 +77,11 @@ def test_read_and_process_sqlite_score_tables_error():
     scores = pandas.DataFrame(scores_row)
     score_values_row = {'value': 2}
     score_values = pandas.DataFrame(score_values_row, index=[0])
+    test_dir = os.path.join(
+        TMP_DIR, 'test_read_and_process_sqlite_score_tables_error')
+    tools.makedirs(test_dir)
     filename = 'test_db_error.sql'
-    path = _create_database(filename, scores, score_values)
+    path = _create_database(test_dir, filename, scores, score_values)
 
     # read database, number of rows incompatible -> exception
     nt.assert_raises(Exception, sqlite_io.read_and_process_sqlite_score_tables,

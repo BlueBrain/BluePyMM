@@ -28,9 +28,10 @@ from nose.plugins.attrib import attr
 from bluepymm.prepare_combos import prepare_emodel_dirs
 from bluepymm import tools
 
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-TMP_DIR = os.path.join(BASE_DIR, 'tmp/prepare_emodel_dirs')
+TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_prepare_emodel_dirs')
 
 
 @attr('unit')
@@ -213,6 +214,11 @@ def test_prepare_emodel_dir():
     """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dir
     based on test example 'simple1'.
     """
+    # create test directory, where output of this test will be created
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dir')
+    tools.makedirs(test_dir)
+
+    # input parameters
     original_emodel = 'emodel1'
     emodel = 'emodel1'
     emodel_dict = {'main_path': '.',
@@ -224,17 +230,16 @@ def test_prepare_emodel_dir():
                    'fitness': {'Step1.SpikeCount': 20.0},
                    'score': 104.72906197480131,
                    'morph_path': 'morphologies/morph1.asc'}
-    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dir')
-    emodels_dir = os.path.join(test_dir, './tmp/emodels/')
-    opt_dir = os.path.join(test_dir, './tmp/emodels_repo/')
-    hoc_dir = os.path.join(test_dir, './output/emodels_hoc/')
+    emodels_dir = os.path.join(test_dir, 'tmp/emodels/')
+    opt_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
+    hoc_dir = os.path.join(test_dir, 'output/emodels_hoc/')
     emodels_in_repo = False
     continu = False
 
     with tools.cd(TEST_DATA_DIR):
-        for path in [emodels_dir, opt_dir, hoc_dir]:
+        # create output directories and run function
+        for path in [emodels_dir, hoc_dir]:
             tools.makedirs(path)
-
         arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
                     os.path.abspath(hoc_dir), emodels_in_repo, continu)
         ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
@@ -256,6 +261,11 @@ def test_prepare_emodel_dirs():
     """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dirs
     based on test example 'simple1'.
     """
+    # create test directory, where output of this test will be created
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dirs')
+    tools.makedirs(test_dir)
+
+    # input parameters
     final_dict = {'emodel1': {'main_path': '.',
                               'seed': 2,
                               'rank': 0,
@@ -280,24 +290,21 @@ def test_prepare_emodel_dirs():
                         'emodel2': {'mm_recipe': 'emodel2',
                                     'etype': 'etype2',
                                     'layer': ['1', '2']}}
+    emodels_dir = os.path.join(test_dir, 'tmp/emodels/')
+    opt_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
+    emodels_hoc_dir = os.path.join(test_dir, './output/emodels_hoc/')
     emodels_in_repo = False
     continu = False
-    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dirs')
 
+    # run function
     with tools.cd(TEST_DATA_DIR):
-        emodels_dir = os.path.abspath(os.path.join(test_dir, './tmp/emodels/'))
-        opt_dir = os.path.join(test_dir, './tmp/emodels_repo')
-        tools.makedirs(opt_dir)
-        emodels_hoc_dir = os.path.abspath(
-            os.path.join(test_dir, './output/emodels_hoc/'))
-
-        expected_ret = {emodel: os.path.join(
-            emodels_dir, emodel) for emodel in final_dict}
-
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
             emodels_hoc_dir, emodels_in_repo, continu)
 
+    # verify output
+    expected_ret = {emodel: os.path.join(
+        emodels_dir, emodel) for emodel in final_dict}
+    nt.assert_dict_equal(ret, expected_ret)
     nt.assert_true(os.path.isdir(emodels_dir))
     nt.assert_true(os.path.isdir(emodels_hoc_dir))
-    nt.assert_dict_equal(ret, expected_ret)
