@@ -198,45 +198,28 @@ def save_scores(scores_db_filename, uid, scores, extra_values, exception,
         scores: scores dict to be added to entry as a json string
         extra_values: dict to be added to entry as a json string
         exception: description of exception that may have happened during score
-            calculation
+                   calculation
         float_representation: use for json encoding. Default is '.17g'.
 
     Returns:
         ValueError if entry has already been updated.
     """
-
     json.encoder.FLOAT_REPR = lambda x: format(x, float_representation)
 
-    while True:
-        try:
-            with sqlite3.connect(scores_db_filename) as scores_db:
-                # Make sure we don't update a row that was already executed
-                scores_cursor = scores_db.execute(
-                    'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
-                    (uid, False))
-                if scores_cursor.fetchone() is None:
-                    # Update row with calculated scores and related values
-                    scores_db.execute(
-                        'UPDATE scores SET '
-                        'scores=?, '
-                        'extra_values=?, '
-                        'exception=?, '
-                        'to_run=? '
-                        'WHERE `index`=?',
-                        (json.dumps(scores),
-                         json.dumps(extra_values),
-                         exception,
-                         False,
-                         uid))
-                    break
-                else:
-                    raise ValueError(
-                        'save_scores: trying to update scores in a row that '
-                        'was already executed: %d' % uid)
-                    break
-        except sqlite3.OperationalError:
-            # Keep retrying if database is locked
-            pass
+    with sqlite3.connect(scores_db_filename) as scores_db:
+        # make sure we don't update a row that was already executed
+        scores_cursor = scores_db.execute(
+            'SELECT `index` FROM scores WHERE `index`=? AND to_run=?',
+            (uid, False))
+        if scores_cursor.fetchone() is None:
+            # update row with calculated scores and related values
+            scores_db.execute('UPDATE scores SET scores=?, extra_values=?, '
+                              'exception=?, to_run=? WHERE `index`=?',
+                              (json.dumps(scores), json.dumps(extra_values),
+                               exception, False, uid))
+        else:
+            raise ValueError('save_scores: trying to update scores in a row '
+                             'that was already executed: %d' % uid)
 
 
 def expand_scores_to_score_values_table(scores_sqlite_filename):
