@@ -237,7 +237,7 @@ def prepare_emodel_dir(input_args):
 
                     create_and_write_hoc_file(
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
-                        'cell_template.jinja2')
+                        'cell_template_neurodamus.jinja2')
 
     except:
         raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
