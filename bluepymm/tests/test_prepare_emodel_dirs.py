@@ -181,7 +181,7 @@ def test_create_and_write_hoc_file_none():
     emodel_dir = './data/emodels_dir/subdir/'
     hoc_dir = './output/emodels_hoc'
     emodel_parameters = {'cm': 1.0}
-    template = 'cell_template.jinja2'
+    template = 'cell_template_neuron.jinja2'
     morph_path = None
     model_name = None
 
@@ -199,7 +199,7 @@ def test_create_and_write_hoc_file_morph_path_model_name():
     emodel_dir = './data/emodels_dir/subdir/'
     hoc_dir = './output/emodels_hoc'
     emodel_parameters = {'cm': 1.0}
-    template = 'cell_template.jinja2'
+    template = 'cell_template_neuron.jinja2'
     morph_path = 'morph.asc'
     model_name = 'test'
 
