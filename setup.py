@@ -50,6 +50,7 @@ setuptools.setup(
         'License :: Other/Proprietary License'],
     entry_points={'console_scripts': ['bluepymm=bluepymm.main:main'], },
     package_data={
-        'bluepymm': ['templates/cell_template.jinja2'],
+        'bluepymm': ['templates/cell_template_neuron.jinja2',
+                     'templates/cell_template_neurodamus.jinja2'],
     }
 )
