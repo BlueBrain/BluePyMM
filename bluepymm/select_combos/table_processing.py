@@ -84,6 +84,7 @@ def row_threshold_transform(row, megate_patterns):
     Args:
         row: has keys 'emodel', 'fullmtype', 'etype', and
             'megate_feature_threshold'
+        megate_patterns: a list of megate patterns
 
     Returns:
         Processed row data: for all me-gate patterns that match the row data,

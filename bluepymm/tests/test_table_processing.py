@@ -23,6 +23,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 import json
 import pandas
 import os
+import re
 from string import digits
 
 import nose.tools as nt
@@ -113,6 +114,75 @@ def test_check_opt_scores():
     scores = pandas.DataFrame(scores_dict)
     nt.assert_raises(Exception, table_processing.check_opt_scores, emodel,
                      scores)
+
+
+@attr('unit')
+def test_process_emodel():
+    # input parameters
+    emodel = 'emodel1'
+    mtypes = ['mtype1', 'mtype2']
+    scores_dict = {'emodel': [emodel, emodel],
+                   'is_exemplar': [1, 0], 'is_repaired': [1, 0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                                  json.dumps({'Step1.SpikeCount': 2.0})],
+                   'scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                              json.dumps({'Step1.SpikeCount': 2.0})],
+                   'etype': ['etype1', 'etype2'],
+                   'fullmtype': mtypes,
+                   'mtype': mtypes,
+                   'extra_values': [json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0}),
+                                    json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0})],
+                   'morph_name': ['morph1', 'morph1'],
+                   'layer': ['layer_1', 'layer_1']
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    score_values_dict = {'Step1.SpikeCount': [2.0, 2.0]}
+    score_values = pandas.DataFrame(score_values_dict)
+    to_skip_patterns = []
+    regex_all = re.compile('.*')
+    megate_patterns = [{'megate_feature_threshold': {'megate_threshold': 5,
+                                                     'features': regex_all},
+                        'emodel': regex_all, 'fullmtype': regex_all,
+                        'etype': regex_all}]
+
+    skip_repaired_exemplar = True
+    enable_check_opt_scores = True
+
+    # run function
+    ret = table_processing.process_emodel(
+        emodel, scores, score_values, to_skip_patterns, megate_patterns,
+        skip_repaired_exemplar, enable_check_opt_scores)
+
+    # expected results
+    columns = ['morph_name', 'layer', 'fullmtype', 'etype', 'emodel',
+               'combo_name', 'threshold_current', 'holding_current']
+    db_dict = {'morph_name': 'morph1',
+               'layer': 'layer_1',
+               'fullmtype': 'mtype2',
+               'etype': 'etype2',
+               'emodel': 'emodel1',
+               'threshold_current': 0.0,
+               'holding_current': 0.0,
+               'combo_name': 'emodel1_mtype2_layer_1_morph1'
+               }
+    exp_db = pandas.DataFrame(data=db_dict, columns=columns, index=[1])
+
+    columns = ['Step1.SpikeCount', 'Passed all']
+    megate_scores_dict = {'Step1.SpikeCount': True, 'Passed all': True}
+    exp_megate_scores = pandas.DataFrame(data=megate_scores_dict,
+                                         columns=columns, index=[1])
+
+    exp_score_values = pandas.DataFrame({'Step1.SpikeCount': 2.0}, index=[1])
+
+    exp_mtypes = pandas.Series('mtype2', index=[1], name='mtype')
+
+    # verify results
+    pandas.util.testing.assert_frame_equal(ret[0], exp_db)
+    pandas.util.testing.assert_frame_equal(ret[1], exp_megate_scores)
+    pandas.util.testing.assert_frame_equal(ret[2], exp_score_values)
+    pandas.util.testing.assert_series_equal(ret[3], exp_mtypes)
 
 
 @attr('unit')
