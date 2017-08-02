@@ -213,6 +213,15 @@ def process_emodel(emodel,
         - megate_scores: pandas.DataFrame with megate scores (fail/success)
         - emodel_score_values: pandas.DataFrame with score values
         - mtypes: pandas.DataFrame with tested m-types
+
+        None:
+        - if boolean skip_repaired_exemplar is set to False, and no repaired
+          exemplars are available,
+        - if the e-model was not run on any released morphology
+
+    Raises:
+        Exception, skip_repaired_exemplar is set to False and more than one
+        exemplars are found.
     """
     print('Processing e-model %s' % emodel)
 
@@ -229,16 +238,18 @@ def process_emodel(emodel,
             (scores.is_exemplar == 1) &
             (scores.is_repaired == 1) &
             (scores.is_original == 0) &
-            (scores.morph_name == exemplar_morph)].head(1).copy()
+            (scores.morph_name == exemplar_morph)]
+
+        if len(exemplar_score_values) > 1:
+            raise Exception('Too many exemplars found for e-model %s: %s' %
+                            (emodel, exemplar_score_values))
+
+        exemplar_score_values = exemplar_score_values.head(1).copy()
         exemplar_score_values.dropna(axis=1, how='all', inplace=True)
 
         if len(exemplar_score_values) == 0:
             print('Skipping e-model %s: no repaired exemplars' % emodel)
             return
-
-        if len(exemplar_score_values) > 1:
-            raise Exception('Too many exemplars found for e-model %s: %s' %
-                            (emodel, exemplar_score_values))
 
         exemplar_row = exemplar_score_values.iloc[0]
 

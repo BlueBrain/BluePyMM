@@ -123,6 +123,7 @@ def test_process_emodel():
     mtypes = ['mtype1', 'mtype2']
     scores_dict = {'emodel': [emodel, emodel],
                    'is_exemplar': [1, 0], 'is_repaired': [1, 0],
+                   'is_original': [0, 0],
                    'opt_scores': [json.dumps({'Step1.SpikeCount': 2.0}),
                                   json.dumps({'Step1.SpikeCount': 2.0})],
                    'scores': [json.dumps({'Step1.SpikeCount': 2.0}),
@@ -147,7 +148,7 @@ def test_process_emodel():
                         'emodel': regex_all, 'fullmtype': regex_all,
                         'etype': regex_all}]
 
-    skip_repaired_exemplar = True
+    skip_repaired_exemplar = False
     enable_check_opt_scores = True
 
     # run function
@@ -183,6 +184,135 @@ def test_process_emodel():
     pandas.util.testing.assert_frame_equal(ret[1], exp_megate_scores)
     pandas.util.testing.assert_frame_equal(ret[2], exp_score_values)
     pandas.util.testing.assert_series_equal(ret[3], exp_mtypes)
+
+
+@attr('unit')
+def test_process_emodel_no_exemplars():
+    # input parameters
+    emodel = 'emodel1'
+    mtypes = ['mtype1', 'mtype2']
+    scores_dict = {'emodel': [emodel, emodel],
+                   'is_exemplar': [0, 0], 'is_repaired': [1, 0],
+                   'is_original': [1, 0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                                  json.dumps({'Step1.SpikeCount': 2.0})],
+                   'scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                              json.dumps({'Step1.SpikeCount': 2.0})],
+                   'etype': ['etype1', 'etype2'],
+                   'fullmtype': mtypes,
+                   'mtype': mtypes,
+                   'extra_values': [json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0}),
+                                    json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0})],
+                   'morph_name': ['morph1', 'morph1'],
+                   'layer': ['layer_1', 'layer_1']
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    score_values_dict = {'Step1.SpikeCount': [2.0, 2.0]}
+    score_values = pandas.DataFrame(score_values_dict)
+    to_skip_patterns = []
+    regex_all = re.compile('.*')
+    megate_patterns = [{'megate_feature_threshold': {'megate_threshold': 5,
+                                                     'features': regex_all},
+                        'emodel': regex_all, 'fullmtype': regex_all,
+                        'etype': regex_all}]
+
+    skip_repaired_exemplar = False
+    enable_check_opt_scores = True
+
+    # run function
+    ret = table_processing.process_emodel(
+        emodel, scores, score_values, to_skip_patterns, megate_patterns,
+        skip_repaired_exemplar, enable_check_opt_scores)
+
+    # verify results
+    nt.assert_is_none(ret)
+
+
+@attr('unit')
+def test_process_emodel_too_many_exemplars():
+    # input parameters
+    emodel = 'emodel1'
+    mtypes = ['mtype1', 'mtype2']
+    scores_dict = {'emodel': [emodel, emodel],
+                   'is_exemplar': [1, 1], 'is_repaired': [1, 1],
+                   'is_original': [0, 0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                                  json.dumps({'Step1.SpikeCount': 2.0})],
+                   'scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                              json.dumps({'Step1.SpikeCount': 2.0})],
+                   'etype': ['etype1', 'etype2'],
+                   'fullmtype': mtypes,
+                   'mtype': mtypes,
+                   'extra_values': [json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0}),
+                                    json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0})],
+                   'morph_name': ['morph1', 'morph1'],
+                   'layer': ['layer_1', 'layer_1']
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    score_values_dict = {'Step1.SpikeCount': [2.0, 2.0]}
+    score_values = pandas.DataFrame(score_values_dict)
+    to_skip_patterns = []
+    regex_all = re.compile('.*')
+    megate_patterns = [{'megate_feature_threshold': {'megate_threshold': 5,
+                                                     'features': regex_all},
+                        'emodel': regex_all, 'fullmtype': regex_all,
+                        'etype': regex_all}]
+
+    skip_repaired_exemplar = False
+    enable_check_opt_scores = True
+
+    # run function
+    nt.assert_raises(Exception, table_processing.process_emodel, emodel,
+                     scores, score_values, to_skip_patterns, megate_patterns,
+                     skip_repaired_exemplar, enable_check_opt_scores)
+
+
+@attr('unit')
+def test_process_emodel_no_released_morphologies():
+    # input parameters
+    emodel = 'emodel1'
+    mtypes = ['mtype1', 'mtype2']
+    scores_dict = {'emodel': [emodel, emodel],
+                   'is_exemplar': [1, 1], 'is_repaired': [1, 0],
+                   'is_original': [1, 0],
+                   'opt_scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                                  json.dumps({'Step1.SpikeCount': 2.0})],
+                   'scores': [json.dumps({'Step1.SpikeCount': 2.0}),
+                              json.dumps({'Step1.SpikeCount': 2.0})],
+                   'etype': ['etype1', 'etype2'],
+                   'fullmtype': mtypes,
+                   'mtype': mtypes,
+                   'extra_values': [json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0}),
+                                    json.dumps({'threshold_current': 0.0,
+                                                'holding_current': 0.0})],
+                   'morph_name': ['morph1', 'morph1'],
+                   'layer': ['layer_1', 'layer_1']
+                   }
+    scores = pandas.DataFrame(scores_dict)
+    score_values_dict = {'Step1.SpikeCount': [2.0, 2.0]}
+    score_values = pandas.DataFrame(score_values_dict)
+    to_skip_patterns = []
+    regex_all = re.compile('.*')
+    megate_patterns = [{'megate_feature_threshold': {'megate_threshold': 5,
+                                                     'features': regex_all},
+                        'emodel': regex_all, 'fullmtype': regex_all,
+                        'etype': regex_all}]
+
+    skip_repaired_exemplar = True
+    enable_check_opt_scores = True
+
+    # run function
+    ret = table_processing.process_emodel(
+        emodel, scores, score_values, to_skip_patterns, megate_patterns,
+        skip_repaired_exemplar, enable_check_opt_scores)
+
+    # verify results
+    nt.assert_is_none(ret)
 
 
 @attr('unit')
