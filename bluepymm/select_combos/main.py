@@ -76,13 +76,10 @@ def select_combos_from_conf(conf_dict):
     print('Wrote pdf to %s' % pdf_filename)
 
     # write output files
-    tools.makedirs(output_dir)
-    if conf_dict.get('make_template_name_compatible', False):
-        log_filename = 'log_make_template_name_compatible.csv'
-        log_path = os.path.join(output_dir, log_filename)
-        table_processing.process_combo_name(ext_neurondb, log_path)
+    compliant = conf_dict.get('make_names_neuron_compliant', False)
     megate_output.save_megate_results(ext_neurondb, output_dir,
-                                      sort_key='combo_name')
+                                      sort_key='combo_name',
+                                      make_names_neuron_compliant=compliant)
 
 
 def add_parser(action):
