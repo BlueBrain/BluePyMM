@@ -47,23 +47,22 @@ def select_combos_from_conf(conf_dict):
     """
     scores_db_filename = conf_dict['scores_db']
     pdf_filename = conf_dict['pdf_filename']
-    extneurondb_filename = conf_dict['extneurondb_filename']
-    mecombo_emodel_filename = conf_dict['mecombo_emodel_filename']
+    output_dir = conf_dict['output_dir']
 
-    # Read skip features
+    # read skip features
     to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
         conf_dict)
 
-    # Read megate thresholds
+    # read megate thresholds
     megate_patterns, megate_thresholds = proc_config.read_megate_thresholds(
         conf_dict)
 
-    # Read score tables
+    # read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_db_filename)
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
-    # Create final database and write report
+    # create final database and write report
     ext_neurondb = reporting.create_final_db_and_write_report(
         pdf_filename,
         to_skip_features,
@@ -76,18 +75,14 @@ def select_combos_from_conf(conf_dict):
         conf_dict.get('plot_emodels_per_morphology', False))
     print('Wrote pdf to %s' % pdf_filename)
 
-    # Write extNeuronDB.dat
+    # write output files
+    tools.makedirs(output_dir)
     if conf_dict.get('make_template_name_compatible', False):
-        log_filename = os.path.join(os.path.dirname(extneurondb_filename),
-                                    'log_make_template_name_compatible.csv')
-        table_processing.process_combo_name(ext_neurondb, log_filename)
-
-    megate_output.save_megate_results(ext_neurondb,
-                                      extneurondb_filename,
-                                      mecombo_emodel_filename,
-                                      'combo_name')
-    print('Wrote extneurondb.dat to %s' % extneurondb_filename)
-    print('Wrote mecombo_emodel.tsv to %s' % mecombo_emodel_filename)
+        log_filename = 'log_make_template_name_compatible.csv'
+        log_path = os.path.join(output_dir, log_filename)
+        table_processing.process_combo_name(ext_neurondb, log_path)
+    megate_output.save_megate_results(ext_neurondb, output_dir,
+                                      sort_key='combo_name')
 
 
 def add_parser(action):

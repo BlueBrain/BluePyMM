@@ -42,20 +42,14 @@ def _test_save_megate_results(data, sort_key, test_dir):
     columns = ['morph_name', 'layer', 'fullmtype', 'etype', 'emodel',
                'combo_name', 'threshold_current', 'holding_current']
     df = pandas.DataFrame(data, columns=columns)
-    dat_filename = 'extNeuronDB.dat'
-    tsv_filename = 'mecombo_emodel.tsv'
-    extneurondbdat = os.path.join(test_dir, dat_filename)
-    mecombo_emodel = os.path.join(test_dir, tsv_filename)
 
     # save_megate_results
-    select_combos.megate_output.save_megate_results(df,
-                                                    extneurondbdat,
-                                                    mecombo_emodel,
-                                                    sort_key)
+    select_combos.megate_output.save_megate_results(df, test_dir,
+                                                    sort_key=sort_key)
 
     # verify output files
     benchmark_dir = os.path.join(TEST_DATA_DIR, 'output_megate_expected')
-    files = [dat_filename, tsv_filename]
+    files = ['extneurondb.dat', 'mecombo_emodel.tsv']
     matches = filecmp.cmpfiles(benchmark_dir, test_dir, files)
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))

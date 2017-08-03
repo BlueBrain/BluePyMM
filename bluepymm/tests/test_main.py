@@ -89,12 +89,10 @@ def _verify_run_combos_output(scores_db):
     """
 
 
-def _verify_select_combos_output(benchmark_dir, output_dir, config):
+def _verify_select_combos_output(benchmark_dir, output_dir):
     """Helper function to verify output of combination selection"""
-    files = [os.path.basename(f) for f in [config['mecombo_emodel_filename'],
-                                           config['extneurondb_filename']]]
+    files = ['extneurondb.dat', 'mecombo_emodel.tsv']
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
-
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
     nt.assert_equal(len(matches[0]), len(files))
@@ -124,9 +122,7 @@ def _new_select_json(original_filename, test_dir):
     config = bluepymm.tools.load_json(original_filename)
     config['scores_db'] = os.path.join(test_dir, 'output', 'scores.sqlite')
     config['pdf_filename'] = os.path.join(test_dir, 'megating.pdf')
-    config['extneurondb_filename'] = os.path.join(test_dir, 'extNeuronDB.dat')
-    config['mecombo_emodel_filename'] = os.path.join(test_dir,
-                                                     'mecombo_emodel.tsv')
+    config['output_dir'] = os.path.join(test_dir, 'output')
     return bluepymm.tools.write_json(test_dir, original_filename, config)
 
 
@@ -165,9 +161,9 @@ def _test_main(test_data_dir, prepare_config_json, run_config_json,
         bluepymm.main.run(args_list)
 
         # test selection output
-        _verify_select_combos_output(
-            'output_megate_expected', test_dir,
-            bluepymm.tools.load_json(select_config_json))
+        select_config = bluepymm.tools.load_json(select_config_json)
+        _verify_select_combos_output('output_megate_expected',
+                                     select_config['output_dir'])
 
 
 def test_main_from_dir():

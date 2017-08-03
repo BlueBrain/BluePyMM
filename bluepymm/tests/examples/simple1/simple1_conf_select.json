@@ -6,8 +6,7 @@
    "megate_thresholds": [
        {"emodel": [".*"], "fullmtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
    ],
-   "extneurondb_filename": "output_megate/extNeuronDB.dat",
-   "mecombo_emodel_filename": "output_megate/mecombo_emodel.tsv",
+   "output_dir": "./output_megate",
    "check_opt_scores": true,
    "plot_emodels_per_morphology": true
 }
