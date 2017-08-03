@@ -25,8 +25,6 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import os
 
-from bluepymm import tools
-
 
 def _write_extneurondbdat(extneurondb, filename):
     """Write extneurondb.dat"""
@@ -43,27 +41,33 @@ def _write_extneurondbdat(extneurondb, filename):
     pure_extneuron_db.to_csv(filename, sep=' ', index=False, header=False)
 
 
-def save_megate_results(extneurondb, extneurondbdat_filename,
-                        mecombo_emodel_filename, sort_key=None):
+def save_megate_results(extneurondb, output_dir,
+                        extneurondb_filename='extneurondb.dat',
+                        mecombo_emodel_filename='mecombo_emodel.tsv',
+                        sort_key=None):
     """Write results of megating to two files.
 
     Args:
-        extneurondb (pandas dataframe): result of me-gating
-        extneurondbdat_filename (str): path to extneurondb.dat file. The
-            columns of this file are ordered as 'morph_name', 'layer',
-            'fullmtype', 'etype', 'combo_name'. Values are separated by a
-            space.
-        mecombo_emodel_filename (str): path to mecombo_emodel file. Values are
-            separated with a tab.
+        extneurondb: pandas.DataFrame with result of me-gating
+        output_dir: path to output directory
+        extneurondb_filename: filename of extended neuron database. The columns
+                              of this file are ordered as 'morph_name',
+                              'layer', 'fullmtype', 'etype', 'combo_name'.
+                              Values are separated by a space. Default filename
+                              is 'extneurondb.dat'.
+        mecombo_emodel_filename: filename of 'mecombo_emodel' file. Values are
+                                 separated with a tab. Default filename is
+                                 'mecombo_emodel.tsv'.
         sort_key: key to sort database in ascending order before writing out to
-            file. Default is None.
+                  file. Default is None.
     """
-    tools.makedirs(os.path.dirname(extneurondbdat_filename))
-    tools.makedirs(os.path.dirname(mecombo_emodel_filename))
-
     if sort_key is not None:
         extneurondb = extneurondb.sort_values(sort_key).reset_index(drop=True)
 
-    _write_extneurondbdat(extneurondb, extneurondbdat_filename)
+    extneurondb_path = os.path.join(output_dir, extneurondb_filename)
+    _write_extneurondbdat(extneurondb, extneurondb_path)
+    print('Wrote extended neuron database to {}'.format(extneurondb_path))
 
-    extneurondb.to_csv(mecombo_emodel_filename, sep='\t', index=False)
+    mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
+    extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
+    print('Wrote mecombo_emodel to {}'.format(mecombo_emodel_path))
