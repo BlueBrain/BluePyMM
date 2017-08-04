@@ -70,7 +70,8 @@ def read_recipe_records(recipe_tree):
     """Parse recipe tree and yield (layer, m-type, e-type)-tuples.
 
     Args:
-        recipe_tree(xml.etree.ElementTree): recipe tree
+        recipe_tree: xml.etree.ElementTree.ElementTree or
+                     xml.etree.ElementTree.Element
 
     Yields:
         (layer, m-type, e-type)-tuples
@@ -106,7 +107,8 @@ def read_morph_records(morph_tree):
     layer)-tuples.
 
     Args:
-        morph_tree(xml.etree.ElementTree): morphology tree
+        morph_tree: xml.etree.ElementTree.ElementTree or
+                    xml.etree.ElementTree.Element
 
     Yields:
         (name, fullmtype, mtype, msubtype, layer)-tuples
@@ -133,7 +135,7 @@ def read_mtype_morph_map(neurondb_filename):
     """
     xml_tree = _parse_xml_tree(neurondb_filename)
     column_labels = ["morph_name", "fullmtype", "mtype", "submtype", "layer"]
-    return pandas.DataFrame(read_morph_records(xml_tree.getroot()),
+    return pandas.DataFrame(read_morph_records(xml_tree),
                             columns=column_labels)
 
 
