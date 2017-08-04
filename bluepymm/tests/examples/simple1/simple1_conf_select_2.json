@@ -9,5 +9,5 @@
    "output_dir": "./output_megate",
    "skip_repaired_exemplar": false,
    "plot_emodels_per_morphology": true,
-   "make_template_name_compatible": true
+   "make_names_neuron_compliant": true
 }

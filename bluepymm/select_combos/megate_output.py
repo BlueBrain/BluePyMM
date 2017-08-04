@@ -24,6 +24,8 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 import os
+from bluepymm import tools
+from . import table_processing
 
 
 def _write_extneurondbdat(extneurondb, filename):
@@ -44,7 +46,8 @@ def _write_extneurondbdat(extneurondb, filename):
 def save_megate_results(extneurondb, output_dir,
                         extneurondb_filename='extneurondb.dat',
                         mecombo_emodel_filename='mecombo_emodel.tsv',
-                        sort_key=None):
+                        sort_key=None,
+                        make_names_neuron_compliant=False):
     """Write results of megating to two files.
 
     Args:
@@ -60,7 +63,19 @@ def save_megate_results(extneurondb, output_dir,
                                  'mecombo_emodel.tsv'.
         sort_key: key to sort database in ascending order before writing out to
                   file. Default is None.
+        make_names_neuron_compliant: boolean indicating whether the combo name
+                                     should be made NEURON-compliant. Default
+                                     is False. If set to True, a log file with
+                                     the conversion info is written out to
+                                     <output_dir>/log_neuron_compliance.csv
     """
+    tools.makedirs(output_dir)
+
+    if make_names_neuron_compliant:
+        log_filename = 'log_neuron_compliance.csv'
+        log_path = os.path.join(output_dir, log_filename)
+        table_processing.process_combo_name(extneurondb, log_path)
+
     if sort_key is not None:
         extneurondb = extneurondb.sort_values(sort_key).reset_index(drop=True)
 
