@@ -33,7 +33,7 @@ from bluepymm import tools
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 @attr('unit')
@@ -41,13 +41,13 @@ def test_check_morphology_existence():
     """prepare_combos.create_mm_sqlite: tests check_morphology_existence"""
     morph_name = 'morph1.asc'
     morph_type = 'test'
-    morph_dir = os.path.join(TEST_DIR, 'data/morphs', morph_name)
+    morph_dir = os.path.join(TEST_DATA_DIR, 'data/morphs', morph_name)
     ret = create_mm_sqlite.check_morphology_existence(morph_name, morph_type,
                                                       morph_dir)
     nt.assert_true(ret)
 
     morph_name = 'does_not_exist.asc'
-    morph_dir = os.path.join(TEST_DIR, 'data/morphs', morph_name)
+    morph_dir = os.path.join(TEST_DATA_DIR, 'data/morphs', morph_name)
     nt.assert_raises(ValueError, create_mm_sqlite.check_morphology_existence,
                      morph_name, morph_type, morph_dir)
 
@@ -75,11 +75,11 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
         'etype': 'etype1',
         'layer': ['1', 'str1']
     }}
-    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    emodel_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
     emodel_dirs = {emodel: emodel_dir}
     skip_repaired_exemplar = True
 
-    with tools.cd(TEST_DIR):
+    with tools.cd(TEST_DATA_DIR):
         ret = create_mm_sqlite.create_exemplar_rows(
             final_dict, fullmtype_morph_map, emodel_etype_map, emodel_dirs,
             skip_repaired_exemplar)
@@ -126,18 +126,18 @@ def test_create_mm_sqlite():
     """
     output_filename = 'scores.sqlite'
     recipe_filename = 'data/simple1_recipe.xml'
-    morph_dir = 'data/morphs/'
-    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
+    morph_db_path = os.path.join(TEST_DATA_DIR, 'data/morphs/morph_db.json')
+    emodel_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
     emodel_etype_map = tools.load_json(os.path.join(emodel_dir,
                                                     'emodel_etype_map.json'))
     final_dict = tools.load_json(os.path.join(emodel_dir, 'final.json'))
     emodel_dirs = {m: emodel_dir for m in ['emodel1', 'emodel2']}
     skip_repaired_exemplar = True
 
-    with tools.cd(TEST_DIR):
+    with tools.cd(TEST_DATA_DIR):
         create_mm_sqlite.create_mm_sqlite(output_filename,
                                           recipe_filename,
-                                          morph_dir,
+                                          morph_db_path,
                                           emodel_etype_map,
                                           final_dict,
                                           emodel_dirs,

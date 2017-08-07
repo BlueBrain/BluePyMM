@@ -183,7 +183,7 @@ def remove_morph_regex_failures(full_map):
 def create_mm_sqlite(
         output_filename,
         recipe_filename,
-        morph_dir,
+        morph_db_path,
         original_emodel_etype_map,
         final_dict,
         emodel_dirs,
@@ -193,30 +193,26 @@ def create_mm_sqlite(
     Args:
         output_filename
         recipe_filename
-        morph_dir: directory with morphology release, contains morph_db.json
-            file
+        morph_db_path(str): path to morphology database (json)
         original_emodel_etype_map
         final_dict: e-model parameters
         emodel_dirs: prepared e-model directories
         skip_repaired_exemplar: indicates whether repaired exemplar should be
             skipped. Default value is False.
     """
-    # TODO: pass morph_db_filename as argument instead of morph_dir
-    morph_db_filename = os.path.join(morph_dir, 'morph_db.json')
-
-    # Contains layer, fullmtype, etype
+    # contains layer, fullmtype, etype
     print('Reading recipe at %s' % recipe_filename)
     fullmtype_etype_map = parse_files.read_mm_recipe(recipe_filename)
     tools.check_no_null_nan_values(fullmtype_etype_map,
                                    "the full m-type e-type map")
 
-    # Contains layer, fullmtype, mtype, submtype, morph_name
-    print('Reading morphology database at %s' % morph_db_filename)
-    fullmtype_morph_map = parse_files.read_morph_database(morph_db_filename)
+    # contains layer, fullmtype, mtype, submtype, morph_name
+    print('Reading morphology database at %s' % morph_db_path)
+    fullmtype_morph_map = parse_files.read_morph_database(morph_db_path)
     tools.check_no_null_nan_values(fullmtype_morph_map,
                                    "the full m-type morphology map")
 
-    # Contains layer, fullmtype, etype, morph_name
+    # contains layer, fullmtype, etype, morph_name
     print('Merging recipe and morphology db tables')
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
@@ -227,14 +223,14 @@ def create_mm_sqlite(
     etypes = morph_fullmtype_etype_map.etype.unique()
 
     print('Creating emodel etype table')
-    # Contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
+    # contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
     emodel_fullmtype_etype_map = parse_files.convert_emodel_etype_map(
         original_emodel_etype_map, fullmtypes, etypes)
     tools.check_no_null_nan_values(emodel_fullmtype_etype_map,
                                    'e-model e-type map')
 
     print('Creating full table by merging subtables')
-    # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
+    # contains layer, fullmtype, etype, morph_name, e_model, morph_regex
     full_map = morph_fullmtype_etype_map.merge(
         emodel_fullmtype_etype_map, on=['layer', 'etype', 'fullmtype'],
         how='left')
@@ -248,7 +244,7 @@ def create_mm_sqlite(
             null_emodel_rows[['layer', 'etype', 'fullmtype']])
 
     print("Filtering out morph_names that don't match regex")
-    # Contains layer, fullmtype, etype, morph_name, e_model
+    # contains layer, fullmtype, etype, morph_name, e_model
     full_map = remove_morph_regex_failures(full_map)
     tools.check_no_null_nan_values(full_map, "the full map")
 
@@ -269,10 +265,10 @@ def create_mm_sqlite(
         emodel_dirs,
         skip_repaired_exemplar=skip_repaired_exemplar)
 
-    # Prepend exemplar rows to full_map
+    # prepend exemplar rows to full_map
     full_map = pandas.concat([exemplar_rows, full_map], ignore_index=True)
 
-    # Write full table to sqlite database
+    # write full table to sqlite database
     with sqlite3.connect(output_filename) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
 
