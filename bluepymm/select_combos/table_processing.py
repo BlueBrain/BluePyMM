@@ -290,7 +290,7 @@ def process_emodel(emodel,
 
     # identify m-types that were tested for this e-model
     mtypes = scores[(scores.emodel == emodel) &
-                    (scores.is_exemplar == 0)].loc[:, 'mtype']
+                    (scores.is_exemplar == 0)].loc[:, 'fullmtype']
 
     return emodel_ext_neurondb, megate_scores, emodel_score_values, mtypes
 

@@ -27,6 +27,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import pandas
 import re
+import os
 
 import xml.etree.ElementTree
 from bluepymm import tools
@@ -103,25 +104,29 @@ def read_mm_recipe(recipe_filename):
                             columns=["layer", "fullmtype", "etype"])
 
 
-def read_morph_database(morph_db_filename):
+def read_morph_database(morph_db_path):
     """Read morphology database and return a pandas.DataFrame with all
-    morphology records.
+    morphology records. Relative paths are resolved to absolute paths based on
+    the directory name of the morph_db_path,
 
     Args:
-        morph_db_filename(str): filename of morphology database (json)
+        morph_db_path(str): path to morphology database (json)
 
     Returns:
-        A pandas.DataFrame with keys "morph_name", "dirname", "extension",
-        "fullmtype", "layer".
+        A pandas.DataFrame with keys 'morph_name', 'morph_dir', 'extension',
+        'fullmtype', and 'layer'.
     """
-    data = tools.load_json(morph_db_filename)
+    data = tools.load_json(morph_db_path)
 
     def _parse_morph_data(data):
         for d in data:
-            yield (d["morphname"], d.get("dirname", "."), d["extension"],
-                   d["mtype"], d["layer"])
+            path = os.path.join(os.path.dirname(morph_db_path),
+                                d.get('dirname', '.'))
+            morph_dir = os.path.abspath(path)
+            yield (d['morphname'], morph_dir, d['extension'], d['mtype'],
+                   d['layer'])
 
-    labels = ["morph_name", "dirname", "extension", "fullmtype", "layer"]
+    labels = ['morph_name', 'morph_dir', 'extension', 'fullmtype', 'layer']
     return pandas.DataFrame(_parse_morph_data(data), columns=labels)
 
 

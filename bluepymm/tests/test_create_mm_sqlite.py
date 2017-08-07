@@ -77,29 +77,28 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
     }}
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_dirs = {emodel: emodel_dir}
-    rep_morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     skip_repaired_exemplar = True
 
     with tools.cd(TEST_DIR):
         ret = create_mm_sqlite.create_exemplar_rows(
             final_dict, fullmtype_morph_map, emodel_etype_map, emodel_dirs,
-            rep_morph_dir, skip_repaired_exemplar)
+            skip_repaired_exemplar)
 
     # construct expected output
     unrep_morph_dir = os.path.dirname(
         os.path.join(emodel_dirs[emodel], final_dict[emodel]['morph_path']))
-    data = [(None, None, None, None, emodel_etype_map[emodel]['etype'],
-             'morph1', emodel, emodel, unrep_morph_dir, None,
+    data = [(None, None, emodel_etype_map[emodel]['etype'], 'morph1', emodel,
+             emodel, unrep_morph_dir, None,
              json.dumps(final_dict[emodel]['fitness']), None, True, True,
              False, False),
-            (None, None, None, None, emodel_etype_map[emodel]['etype'],
-             'morph1', emodel, emodel, unrep_morph_dir, None,
+            (None, None, emodel_etype_map[emodel]['etype'], 'morph1', emodel,
+             emodel, unrep_morph_dir, None,
              json.dumps(final_dict[emodel]['fitness']), None, True, True,
              False, True)]
-    columns = ['layer', 'fullmtype', 'mtype', 'msubtype', 'etype',
-               'morph_name', 'emodel', 'original_emodel', 'morph_dir',
-               'scores', 'opt_scores', 'exception', 'to_run', 'is_exemplar',
-               'is_repaired', 'is_original']
+    columns = ['layer', 'fullmtype', 'etype', 'morph_name', 'emodel',
+               'original_emodel', 'morph_dir', 'scores', 'opt_scores',
+               'exception', 'to_run', 'is_exemplar', 'is_repaired',
+               'is_original']
     expected_ret = pandas.DataFrame(data, columns=columns)
     expected_ret.sort_index(axis=1, inplace=True)
 
@@ -115,8 +114,7 @@ def test_remove_morph_regex_failures():
                             columns=['morph_name', 'morph_regex'])
     ret = create_mm_sqlite.remove_morph_regex_failures(data)
 
-    expected_ret = pandas.DataFrame([('morph1'),
-                                     ('morph3'), ],
+    expected_ret = pandas.DataFrame([('morph1'), ('morph3'), ],
                                     columns=['morph_name'])
     pandas.util.testing.assert_frame_equal(ret, expected_ret)
 

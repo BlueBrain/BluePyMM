@@ -177,7 +177,7 @@ def test_process_emodel():
 
     exp_score_values = pandas.DataFrame({'Step1.SpikeCount': 2.0}, index=[1])
 
-    exp_mtypes = pandas.Series('mtype2', index=[1], name='mtype')
+    exp_mtypes = pandas.Series('mtype2', index=[1], name='fullmtype')
 
     # verify results
     pandas.util.testing.assert_frame_equal(ret[0], exp_db)

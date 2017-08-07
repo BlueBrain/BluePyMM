@@ -95,10 +95,10 @@ def test_read_recipe_records():
             </NeuronTypes>
         </Recipe>
     """
-    expected_records = [("1", "mtype1", "etype1"),
-                        ("1", "mtype1", "etype2"),
-                        ("1", "mtype2", "etype1"),
-                        ("two", "mtype1", "etype2"), ]
+    expected_records = [('1', 'mtype1', 'etype1'),
+                        ('1', 'mtype1', 'etype2'),
+                        ('1', 'mtype2', 'etype1'),
+                        ('two', 'mtype1', 'etype2'), ]
     recipe_tree = ET.fromstring(tree_string)
     records = [r for r in parse_files.read_recipe_records(recipe_tree)]
     nt.assert_list_equal(records, expected_records)
@@ -112,12 +112,12 @@ def test_read_mm_recipe():
     recipe_filename = os.path.join(
         BASE_DIR,
         'examples/simple1/data/simple1_recipe.xml')
-    expected_records = [("1", "mtype1", "etype1"),
-                        ("1", "mtype1", "etype2"),
-                        ("1", "mtype2", "etype1"),
-                        ("2", "mtype1", "etype2"), ]
+    expected_records = [('1', 'mtype1', 'etype1'),
+                        ('1', 'mtype1', 'etype2'),
+                        ('1', 'mtype2', 'etype1'),
+                        ('2', 'mtype1', 'etype2'), ]
     expected_df = pandas.DataFrame(expected_records,
-                                   columns=["layer", "fullmtype", "etype"])
+                                   columns=['layer', 'fullmtype', 'etype'])
     df = parse_files.read_mm_recipe(recipe_filename)
     pandas.util.testing.assert_frame_equal(df, expected_df)
 
@@ -126,16 +126,15 @@ def test_read_mm_recipe():
 def test_read_morph_database():
     """bluepymm.prepare_combos.parse_files: test read_morph_database.
     """
-    morph_db_filename = "data/morphs/morph_db.json"
+    morph_db_path = os.path.join(TEST_DATA_DIR, 'data/morphs/morph_db.json')
 
-    expected_data = [("morph1", ".", "asc", "mtype1", "1"),
-                     ("morph2", ".", "asc", "mtype2", "1")]
-    columns = ["morph_name", "dirname", "extension", "fullmtype", "layer"]
+    df = parse_files.read_morph_database(morph_db_path)
+
+    expected_morph_dir = os.path.dirname(os.path.abspath(morph_db_path))
+    expected_data = [('morph1', expected_morph_dir, 'asc', 'mtype1', '1'),
+                     ('morph2', expected_morph_dir, 'asc', 'mtype2', '1')]
+    columns = ['morph_name', 'morph_dir', 'extension', 'fullmtype', 'layer']
     expected_df = pandas.DataFrame(expected_data, columns=columns)
-
-    with tools.cd(TEST_DATA_DIR):
-        df = parse_files.read_morph_database(morph_db_filename)
-
     pandas.util.testing.assert_frame_equal(df, expected_df)
 
 
@@ -145,11 +144,11 @@ def _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
     df = parse_files.convert_emodel_etype_map(emodel_etype_map, fullmtypes,
                                               etypes)
     nt.assert_equal(len(df.index), len(fullmtypes) * len(layers))
-    nt.assert_equal(df["original_emodel"].unique(), ["emodel1"])
-    nt.assert_equal(df["emodel"].unique(), ["emodel2"])
+    nt.assert_equal(df['original_emodel'].unique(), ['emodel1'])
+    nt.assert_equal(df['emodel'].unique(), ['emodel2'])
 
     for mtype in fullmtypes:
-        df_layers = list(df[df["fullmtype"] == mtype]["layer"].unique())
+        df_layers = list(df[df['fullmtype'] == mtype]['layer'].unique())
         nt.assert_list_equal(df_layers, layers)
 
     nt.assert_equal(len(df.drop_duplicates().index),
@@ -159,11 +158,11 @@ def _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
 @attr('unit')
 def test_convert_emodel_etype_map_no_regex():
     """prepare_combos.parse_files: test emodel etype map convert w/ regex"""
-    layers = ["layer1", "2"]
-    emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
-                                    "layer": layers}}
-    fullmtypes = ["mtype1", "mtype2"]
-    etypes = ["etype1"]
+    layers = ['layer1', '2']
+    emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel2',
+                                    'layer': layers}}
+    fullmtypes = ['mtype1', 'mtype2']
+    etypes = ['etype1']
     _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
                                    layers)
 
@@ -171,12 +170,12 @@ def test_convert_emodel_etype_map_no_regex():
 @attr('unit')
 def test_convert_emodel_etype_map_etype_regex():
     """prepare_combos.parse_files: test emodeletype map convert mtype regex"""
-    layers = ["layer1", "2"]
-    emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
-                                    "etype": ".*",
-                                    "layer": layers}}
-    fullmtypes = ["mtype1", "mtype2"]
-    etypes = ["etype1"]
+    layers = ['layer1', '2']
+    emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel2',
+                                    'etype': '.*',
+                                    'layer': layers}}
+    fullmtypes = ['mtype1', 'mtype2']
+    etypes = ['etype1']
     _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
                                    layers)
 
@@ -185,12 +184,12 @@ def test_convert_emodel_etype_map_etype_regex():
 def test_convert_emodel_etype_map_mtype_regex():
     """prepare_combos.parse_files: test emodel etype map convert etype regex"""
 
-    layers = ["layer1", "2"]
-    emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
-                                    "mtype": ".*",
-                                    "layer": layers}}
-    fullmtypes = ["mtype1", "mtype2"]
-    etypes = ["etype1"]
+    layers = ['layer1', '2']
+    emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel2',
+                                    'mtype': '.*',
+                                    'layer': layers}}
+    fullmtypes = ['mtype1', 'mtype2']
+    etypes = ['etype1']
     _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
                                    layers)
 
@@ -199,11 +198,11 @@ def test_convert_emodel_etype_map_mtype_regex():
 def test_convert_emodel_etype_map_morph_name_regex():
     """prepare_combos.parse_files: test emodel etype map convert morph regex"""
 
-    layers = ["layer1", "2"]
-    emodel_etype_map = {"emodel1": {"mm_recipe": "emodel2",
-                                    "morph_name": ".*",
-                                    "layer": layers}}
-    fullmtypes = ["mtype1", "mtype2"]
-    etypes = ["etype1"]
+    layers = ['layer1', '2']
+    emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel2',
+                                    'morph_name': '.*',
+                                    'layer': layers}}
+    fullmtypes = ['mtype1', 'mtype2']
+    etypes = ['etype1']
     _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
                                    layers)
