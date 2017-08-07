@@ -29,8 +29,10 @@ import pandas
 import xml.etree.ElementTree as ET
 
 from bluepymm.prepare_combos import parse_files
+from bluepymm import tools
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
 @attr('unit')
@@ -121,49 +123,19 @@ def test_read_mm_recipe():
 
 
 @attr('unit')
-def test_read_morph_records():
-    """bluepymm.prepare_combos.parse_files: test read_morph_records.
+def test_read_morph_database():
+    """bluepymm.prepare_combos.parse_files: test read_morph_database.
     """
-    tree_string = """
-        <neurondb>
-            <listing>
-                <morphology>
-                    <name>morph1</name>
-                    <mtype>mtype1</mtype>
-                    <msubtype />
-                    <layer>1</layer>
-                </morphology>
-                <morphology>
-                    <name>morph2</name>
-                    <mtype>mtype2</mtype>
-                    <msubtype>subtype2</msubtype>
-                    <layer>layer2</layer>
-                </morphology>
-            </listing>
-        </neurondb>
-    """
-    expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
-                        ("morph2", "mtype2:subtype2", "mtype2", "subtype2",
-                         "layer2")]
-    morph_tree = ET.fromstring(tree_string)
-    records = [r for r in parse_files.read_morph_records(morph_tree)]
-    nt.assert_list_equal(records, expected_records)
+    morph_db_filename = "data/morphs/morph_db.json"
 
+    expected_data = [("morph1", ".", "asc", "mtype1", "1"),
+                     ("morph2", ".", "asc", "mtype2", "1")]
+    columns = ["morph_name", "dirname", "extension", "fullmtype", "layer"]
+    expected_df = pandas.DataFrame(expected_data, columns=columns)
 
-@attr('unit')
-def test_read_mtype_morph_map():
-    """bluepymm.prepare_combos.parse_files: test read_mtype_morph_map with
-    morphology database from test example "simple1".
-    """
-    neurondb_filename = os.path.join(
-        BASE_DIR,
-        "examples/simple1/data/morphs/neuronDB.xml")
-    expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
-                        ("morph2", "mtype2", "mtype2", "", "1")]
-    expected_df = pandas.DataFrame(expected_records,
-                                   columns=["morph_name", "fullmtype", "mtype",
-                                            "submtype", "layer"])
-    df = parse_files.read_mtype_morph_map(neurondb_filename)
+    with tools.cd(TEST_DATA_DIR):
+        df = parse_files.read_morph_database(morph_db_filename)
+
     pandas.util.testing.assert_frame_equal(df, expected_df)
 
 

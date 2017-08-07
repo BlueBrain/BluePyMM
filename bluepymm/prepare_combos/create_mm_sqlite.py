@@ -196,7 +196,7 @@ def create_mm_sqlite(
     Args:
         output_filename
         recipe_filename
-        morph_dir: directory with morphology release, contains neuronDB.xml
+        morph_dir: directory with morphology release, contains morph_db.json
             file
         original_emodel_etype_map
         final_dict: e-model parameters
@@ -204,7 +204,8 @@ def create_mm_sqlite(
         skip_repaired_exemplar: indicates whether repaired exemplar should be
             skipped. Default value is False.
     """
-    neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
+    # TODO: pass morph_db_filename as argument instead of morph_dir
+    morph_db_filename = os.path.join(morph_dir, 'morph_db.json')
 
     # Contains layer, fullmtype, etype
     print('Reading recipe at %s' % recipe_filename)
@@ -213,8 +214,8 @@ def create_mm_sqlite(
                                    "the full m-type e-type map")
 
     # Contains layer, fullmtype, mtype, submtype, morph_name
-    print('Reading neuronDB at %s' % neurondb_filename)
-    fullmtype_morph_map = parse_files.read_mtype_morph_map(neurondb_filename)
+    print('Reading morphology database at %s' % morph_db_filename)
+    fullmtype_morph_map = parse_files.read_morph_database(morph_db_filename)
     tools.check_no_null_nan_values(fullmtype_morph_map,
                                    "the full m-type morphology map")
 

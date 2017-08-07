@@ -1,0 +1,15 @@
+[
+    {
+        "morphname": "morph1",
+        "dirname": ".",
+        "extension": "asc",
+        "mtype": "mtype1",
+        "layer": "1"
+    },
+    {
+        "morphname": "morph2",
+        "extension": "asc",
+        "mtype": "mtype2",
+        "layer": "1"
+    }
+]

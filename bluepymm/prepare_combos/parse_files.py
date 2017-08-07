@@ -29,6 +29,7 @@ import pandas
 import re
 
 import xml.etree.ElementTree
+from bluepymm import tools
 
 
 def _parse_xml_tree(filename):
@@ -102,41 +103,26 @@ def read_mm_recipe(recipe_filename):
                             columns=["layer", "fullmtype", "etype"])
 
 
-def read_morph_records(morph_tree):
-    """Parse morphology tree and yield (name, fullmtype, mtype, msubtype,
-    layer)-tuples.
-
-    Args:
-        morph_tree: xml.etree.ElementTree.ElementTree or
-                    xml.etree.ElementTree.Element
-
-    Yields:
-        (name, fullmtype, mtype, msubtype, layer)-tuples
-    """
-    for morph in morph_tree.findall('.//morphology'):
-        name = morph.findtext('name')
-        mtype = morph.findtext('mtype')
-        msubtype = morph.findtext('msubtype')
-        fullmtype = '%s:%s' % (mtype, msubtype) if msubtype != '' else mtype
-        layer = morph.findtext('layer')
-        yield (name, fullmtype, mtype, msubtype, layer)
-
-
-def read_mtype_morph_map(neurondb_filename):
+def read_morph_database(morph_db_filename):
     """Read morphology database and return a pandas.DataFrame with all
     morphology records.
 
     Args:
-        neurondb_filename(str): filename of morphology database (XML)
+        morph_db_filename(str): filename of morphology database (json)
 
     Returns:
-        A pandas.DataFrame with field "morph_name", "fullmtype", "mtype",
-        "submtype", "layer".
+        A pandas.DataFrame with keys "morph_name", "dirname", "extension",
+        "fullmtype", "layer".
     """
-    xml_tree = _parse_xml_tree(neurondb_filename)
-    column_labels = ["morph_name", "fullmtype", "mtype", "submtype", "layer"]
-    return pandas.DataFrame(read_morph_records(xml_tree),
-                            columns=column_labels)
+    data = tools.load_json(morph_db_filename)
+
+    def _parse_morph_data(data):
+        for d in data:
+            yield (d["morphname"], d.get("dirname", "."), d["extension"],
+                   d["mtype"], d["layer"])
+
+    labels = ["morph_name", "dirname", "extension", "fullmtype", "layer"]
+    return pandas.DataFrame(_parse_morph_data(data), columns=labels)
 
 
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
