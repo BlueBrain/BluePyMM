@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<blueColumn>
+<Recipe>
     <NeuronTypes>
 		<Layer id="1" percentage="1.037315">
 		  <StructuralType id="mtype1" percentage="17.7304964539">
@@ -17,4 +17,4 @@
 			</StructuralType>
 		</Layer>
 	</NeuronTypes>
-</blueColumn>
+</Recipe>

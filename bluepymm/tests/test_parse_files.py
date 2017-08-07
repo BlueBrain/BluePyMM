@@ -73,7 +73,7 @@ def test_read_recipe_records():
     """bluepymm.prepare_combos.parse_files: test read_recipe_records.
     """
     tree_string = """
-        <blueColumn>
+        <Recipe>
             <NeuronTypes>
                 <Layer id="1" percentage="1.037315">
                   <StructuralType id="mtype1" percentage="17.7304964539">
@@ -91,7 +91,7 @@ def test_read_recipe_records():
                     </StructuralType>
                 </Layer>
             </NeuronTypes>
-        </blueColumn>
+        </Recipe>
     """
     expected_records = [("1", "mtype1", "etype1"),
                         ("1", "mtype1", "etype2"),
@@ -129,22 +129,17 @@ def test_read_morph_records():
             <listing>
                 <morphology>
                     <name>morph1</name>
-                  <mtype>mtype1</mtype>
-                  <msubtype />
-                  <layer>1</layer>
+                    <mtype>mtype1</mtype>
+                    <msubtype />
+                    <layer>1</layer>
                 </morphology>
                 <morphology>
                     <name>morph2</name>
-                  <mtype>mtype2</mtype>
-                  <msubtype>subtype2</msubtype>
-                  <layer>layer2</layer>
+                    <mtype>mtype2</mtype>
+                    <msubtype>subtype2</msubtype>
+                    <layer>layer2</layer>
                 </morphology>
             </listing>
-            <overview>
-                <count>
-                    2
-                </count>
-            </overview>
         </neurondb>
     """
     expected_records = [("morph1", "mtype1", "mtype1", "", "1"),
