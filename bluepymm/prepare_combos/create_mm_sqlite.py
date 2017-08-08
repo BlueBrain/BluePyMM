@@ -64,7 +64,6 @@ def create_exemplar_rows(
         fullmtype_morph_map,
         emodel_etype_map,
         emodel_dirs,
-        rep_morph_dir,
         skip_repaired_exemplar=False):
     """Create exemplar rows.
 
@@ -73,15 +72,14 @@ def create_exemplar_rows(
         fullmtype_morph_map: pandas.DataFrame with morphology database
         emodel_etype_map: e-model e-type map
         emodel_dirs: a dict mapping e-models to prepared e-model directories
-        rep_morph_dir: directory with repaired morphologies
         skip_repaired_exemplar: indicates whether repaired exemplar should be
             skipped. Default value is False.
 
     Returns:
         pandas.DataFrame with one row for each exemplar. Keys are 'layer',
-        'fullmtype', 'mtype', 'msubtype', 'etype', 'morph_name', 'emodel',
-        'original_emodel', 'morph_dir', 'scores', 'opt_scores', 'exception',
-        'to_run', 'is_exemplar', 'is_repaired', and 'is_original'.
+        'fullmtype', 'etype', 'morph_name', 'emodel', 'original_emodel',
+        'morph_dir', 'scores', 'opt_scores', 'exception', 'to_run',
+        'is_exemplar', 'is_repaired', and 'is_original'.
     """
 
     exemplar_rows = []
@@ -105,9 +103,8 @@ def create_exemplar_rows(
 
         if skip_repaired_exemplar:
             fullmtype = None
-            mtype = None
-            msubtype = None
-            # Don't run repaired version
+            layer = None
+            # don't run repaired version
             combos = [(emodel, False, False),
                       (original_emodel, True, False)]
         else:
@@ -118,11 +115,13 @@ def create_exemplar_rows(
                     'Morphology %s for %s e-model not found in morphology '
                     'release' % (morph_name, original_emodel))
             else:
-                _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
+                morph_name, morph_dir, extension, fullmtype, layer = \
+                    morph_info_list[0]
 
-            morph_path = os.path.join(rep_morph_dir, morph_filename)
-            check_morphology_existence(morph_filename, 'repaired', morph_path)
-            # Run repaired version
+            basename = '{}.{}'.format(morph_name, extension)
+            morph_path = os.path.join(morph_dir, basename)
+            check_morphology_existence(basename, 'repaired', morph_path)
+            # run repaired version
             combos = [(emodel, False, True),
                       (original_emodel, True, True),
                       (emodel, False, False),
@@ -130,15 +129,13 @@ def create_exemplar_rows(
 
         for (stored_emodel, original, repaired) in combos:
             new_row_dict = {
-                'layer': None,
+                'layer': layer,
                 'fullmtype': fullmtype,
-                'mtype': mtype,
-                'msubtype': msubtype,
                 'etype': emodel_etype_map[original_emodel]['etype'],
                 'morph_name': morph_name,
                 'emodel': stored_emodel,
                 'original_emodel': original_emodel,
-                'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
+                'morph_dir': morph_dir if repaired else unrep_morph_dir,
                 'scores': None,
                 'opt_scores': json.dumps(opt_scores) if not repaired else None,
                 'exception': None,
@@ -186,7 +183,7 @@ def remove_morph_regex_failures(full_map):
 def create_mm_sqlite(
         output_filename,
         recipe_filename,
-        morph_dir,
+        morph_db_path,
         original_emodel_etype_map,
         final_dict,
         emodel_dirs,
@@ -196,66 +193,62 @@ def create_mm_sqlite(
     Args:
         output_filename
         recipe_filename
-        morph_dir: directory with morphology release, contains neuronDB.xml
-            file
+        morph_db_path(str): path to morphology database (json)
         original_emodel_etype_map
         final_dict: e-model parameters
         emodel_dirs: prepared e-model directories
         skip_repaired_exemplar: indicates whether repaired exemplar should be
             skipped. Default value is False.
     """
-    neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
-
-    # Contains layer, fullmtype, etype
+    # contains layer, fullmtype, etype
     print('Reading recipe at %s' % recipe_filename)
     fullmtype_etype_map = parse_files.read_mm_recipe(recipe_filename)
     tools.check_no_null_nan_values(fullmtype_etype_map,
                                    "the full m-type e-type map")
 
-    # Contains layer, fullmtype, mtype, submtype, morph_name
-    print('Reading neuronDB at %s' % neurondb_filename)
-    fullmtype_morph_map = parse_files.read_mtype_morph_map(neurondb_filename)
+    # contains layer, fullmtype, mtype, submtype, morph_name
+    print('Reading morphology database at %s' % morph_db_path)
+    fullmtype_morph_map = parse_files.read_morph_database(morph_db_path)
     tools.check_no_null_nan_values(fullmtype_morph_map,
                                    "the full m-type morphology map")
 
-    # Contains layer, fullmtype, etype, morph_name
-    print('Merging recipe and neuronDB tables')
+    # contains layer, fullmtype, etype, morph_name
+    print('Merging recipe and morphology db tables')
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
     tools.check_no_null_nan_values(morph_fullmtype_etype_map,
-                                   "morph_fullmtype_etype_map")
+                                   'morph_fullmtype_etype_map')
 
     fullmtypes = morph_fullmtype_etype_map.fullmtype.unique()
     etypes = morph_fullmtype_etype_map.etype.unique()
 
     print('Creating emodel etype table')
-    # Contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
+    # contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
     emodel_fullmtype_etype_map = parse_files.convert_emodel_etype_map(
         original_emodel_etype_map, fullmtypes, etypes)
     tools.check_no_null_nan_values(emodel_fullmtype_etype_map,
-                                   "e-model e-type map")
+                                   'e-model e-type map')
 
     print('Creating full table by merging subtables')
-    # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
+    # contains layer, fullmtype, etype, morph_name, e_model, morph_regex
     full_map = morph_fullmtype_etype_map.merge(
-        emodel_fullmtype_etype_map,
-        on=['layer', 'etype', 'fullmtype'], how='left')
+        emodel_fullmtype_etype_map, on=['layer', 'etype', 'fullmtype'],
+        how='left')
 
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
 
     if len(null_emodel_rows) > 0:
         raise Exception(
-            'No emodels found for the following layer, etype, fullmtype'
+            'No e-models found for the following layer, etype, fullmtype'
             ' combinations: \n%s' %
             null_emodel_rows[['layer', 'etype', 'fullmtype']])
 
-    print('Filtering out morp_names that dont match regex')
-    # Contains layer, fullmtype, etype, morph_name, e_model
+    print("Filtering out morph_names that don't match regex")
+    # contains layer, fullmtype, etype, morph_name, e_model
     full_map = remove_morph_regex_failures(full_map)
     tools.check_no_null_nan_values(full_map, "the full map")
 
     print('Adding exemplar rows')
-    full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'is_repaired', True)
     full_map.insert(len(full_map.columns), 'is_original', False)
@@ -270,13 +263,12 @@ def create_mm_sqlite(
         fullmtype_morph_map,
         original_emodel_etype_map,
         emodel_dirs,
-        morph_dir,
         skip_repaired_exemplar=skip_repaired_exemplar)
 
-    # Prepend exemplar rows to full_map
+    # prepend exemplar rows to full_map
     full_map = pandas.concat([exemplar_rows, full_map], ignore_index=True)
 
-    # Write full table to sqlite database
+    # write full table to sqlite database
     with sqlite3.connect(output_filename) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
 
