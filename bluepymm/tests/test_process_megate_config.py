@@ -72,7 +72,7 @@ def test_read_megate_thresholds():
 
     # all keys present
     test_dict = {'megate_thresholds': [
-        {'emodel': ['test1'], 'fullmtype': ['test2'], 'etype': ['test3'],
+        {'emodel': ['test1'], 'mtype': ['test2'], 'etype': ['test3'],
          'features': ['.*'], 'megate_threshold': 5}]}
     ret_patterns, ret_thresholds = proc_config.read_megate_thresholds(
         test_dict)
@@ -86,7 +86,7 @@ def test_read_megate_thresholds():
     nt.assert_equal(len(ret_patterns), len(expected_patterns))
     nt.assert_dict_equal(ret_patterns[0], expected_patterns[0])
 
-    # key 'fullmtype' not present
+    # key 'mtype' not present
     test_dict = {'megate_thresholds': [
         {'emodel': ['test1'], 'etype': ['test3'], 'features': ['.*'],
          'megate_threshold': 5}]}
