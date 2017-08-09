@@ -59,7 +59,9 @@ def read_megate_thresholds(conf_dict):
             processed if available.
 
     Returns:
-        A tuple (<list_of_dicts>, <conf_dict['megate_thresholds']>)"""
+        A tuple (<list_of_dicts>, <conf_dict['megate_thresholds']>). The key
+        'mtype' is converted to its internal equivalent 'fullmtype'.
+    """
 
     megate_thresholds = conf_dict.get('megate_thresholds', [])
 
@@ -70,11 +72,13 @@ def read_megate_thresholds(conf_dict):
             'megate_threshold': megate_threshold_dict['megate_threshold'],
             'features': join_regex(megate_threshold_dict['features'])
         }
-        for key in ['emodel', 'fullmtype', 'etype']:
+        for key in ['emodel', 'mtype', 'etype']:
             if key in megate_threshold_dict:
                 megate_pattern[key] = join_regex(megate_threshold_dict[key])
             else:
                 megate_pattern[key] = re.compile('.*')
+        if 'mtype' in megate_pattern:
+            megate_pattern['fullmtype'] = megate_pattern.pop('mtype')
 
         megate_patterns.append(megate_pattern)
 
