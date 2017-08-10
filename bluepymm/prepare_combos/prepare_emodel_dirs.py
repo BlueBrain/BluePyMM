@@ -44,38 +44,6 @@ def _get_template(template_type):
         raise ValueError('Unknown template type'.format(template_type))
 
 
-def check_emodels_in_repo(conf_dict):
-    """Check whether input e-models are organized in branches of a repository.
-
-    Args:
-        conf_dict: A dict with either the key "emodels_repo" or the key
-            "emodels_dir".
-
-    Returns:
-        True if the input e-models are organized in separate branches of a
-        git repository, false if the e-models are organized into separate
-        subdirectories.
-
-    Raises:
-        ValueError: if both or none of the keys "emodels_repo" and
-            "emodels_dir" are present.
-
-    TODO: replace "emodels_repo" and "emodels_dir" by "emodels_input_type" and
-        "emodels_path" or similar.
-    """
-    if 'emodels_repo' in conf_dict and 'emodels_dir' in conf_dict:
-        raise ValueError("Impossible to specify both 'emodels_repo' and"
-                         " 'emodels_dir' in configuration file")
-    elif 'emodels_repo' in conf_dict:
-        emodels_in_repo = True
-    elif 'emodels_dir' in conf_dict:
-        emodels_in_repo = False
-    else:
-        raise ValueError("Need to specify either 'emodels_dir' or"
-                         " 'emodels_repo' in configuration file")
-    return emodels_in_repo
-
-
 def convert_emodel_input(emodels_in_repo, conf_dict, continu):
     """Convert e-model input to BluePyMM file structure and return path to that
     structure.
@@ -95,14 +63,13 @@ def convert_emodel_input(emodels_in_repo, conf_dict, continu):
                                                    'emodels_repo'))
     if not continu:
         if emodels_in_repo:
-            print('Cloning input e-models repository in %s' % tmp_emodels_dir)
-            print('HERE %s' % os.getcwd())
-            sh.git('clone', conf_dict['emodels_repo'], tmp_emodels_dir)
+            print('Cloning input e-models repository to %s' % tmp_emodels_dir)
+            sh.git('clone', conf_dict['emodels_path'], tmp_emodels_dir)
 
             with tools.cd(tmp_emodels_dir):
                 sh.git('checkout', conf_dict['emodels_githash'])
         else:
-            shutil.copytree(conf_dict['emodels_dir'], tmp_emodels_dir)
+            shutil.copytree(conf_dict['emodels_path'], tmp_emodels_dir)
     return tmp_emodels_dir
 
 

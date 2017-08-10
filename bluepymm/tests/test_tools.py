@@ -179,3 +179,19 @@ def test_get_neuron_compliant_template_name():
     nt.assert_false(tools.check_compliance_with_neuron(name))
     ret = tools.get_neuron_compliant_template_name(name)
     nt.assert_true(tools.check_compliance_with_neuron(ret))
+
+
+@attr('unit')
+def test_check_git_repo_root_folder():
+    """bluepymm.tools: test check_is_git_repo_root_folder
+    """
+    nt.assert_false(tools.check_is_git_repo_root_folder(TMP_DIR))
+
+    # check for absolute path
+    git_repo_rel = 'simple1/tmp_git'
+    git_repo_abs = os.path.join(EXAMPLES, git_repo_rel)
+    nt.assert_true(tools.check_is_git_repo_root_folder(git_repo_abs))
+
+    # check for relative path
+    with tools.cd(EXAMPLES):
+        nt.assert_true(tools.check_is_git_repo_root_folder(git_repo_rel))

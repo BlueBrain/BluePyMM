@@ -34,25 +34,6 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_prepare_emodel_dirs')
 
 
-@attr('unit')
-def test_check_emodels_in_repo():
-    """prepare_combos.prepare_emodel_dirs: test check_emodels_in_repo.
-    """
-    config = {'emodels_repo': 'test'}
-    nt.assert_true(prepare_emodel_dirs.check_emodels_in_repo(config))
-
-    config = {'emodels_dir': 'test'}
-    nt.assert_false(prepare_emodel_dirs.check_emodels_in_repo(config))
-
-    config = {'emodels_dir': 'test', 'emodels_repo': 'test'}
-    nt.assert_raises(ValueError, prepare_emodel_dirs.check_emodels_in_repo,
-                     config)
-
-    config = {}
-    nt.assert_raises(ValueError, prepare_emodel_dirs.check_emodels_in_repo,
-                     config)
-
-
 def _test_convert_emodel_input(test_dir, emodels_in_repo, conf_dict, continu):
     """Helper function to test convert_emodel_input"""
     with tools.cd(test_dir):
@@ -68,7 +49,7 @@ def test_convert_emodel_input_dir():
     """prepare_combos.prepare_emodel_dirs: test convert_emodel_input for dir
     based on test example 'simple1' with directory input.
     """
-    conf_dict = {'emodels_dir': './data/emodels_dir',
+    conf_dict = {'emodels_path': './data/emodels_dir',
                  'emodel_etype_map_path': 'subdir/emodel_etype_map.json',
                  'final_json_path': 'subdir/final.json',
                  'tmp_dir': os.path.join(
@@ -79,23 +60,21 @@ def test_convert_emodel_input_dir():
                                continu)
 
 
-# TODO : how to do the test below?
-# @attr('unit')
-# def test_convert_emodel_input_repo():
-#     """prepare_combos.prepare_emodel_dirs: test convert_emodel_input for repo
-#     based on test example 'simple1' with repository input.
-#     """
-#     conf_dict = {'emodels_repo': './tmp_git',
-#                  'emodels_githash': 'master',
-#                  'emodel_etype_map_path': 'subdir/emodel_etype_map.json',
-#                  'final_json_path': 'subdir/final.json',
-#                  'tmp_dir': os.path.join(
-#                      TMP_DIR, 'test_convert_emodel_input_dir'), }
-#                  }
-#     emodels_in_repo = True
-#     continu = False
-#     _test_convert_emodel_input(TEST_DATA_DIR, emodels_in_repo, conf_dict,
-#                                continu)
+@attr('unit')
+def test_convert_emodel_input_repo():
+    """prepare_combos.prepare_emodel_dirs: test convert_emodel_input for repo
+    based on test example 'simple1' with repository input.
+    """
+    conf_dict = {'emodels_path': './tmp_git',
+                 'emodels_githash': 'master',
+                 'emodel_etype_map_path': 'subdir/emodel_etype_map.json',
+                 'final_json_path': 'subdir/final.json',
+                 'tmp_dir': os.path.join(
+                     TMP_DIR, 'test_convert_emodel_input_repo'), }
+    emodels_in_repo = True
+    continu = False
+    _test_convert_emodel_input(TEST_DATA_DIR, emodels_in_repo, conf_dict,
+                               continu)
 
 
 @attr('unit')
