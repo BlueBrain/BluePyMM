@@ -149,10 +149,9 @@ def test_run_create_and_write_hoc_file():
     emodel_dir = os.path.join(test_dir, 'tmp', 'emodels', emodel)
     hoc_dir = os.path.join(test_dir, 'emodels_hoc')
     emodel_parameters = {'cm': 1.0}
-    template = 'cell_template_neuron.jinja2'
-    template_dir = '.'
     morph_path = 'morph.asc'
     model_name = 'test'
+    template_type = 'neuron'
 
     with bluepymm.tools.cd(TEST_DATA_DIR):
         # prepare input files
@@ -162,8 +161,8 @@ def test_run_create_and_write_hoc_file():
         # create output directory and run function
         bluepymm.tools.makedirs(hoc_dir)
         bluepymm.legacy.create_hoc_files.run_create_and_write_hoc_file(
-            emodel, emodel_dir, hoc_dir, emodel_parameters, template,
-            template_dir, morph_path, model_name)
+            emodel, emodel_dir, hoc_dir, emodel_parameters, morph_path,
+            model_name, template_type)
 
         # verify output directory. TODO: test hoc file contents
         expected_nb_files = 1

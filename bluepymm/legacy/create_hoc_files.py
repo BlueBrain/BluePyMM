@@ -73,8 +73,7 @@ def load_combinations_dict(mecombo_emodel_path):
 
 
 def run_create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
-                                  template, template_dir, morph_path,
-                                  model_name):
+                                  morph_path, model_name, template_type):
     """Run create_and_write_hoc_file in isolated environment.
 
     Args:
@@ -82,15 +81,15 @@ def run_create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
     """
     pool = multiprocessing.pool.Pool(1, maxtasksperchild=1)
     pool.apply(prepare_combos.prepare_emodel_dirs.create_and_write_hoc_file,
-               (emodel, setup_dir, hoc_dir, emodel_params, template,
-                template_dir, morph_path, model_name))
+               (emodel, setup_dir, hoc_dir, emodel_params, morph_path,
+                model_name, template_type))
     pool.terminate()
     pool.join()
     del pool
 
 
-def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
-                     hoc_dir):
+def create_hoc_files(combinations_dict, emodels_dir, final_dict, hoc_dir,
+                     template_type):
     """Create a .hoc file for every combination in a given database.
 
     Args:
@@ -98,8 +97,10 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
         emodels_dir: Directory containing all e-model data as used by the
                      application 'bluepymm'.
         final_dict: Dictionary with e-model parameters.
-        template: Template to be used to create .hoc files.
         hoc_dir: Directory where all create .hoc files will be written.
+        template_type: template type. 'neuron' or 'neurodamus' for a hoc
+                       template that is compatible with NEURON or Neurodamus
+                       respectively.
     """
     for combination, comb_data in combinations_dict.items():
         print('Working on combination {}'.format(combination))
@@ -112,10 +113,9 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
                                       setup_dir,
                                       hoc_dir,
                                       emodel_params,
-                                      os.path.basename(template),
-                                      os.path.dirname(template),
                                       morph_path,
-                                      combination)
+                                      combination,
+                                      template_type)
 
 
 def main(arg_list):
@@ -138,7 +138,7 @@ def main(arg_list):
 
     # create hoc files
     create_hoc_files(combinations_dict, emodels_dir, final_dict,
-                     config['template'], config['hoc_output_dir'])
+                     config['hoc_output_dir'], config['template_type'])
 
 
 if __name__ == '__main__':
