@@ -2,7 +2,7 @@
     "version": "1.0",
     "recipe_path": "./data/simple1_recipe.xml",
     "morph_db_path": "./data/morphs/morph_db.json",
-    "emodels_repo": "tmp_git",
+    "emodels_path": "./tmp_git",
     "emodels_githash": "master",
     "emodels_hoc_dir": "./output/emodels_hoc",
     "emodel_etype_map_path": "subdir/emodel_etype_map.json",

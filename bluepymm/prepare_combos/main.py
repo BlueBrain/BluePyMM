@@ -36,7 +36,8 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
     emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
 
     # convert e-models input to BluePyMM file structure
-    emodels_in_repo = prepare_dirs.check_emodels_in_repo(conf_dict)
+    emodels_in_repo = tools.check_is_git_repo_root_folder(
+        conf_dict['emodels_path'])
     tmp_emodels_dir = prepare_dirs.convert_emodel_input(emodels_in_repo,
                                                         conf_dict,
                                                         continu)
