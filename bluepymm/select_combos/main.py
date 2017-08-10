@@ -43,12 +43,8 @@ def select_combos_from_conf(conf_dict):
     combinations, and write results out to file.
 
     Args:
-        conf_filename: filename of configuration (.json file)
+        conf_dict: configuration dict
     """
-    scores_db_filename = conf_dict['scores_db']
-    pdf_filename = conf_dict['pdf_filename']
-    output_dir = conf_dict['output_dir']
-
     # read skip features
     to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
         conf_dict)
@@ -58,13 +54,17 @@ def select_combos_from_conf(conf_dict):
         conf_dict)
 
     # read score tables
+    scores_db_filename = conf_dict['scores_db']
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_db_filename)
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
     # create final database and write report
+    report_dir = conf_dict['report_dir']
+    tools.makedirs(report_dir)
+    report_pdf_path = os.path.join(report_dir, 'report.pdf')
     ext_neurondb = reporting.create_final_db_and_write_report(
-        pdf_filename,
+        report_pdf_path,
         to_skip_features,
         to_skip_patterns,
         megate_thresholds,
@@ -73,11 +73,11 @@ def select_combos_from_conf(conf_dict):
         conf_dict.get('check_opt_scores', True),
         scores, score_values,
         conf_dict.get('plot_emodels_per_morphology', False))
-    print('Wrote pdf to %s' % pdf_filename)
+    print('Wrote pdf to %s' % report_pdf_path)
 
     # write output files
     compliant = conf_dict.get('make_names_neuron_compliant', False)
-    megate_output.save_megate_results(ext_neurondb, output_dir,
+    megate_output.save_megate_results(ext_neurondb, conf_dict['output_dir'],
                                       sort_key='combo_name',
                                       make_names_neuron_compliant=compliant)
 

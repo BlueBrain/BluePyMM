@@ -254,7 +254,7 @@ def plot_emodels_per_metype(data, final_db):
 
 
 # TODO: can this function be split into processing and reporting?
-def create_final_db_and_write_report(pdf_filename,
+def create_final_db_and_write_report(report_pdf_path,
                                      to_skip_features,
                                      to_skip_patterns,
                                      megate_thresholds,
@@ -267,7 +267,7 @@ def create_final_db_and_write_report(pdf_filename,
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
 
-    with pdf_file(pdf_filename) as pp:
+    with pdf_file(report_pdf_path) as pp:
         # Plot input configuration details
         add_plot_to_report(pp, plot_dict, to_skip_features,
                            'Ignored feature patterns')
