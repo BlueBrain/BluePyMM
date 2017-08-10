@@ -26,6 +26,7 @@ import json
 import os
 import sys
 import hashlib
+import sh
 from string import digits
 
 
@@ -183,3 +184,13 @@ def get_neuron_compliant_template_name(name):
                                                 keep_length=40,
                                                 hash_length=9)
     return template_name
+
+
+def check_is_git_repo_root_folder(directory):
+    """Check whether a given directory is the root folder of a git repository.
+    """
+    with cd(directory):
+        if(os.system('git rev-parse 2> /dev/null > /dev/null') == 0):
+            repo = sh.git('rev-parse', '--show-toplevel').stdout.rstrip()
+            return repo.decode() == os.getcwd()
+        return False
