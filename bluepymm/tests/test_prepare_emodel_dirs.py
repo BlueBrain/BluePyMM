@@ -134,16 +134,17 @@ def _test_create_and_write_hoc_file(test_dir,
                                     emodel_dir,
                                     hoc_dir,
                                     emodel_parameters,
-                                    template,
                                     morph_path,
-                                    model_name):
+                                    model_name,
+                                    template_type):
     """Test create_and_write_hoc_files"""
     with tools.cd(test_dir):
         tools.makedirs(hoc_dir)
 
         prepare_emodel_dirs.create_and_write_hoc_file(
-            emodel, emodel_dir, hoc_dir, emodel_parameters, template,
-            morph_path=morph_path, model_name=model_name)
+            emodel, emodel_dir, hoc_dir, emodel_parameters,
+            morph_path=morph_path, model_name=model_name,
+            template_type=template_type)
 
         # TODO: test hoc file contents
         template_name = model_name or emodel
@@ -161,13 +162,13 @@ def test_create_and_write_hoc_file_none():
     emodel_dir = './data/emodels_dir/subdir/'
     hoc_dir = './output/emodels_hoc'
     emodel_parameters = {'cm': 1.0}
-    template = 'cell_template_neuron.jinja2'
     morph_path = None
     model_name = None
+    template_type = 'neuron'
 
     _test_create_and_write_hoc_file(TEST_DATA_DIR, emodel, emodel_dir, hoc_dir,
-                                    emodel_parameters, template, morph_path,
-                                    model_name)
+                                    emodel_parameters, morph_path, model_name,
+                                    template_type)
 
 
 @attr('unit')
@@ -179,13 +180,49 @@ def test_create_and_write_hoc_file_morph_path_model_name():
     emodel_dir = './data/emodels_dir/subdir/'
     hoc_dir = './output/emodels_hoc'
     emodel_parameters = {'cm': 1.0}
-    template = 'cell_template_neuron.jinja2'
     morph_path = 'morph.asc'
     model_name = 'test'
+    template_type = 'neuron'
 
     _test_create_and_write_hoc_file(TEST_DATA_DIR, emodel, emodel_dir, hoc_dir,
-                                    emodel_parameters, template, morph_path,
-                                    model_name)
+                                    emodel_parameters, morph_path, model_name,
+                                    template_type)
+
+
+@attr('unit')
+def test_create_template():
+    """prepare_combos.create_template: test create_template
+    """
+    name = 'test'
+    emodel = 'emodel1'
+    emodel_dir = './data/emodels_dir/subdir/'
+    emodel_params = {'cm': 1.0}
+    morph_path = 'morph.asc'
+    template_type = 'neuron'
+
+    with tools.cd(TEST_DATA_DIR):
+        ret = prepare_emodel_dirs.create_template(
+            name, emodel, emodel_dir, emodel_params, morph_path=morph_path,
+            template_type=template_type)
+
+        nt.assert_true(all(key in ret for key in [name, morph_path]))
+
+
+@attr('unit')
+def test_create_template_unknown_template_type():
+    """prepare_combos.create_template: test create_template raises ValueError
+    """
+    name = 'test'
+    emodel = 'emodel1'
+    emodel_dir = './data/emodels_dir/subdir/'
+    emodel_params = {'cm': 1.0}
+    morph_path = 'morph.asc'
+    template_type = 'unknown'
+
+    with tools.cd(TEST_DATA_DIR):
+        nt.assert_raises(ValueError, prepare_emodel_dirs.create_template, name,
+                         emodel, emodel_dir, emodel_params,
+                         morph_path=morph_path, template_type=template_type)
 
 
 @attr('unit')
