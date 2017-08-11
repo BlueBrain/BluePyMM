@@ -46,12 +46,21 @@ def _verify_output(benchmark_dir, output_dir):
 def _config_select_combos(config_template_path, tmp_dir):
     """Helper function to prepare input data for select_combos"""
     # copy input data
-    shutil.copytree('output_expected', tmp_dir)
+    shutil.copy('output_expected/scores.sqlite', tmp_dir)
 
     # set configuration dict
     config = tools.load_json(config_template_path)
-    config['scores_db'] = os.path.join(tmp_dir, 'scores.sqlite')
-    config['pdf_filename'] = os.path.join(tmp_dir, 'megating.pdf')
+
+    # load, edit, and save run_combos config json
+    run_config = tools.load_json(config['run_config'])
+    run_config['scores_db'] = os.path.join(tmp_dir, 'scores.sqlite')
+    run_config_filename = os.path.basename(config['run_config'])
+    run_config_path = tools.write_json(tmp_dir, run_config_filename,
+                                       run_config)
+
+    # edit and save select_combos config json
+    config['run_config'] = run_config_path
+    config['report_dir'] = os.path.join(tmp_dir, 'report')
     config['output_dir'] = os.path.join(tmp_dir, 'output')
     return config
 
@@ -75,6 +84,7 @@ def test_select_combos():
     config_template_path = 'simple1_conf_select.json'
     benchmark_dir = 'output_megate_expected'
     tmp_dir = os.path.join(TMP_DIR, 'test_select_combos')
+    tools.makedirs(tmp_dir)
 
     _test_select_combos(TEST_DATA_DIR, tmp_dir, config_template_path,
                         benchmark_dir)
@@ -86,6 +96,7 @@ def test_select_combos_2():
     config_template_path = 'simple1_conf_select_2.json'
     benchmark_dir = 'output_megate_expected'
     tmp_dir = os.path.join(TMP_DIR, 'test_select_combos_2')
+    tools.makedirs(tmp_dir)
 
     _test_select_combos(TEST_DATA_DIR, tmp_dir, config_template_path,
                         benchmark_dir)
