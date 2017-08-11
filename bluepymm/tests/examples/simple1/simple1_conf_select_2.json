@@ -1,13 +1,13 @@
 {
    "version": "1.0",
-   "scores_db": "./output/scores.sqlite",
+   "run_config": "./simple1_conf_run.json",
+   "output_dir": "./output_megate",
+   "report_dir": "./report",
    "to_skip_features": [],
    "megate_thresholds": [
        {"emodel": [".*"], "mtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
    ],
    "skip_repaired_exemplar": false,
    "plot_emodels_per_morphology": true,
-   "make_names_neuron_compliant": true,
-   "output_dir": "./output_megate",
-   "report_dir": "./report"
+   "make_names_neuron_compliant": true
 }

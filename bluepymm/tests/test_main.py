@@ -117,11 +117,11 @@ def _new_run_json(original_filename, test_dir):
     return bluepymm.tools.write_json(test_dir, original_filename, config)
 
 
-def _new_select_json(original_filename, test_dir):
+def _new_select_json(original_filename, test_dir, run_config_json):
     """Helper function to prepare new configuration file for select_combos."""
     config = bluepymm.tools.load_json(original_filename)
-    config['scores_db'] = os.path.join(test_dir, 'output', 'scores.sqlite')
-    config['pdf_filename'] = os.path.join(test_dir, 'megating.pdf')
+    config['run_config'] = os.path.join(test_dir, run_config_json)
+    config['report_dir'] = os.path.join(test_dir, 'report')
     config['output_dir'] = os.path.join(test_dir, 'output')
     return bluepymm.tools.write_json(test_dir, original_filename, config)
 
@@ -136,7 +136,8 @@ def _test_main(test_data_dir, prepare_config_json, run_config_json,
         # prepare new configuration files based on 'test_dir'
         prepare_config_json = _new_prepare_json(prepare_config_json, test_dir)
         run_config_json = _new_run_json(run_config_json, test_dir)
-        select_config_json = _new_select_json(select_config_json, test_dir)
+        select_config_json = _new_select_json(select_config_json, test_dir,
+                                              run_config_json)
 
         # prepare combinations
         args_list = ['prepare', prepare_config_json]

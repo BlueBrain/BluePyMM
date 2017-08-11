@@ -54,7 +54,8 @@ def select_combos_from_conf(conf_dict):
         conf_dict)
 
     # read score tables
-    scores_db_filename = conf_dict['scores_db']
+    run_conf_dict = tools.load_json(conf_dict['run_config'])
+    scores_db_filename = run_conf_dict['scores_db']
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_db_filename)
     tools.check_all_combos_have_run(scores, scores_db_filename)
