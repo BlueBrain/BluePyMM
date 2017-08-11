@@ -37,6 +37,13 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, '../templates')
 
 
+def _get_template(template_type):
+    if template_type in ['neuron', 'neurodamus']:
+        return 'cell_template_{}.jinja2'.format(template_type)
+    else:
+        raise ValueError('Unknown template type'.format(template_type))
+
+
 def convert_emodel_input(emodels_in_repo, conf_dict, continu):
     """Convert e-model input to BluePyMM file structure and return path to that
     structure.
@@ -90,27 +97,60 @@ def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
     return final_dict, emodel_etype_map, dict_dir
 
 
-def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
-                              template, template_dir=None, morph_path=None,
-                              model_name=None):
+def create_and_write_hoc_file(emodel, emodel_dir, output_dir, emodel_params,
+                              morph_path=None, model_name=None,
+                              template_type='neurodamus'):
     """Create .hoc code for a given e-model based on code from
     '<emodel_dir>/setup', e-model parameters and a given template, and write
-    out the result to a file named <hoc_dir>/<model_name or emodel>.hoc.
+    out the result to a file named <output_dir>/<model_name or emodel>.hoc.
 
     Args:
         emodel: e-model name
         emodel_dir: the directory containing a module 'setup', which describes
                     the e-model
-        hoc_dir: the directory to which the resulting .hoc file will be written
-                 out.
+        output_dir: the directory to which the resulting .hoc file will be
+                    written out.
         emodel_params: a dict with e-model parameters
-        template: template file used for the creation of the .hoc file
-        template_dir: directory that contains the template. If None, a template
-                      provided by BluePyMM is used. Default is None.
         morph_path: path to morphology file, used to overwrite the original
                     morphology of an e-model. Default is None.
         model_name: used to name the .hoc file. If None, the e-model name is
                     used. Default is None.
+        template_type: template type. 'neuron' or 'neurodamus' for a hoc
+                       template that is compatible with NEURON or Neurodamus
+                       respectively. Default is 'neurodamus'.
+    """
+    name = model_name or emodel
+    hoc_template_string = create_template(name, emodel, emodel_dir,
+                                          emodel_params, morph_path)
+    # write out result
+    hoc_file_name = '{}.hoc'.format(name)
+    emodel_hoc_path = os.path.join(output_dir, hoc_file_name)
+    with open(emodel_hoc_path, 'w') as emodel_hoc_file:
+        emodel_hoc_file.write(hoc_template_string)
+
+
+def create_template(name, emodel, emodel_dir, emodel_params,
+                    morph_path=None, template_type='neurodamus'):
+    """Create hoc template for a given e-model based on code from
+    '<emodel_dir>/setup', e-model parameters and a given template type.
+
+    Args:
+        name: used to name the template
+        emodel: e-model name
+        emodel_dir: the directory containing a module 'setup', which describes
+                    the e-model
+        emodel_params: a dict with e-model parameters
+        morph_path: path to morphology file, used to overwrite the original
+                    morphology of an e-model. Default is None.
+        template_type: template type. 'neuron' or 'neurodamus' for a hoc
+                       template that is compatible with NEURON or Neurodamus
+                       respectively. Default is 'neurodamus'.
+
+    Raises:
+        ValueError when the template type is unknown.
+
+    Returns:
+        A string with the hoc template.
     """
     setup = tools.load_module('setup', emodel_dir)
 
@@ -118,30 +158,19 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         old_stdout = sys.stdout
         try:
             sys.stdout = devnull
-            evaluator = setup.evaluator.create(emodel)
 
-            # set path to morphology
+            # create model and set model parameters
+            evaluator = setup.evaluator.create(emodel)
             if morph_path is not None:
                 evaluator.cell_model.morphology.morphology_path = morph_path
-
-            # set template name
-            template_name = model_name or emodel
-            evaluator.cell_model.name = template_name
+            evaluator.cell_model.name = name
             evaluator.cell_model.check_name()
         finally:
             sys.stdout = old_stdout
 
-    # create hoc code
-    if template_dir is None:
-        template_dir = TEMPLATE_DIR
-    hoc = evaluator.cell_model.create_hoc(emodel_params, template=template,
-                                          template_dir=template_dir)
-
-    # write out result
-    hoc_file_name = '{}.hoc'.format(template_name)
-    emodel_hoc_path = os.path.join(hoc_dir, hoc_file_name)
-    with open(emodel_hoc_path, 'w') as emodel_hoc_file:
-        emodel_hoc_file.write(hoc)
+    template = _get_template(template_type)
+    return evaluator.cell_model.create_hoc(emodel_params, template=template,
+                                           template_dir=TEMPLATE_DIR)
 
 
 def prepare_emodel_dir(input_args):
@@ -202,9 +231,10 @@ def prepare_emodel_dir(input_args):
                     print('Compiling mechanisms ...')
                     sh.nrnivmodl('mechanisms')
 
+                    # TODO: move hoc file creation to final output
                     create_and_write_hoc_file(
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
-                        'cell_template_neurodamus.jinja2')
+                        template_type='neurodamus')
 
     except:
         raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
