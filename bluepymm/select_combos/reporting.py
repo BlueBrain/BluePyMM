@@ -253,51 +253,45 @@ def plot_emodels_per_metype(data, final_db):
         [BLUE, YELLOW, RED])
 
 
-# TODO: can this function be split into processing and reporting?
-def create_final_db_and_write_report(report_pdf_path,
-                                     to_skip_features,
-                                     to_skip_patterns,
-                                     megate_thresholds,
-                                     megate_patterns,
-                                     skip_repaired_exemplar,
-                                     check_opt_scores,
-                                     scores,
-                                     score_values,
-                                     enable_plot_emodels_per_morphology):
-    """Create the final output files and report"""
-    ext_neurondb = pandas.DataFrame()
+def write_report(report_pdf_path,
+                 to_skip_features,
+                 megate_thresholds,
+                 enable_plot_emodels_per_morphology,
+                 selected_combos_db,
+                 analysis_dict,
+                 scores):
+    """Write pdf report to file.
 
+    Args:
+        report_pdf_path: path to report file
+        to_skip_features: dict with features that were skipped during
+                          combination selection
+        megate_thresholds: dict with threshold that were applied during
+                           combination selection
+        enable_plot_emodels_per_morphology: boolean indicating whether to plot
+                                            e-models tested per morphology
+        selected_combos_db: pandas.DataFrame with selected combinations
+        analysis_dict: dict with data on analysis performed on scores
+        scores: pandas.DataFrame with all me-combinations and related scores
+    """
     with pdf_file(report_pdf_path) as pp:
-        # Plot input configuration details
         add_plot_to_report(pp, plot_dict, to_skip_features,
                            'Ignored feature patterns')
         add_plot_to_report(pp, plot_dict, megate_thresholds,
                            'MEGating thresholds')
 
-        # Process all the e-models
-        emodels = sorted(scores[scores.is_original == 0].emodel.unique())
-        for emodel in emodels:
-            emodel_ext_neurondb_rows, megate_scores, \
-                emodel_score_values, mtypes = table_processing.process_emodel(
-                    emodel,
-                    scores,
-                    score_values,
-                    to_skip_patterns,
-                    megate_patterns,
-                    skip_repaired_exemplar,
-                    check_opt_scores)
-            ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+        for emodel in analysis_dict:
+            megate_scores = analysis_dict[emodel]['megate_scores']
+            emodel_score_values = analysis_dict[emodel]['emodel_score_values']
+            mtypes = analysis_dict[emodel]['mtypes']
 
-            # Reporting per e-model
             add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
                                megate_scores, emodel_score_values)
             add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
                                mtypes, megate_scores)
 
-        # More reporting
         if enable_plot_emodels_per_morphology:
             add_plot_to_report(pp, plot_emodels_per_morphology, scores,
-                               ext_neurondb)
-        add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
-
-    return ext_neurondb
+                               selected_combos_db)
+        add_plot_to_report(pp, plot_emodels_per_metype, scores,
+                           selected_combos_db)

@@ -312,3 +312,47 @@ def process_combo_name(data, log_filename):
 
     log_data['neuron_compliant_combo_name'] = data['combo_name'].copy()
     log_data.to_csv(log_filename, index=False)
+
+
+def select_combinations(to_skip_patterns,
+                        megate_patterns,
+                        skip_repaired_exemplar,
+                        check_opt_scores,
+                        scores,
+                        score_values):
+    """Create database with successful me-combinations.
+
+    Args:
+        to_skip_patterns: list of patterns with features to skip during
+                          selection
+        megate_patterns: list of threshold patterns that are applied during
+                         selection
+        skip_repaired_exemplar: boolean indicating whether exemplar should be
+                                skipped
+        check_opt_scores: boolean
+        scores: pandas.DataFrame with all me-combinations and related scores
+        score_values: pandas.DataFrame with scores values
+
+    Returns:
+        pandas.DataFrame with selected combinations, and dict with analysis
+        data made during selection
+    """
+    selected_combos_db = pandas.DataFrame()
+    analysis_dict = {}
+
+    emodels = sorted(scores[scores.is_original == 0].emodel.unique())
+    for emodel in emodels:
+        emodel_selected_combos, megate_scores, \
+            emodel_score_vals, mtypes = process_emodel(emodel,
+                                                       scores,
+                                                       score_values,
+                                                       to_skip_patterns,
+                                                       megate_patterns,
+                                                       skip_repaired_exemplar,
+                                                       check_opt_scores)
+        selected_combos_db = selected_combos_db.append(emodel_selected_combos)
+        analysis_dict[emodel] = {'megate_scores': megate_scores,
+                                 'emodel_score_values': emodel_score_vals,
+                                 'mtypes': mtypes}
+
+    return selected_combos_db, analysis_dict

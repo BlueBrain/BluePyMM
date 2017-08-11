@@ -59,25 +59,31 @@ def select_combos_from_conf(conf_dict):
         scores_db_filename)
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
-    # create final database and write report
-    report_dir = conf_dict['report_dir']
-    tools.makedirs(report_dir)
-    report_pdf_path = os.path.join(report_dir, 'report.pdf')
-    ext_neurondb = reporting.create_final_db_and_write_report(
-        report_pdf_path,
-        to_skip_features,
+    # select me-combinations
+    selected_combos_db, analysis_dict = table_processing.select_combinations(
         to_skip_patterns,
-        megate_thresholds,
         megate_patterns,
         conf_dict.get('skip_repaired_exemplar', False),
         conf_dict.get('check_opt_scores', True),
-        scores, score_values,
-        conf_dict.get('plot_emodels_per_morphology', False))
-    print('Wrote pdf to %s' % report_pdf_path)
+        scores, score_values)
+
+    # write report to file
+    report_dir = conf_dict['report_dir']
+    tools.makedirs(report_dir)
+    report_pdf_path = os.path.join(report_dir, 'report.pdf')
+    reporting.write_report(report_pdf_path,
+                           to_skip_features,
+                           megate_thresholds,
+                           conf_dict.get('plot_emodels_per_morphology', False),
+                           selected_combos_db,
+                           analysis_dict,
+                           scores)
+    print('Wrote report to %s' % report_pdf_path)
 
     # write output files
     compliant = conf_dict.get('make_names_neuron_compliant', False)
-    megate_output.save_megate_results(ext_neurondb, conf_dict['output_dir'],
+    megate_output.save_megate_results(selected_combos_db,
+                                      conf_dict['output_dir'],
                                       sort_key='combo_name',
                                       make_names_neuron_compliant=compliant)
 
