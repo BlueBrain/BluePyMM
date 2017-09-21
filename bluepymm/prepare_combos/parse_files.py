@@ -27,9 +27,9 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import pandas
 import re
-import collections
 
-import xml.etree.ElementTree
+import lxml
+import lxml.etree
 
 
 def _parse_xml_tree(filename):
@@ -41,9 +41,8 @@ def _parse_xml_tree(filename):
     Returns:
         xml.etree.ElementTree
     """
-    parser = xml.etree.ElementTree.XMLParser()
-    parser.entity = collections.defaultdict(lambda: '')
-    return xml.etree.ElementTree.parse(filename, parser=parser)
+    parser = lxml.etree.XMLParser(resolve_entities=False)
+    return lxml.etree.parse(filename, parser=parser)
 
 
 def verify_no_zero_percentage(tree_element_list):
