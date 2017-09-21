@@ -27,6 +27,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import pandas
 import re
+import collections
 
 import xml.etree.ElementTree
 
@@ -41,6 +42,7 @@ def _parse_xml_tree(filename):
         xml.etree.ElementTree
     """
     parser = xml.etree.ElementTree.XMLParser()
+    parser.entity = collections.defaultdict(lambda: '')
     return xml.etree.ElementTree.parse(filename, parser=parser)
 
 
