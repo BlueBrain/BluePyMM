@@ -178,7 +178,7 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
                         for etype in etypes:
                             if etype_regex.match(etype):
                                 yield (emodel,
-                                       layer,
+                                       str(layer),
                                        fullmtype,
                                        etype,
                                        morph_name_regex,
