@@ -89,7 +89,6 @@ def convert_emodel_input(emodels_in_repo, conf_dict, continu):
     if not continu:
         if emodels_in_repo:
             print('Cloning input e-models repository in %s' % tmp_emodels_dir)
-            print('HERE %s' % os.getcwd())
             sh.git('clone', conf_dict['emodels_repo'], tmp_emodels_dir)
 
             with tools.cd(tmp_emodels_dir):
