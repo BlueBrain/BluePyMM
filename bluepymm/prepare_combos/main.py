@@ -59,12 +59,15 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
         skip_repaired_exemplar = conf_dict.get('skip_repaired_exemplar', False)
         recipe_filename = conf_dict['recipe_path']
         morph_dir = conf_dict['morph_path']
+        rep_morph_dir = conf_dict['rep_morph_path']
+        print('Using repaired exemplar morph path: %s' % rep_morph_dir)
 
         # Create a sqlite3 db with all the combos
         create_mm_sqlite.create_mm_sqlite(
             scores_db_path,
             recipe_filename,
             morph_dir,
+            rep_morph_dir,
             emodel_etype_map,
             final_dict,
             emodel_dirs,
