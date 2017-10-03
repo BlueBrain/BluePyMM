@@ -1,0 +1,4 @@
+morph_name	layer	fullmtype	etype	emodel	combo_name	threshold_current	holding_current
+morph1	1	mtype1	etype1	emodel1	emodel1_mtype1_1_morph1		
+morph2	1	mtype2	etype1	emodel1	emodel1_mtype2_1_morph2		
+morph1	1	mtype1	etype2	emodel2	emodel2_mtype1_1_morph1		

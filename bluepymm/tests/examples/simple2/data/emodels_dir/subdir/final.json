@@ -1,0 +1,26 @@
+{
+  "emodel1": {
+    "main_path": ".",
+    "seed": 2,
+    "rank": 0,
+    "notes": "",
+    "branch": "emodel1",
+    "params": {"cm": 1.0},
+    "fitness": {"Step1.SpikeCount": 20.0},
+    "opt_protocol": "emodel1",
+    "opt_scores": 104.72906197480131,
+    "opt_morph_name": "morph1"
+  },
+  "emodel2": {
+    "main_path": ".",
+    "seed": 2,
+    "rank": 0,
+    "notes": "",
+    "branch": "emodel2",
+    "params": {"cm": 0.5},
+    "fitness": {"Step1.SpikeCount": 20.0},
+    "opt_protocol": "emodel1",  
+    "opt_scores": 104.72906197480131,
+    "opt_morph_name": "morph2"
+  }
+}

@@ -1,5 +1,7 @@
 """BluePyMM tools"""
 
+from __future__ import print_function
+
 """
 Copyright (c) 2017, EPFL/Blue Brain Project
 
@@ -27,7 +29,10 @@ import os
 import sys
 import hashlib
 import sh
+import importlib
 from string import digits
+
+VERBOSE_LEVEL = 1
 
 
 @contextlib.contextmanager
@@ -39,6 +44,12 @@ def cd(dir_name):
         yield
     finally:
         os.chdir(old_cwd)
+
+
+def printv(*args, **kwargs):
+    """Print with verbose level"""
+    if VERBOSE_LEVEL >= 1:
+        print(*args)
 
 
 def load_json(path):
@@ -190,7 +201,21 @@ def check_is_git_repo_root_folder(directory):
     """Check whether a given directory is the root folder of a git repository.
     """
     with cd(directory):
-        if(os.system('git rev-parse 2> /dev/null > /dev/null') == 0):
-            repo = sh.git('rev-parse', '--show-toplevel').stdout.rstrip()
+        if os.system('git rev-parse 2> /dev/null > /dev/null') == 0:
+            repo = sh.git(  # pylint: disable=E1121
+                'rev-parse',
+                '--show-toplevel').stdout.rstrip()
             return repo.decode() == os.getcwd()
         return False
+
+
+def conf_to_obj(json_conf):
+    """Decode a json string in an object"""
+    class_module = importlib.import_module(json_conf['class_module'])
+    class_name = json_conf['class_name']
+
+    class_ = getattr(class_module, class_name)
+
+    obj = class_(**json_conf['config'])
+
+    return obj

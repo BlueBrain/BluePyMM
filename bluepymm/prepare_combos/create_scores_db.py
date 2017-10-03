@@ -25,45 +25,21 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914
 
-import os
 import json
+import re
 
 import pandas
 import sqlite3
 
 from bluepymm import tools
-from . import parse_files
-
-
-def check_morphology_existence(morph_name, morph_type, morph_path):
-    """Check if a morphology exists based on its path.
-
-    Args:
-        morph_name: a string representing the name of the morphology. Used for
-            makeing a pretty error string.
-        morph_type: a string representing the type of the morphology. Used for
-            making a pretty error string.
-        morph_path: the path to the morphology file
-
-    Returns:
-        True if the morphology exists.
-
-    Raises:
-        ValueError: The morphology does not exist.
-    """
-    if not os.path.isfile(morph_path):
-        raise ValueError(
-            "{} morphology {} doesn't exist at {}".format(
-                morph_type.capitalize(), morph_name, morph_path))
-    else:
-        return True
+from bluepymm.tools import printv
 
 
 def create_exemplar_rows(
-        final_dict,
+        emodel_release,
+        morph_release,
+        opt_morph_release,
         fullmtype_morph_map,
-        emodel_etype_map,
-        emodel_dirs,
         skip_repaired_exemplar=False):
     """Create exemplar rows.
 
@@ -84,58 +60,55 @@ def create_exemplar_rows(
 
     exemplar_rows = []
 
-    for original_emodel in emodel_etype_map:
-        emodel = emodel_etype_map[original_emodel]['mm_recipe']
+    # Get all the emodels in release
+    emodels = emodel_release.get_emodels()
+
+    # For every emodel at exemplar rows to the database
+    for emodel_name, emodel in emodels.items():
         print('Adding exemplar row for e-model %s' % emodel)
 
-        original_emodel_dict = final_dict[original_emodel]
+        # Get stimulus protocol that will be used for gating
+        gating_protocol = emodel.gating_protocol
 
-        opt_scores = original_emodel_dict['fitness']
+        # Get stimulus protocol that was used for optimization
+        opt_protocol = emodel.opt_protocol
 
-        morph_filename = os.path.basename(original_emodel_dict['morph_path'])
-        morph_name, _ = os.path.splitext(morph_filename)
-        unrep_morph_dir = os.path.dirname(os.path.abspath(
-            os.path.join(
-                emodel_dirs[emodel],
-                original_emodel_dict['morph_path'])))
-        morph_path = os.path.join(unrep_morph_dir, morph_filename)
-        check_morphology_existence(morph_filename, 'unrepaired', morph_path)
+        # Score obtained during optimization
+        opt_scores = emodel.opt_scores
 
+        # Morphology used for optimization
+        opt_morph_name = emodel.opt_morph_name
+
+        # Decide to use repaired morphology or not
         if skip_repaired_exemplar:
-            fullmtype = None
-            layer = None
             # don't run repaired version
-            combos = [(emodel, False, False),
-                      (original_emodel, True, False)]
+            combos = [(gating_protocol, False, False),
+                      (opt_protocol, True, False)]
         else:
-            morph_info_list = fullmtype_morph_map[
-                fullmtype_morph_map['morph_name'] == morph_name].values
-            if len(morph_info_list) == 0:
+            if opt_morph_name not in opt_morph_release.get_morph_names():
                 raise Exception(
-                    'Morphology %s for %s e-model not found in morphology '
-                    'release' % (morph_name, original_emodel))
-            else:
-                morph_name, morph_dir, extension, fullmtype, layer = \
-                    morph_info_list[0]
+                    'Morphology %s for e-model %s not found in optimisation '
+                    'morphology release' % (opt_morph_name, emodel.name))
+            if opt_morph_name not in morph_release.get_morph_names():
+                raise Exception(
+                    'Morphology %s for e-model %s not found in main '
+                    'morphology release' % (opt_morph_name, emodel.name))
 
-            basename = '{}.{}'.format(morph_name, extension)
-            morph_path = os.path.join(morph_dir, basename)
-            check_morphology_existence(basename, 'repaired', morph_path)
             # run repaired version
-            combos = [(emodel, False, True),
-                      (original_emodel, True, True),
-                      (emodel, False, False),
-                      (original_emodel, True, False)]
+            combos = [(gating_protocol, False, True),
+                      (opt_protocol, True, True),
+                      (gating_protocol, False, False),
+                      (opt_protocol, True, False)]
 
-        for (stored_emodel, original, repaired) in combos:
+        # Create the actual examplar rows
+        for (protocol_name, original, repaired) in combos:
             new_row_dict = {
-                'layer': layer,
-                'fullmtype': fullmtype,
-                'etype': emodel_etype_map[original_emodel]['etype'],
-                'morph_name': morph_name,
-                'emodel': stored_emodel,
-                'original_emodel': original_emodel,
-                'morph_dir': morph_dir if repaired else unrep_morph_dir,
+                'layer': None,
+                'fullmtype': None,
+                'etype': emodel.etype,
+                'morph_name': opt_morph_name,
+                'emodel': emodel_name,
+                'protocol': protocol_name,
                 'scores': None,
                 'opt_scores': json.dumps(opt_scores) if not repaired else None,
                 'exception': None,
@@ -145,6 +118,7 @@ def create_exemplar_rows(
                 'is_original': original}
             exemplar_rows.append(new_row_dict)
 
+    # Return a pandas dataframe of the examplar rows
     return pandas.DataFrame(exemplar_rows)
 
 
@@ -180,13 +154,12 @@ def remove_morph_regex_failures(full_map):
     return full_map.reset_index(drop=True)
 
 
-def create_mm_sqlite(
-        output_filename,
-        recipe_filename,
-        morph_db_path,
-        original_emodel_etype_map,
-        final_dict,
-        emodel_dirs,
+def create_scores_db(
+        db_path,
+        emodel_release,
+        morph_release,
+        opt_morph_release,
+        recipe,
         skip_repaired_exemplar=False):
     """Create SQLite database with all possible me-combinations.
 
@@ -200,55 +173,57 @@ def create_mm_sqlite(
         skip_repaired_exemplar: indicates whether repaired exemplar should be
             skipped. Default value is False.
     """
+
+    printv('Reading recipe at %s' % recipe.path)
     # contains layer, fullmtype, etype
-    print('Reading recipe at %s' % recipe_filename)
-    fullmtype_etype_map = parse_files.read_mm_recipe(recipe_filename)
+    fullmtype_etype_map = recipe.get_fullmtype_etype_map()
     tools.check_no_null_nan_values(fullmtype_etype_map,
                                    "the full m-type e-type map")
 
+    printv('Reading morphology release at %s' % morph_release.path)
     # contains layer, fullmtype, mtype, submtype, morph_name
-    print('Reading morphology database at %s' % morph_db_path)
-    fullmtype_morph_map = parse_files.read_morph_database(morph_db_path)
+    fullmtype_morph_map = morph_release.get_fullmtype_morph_map()
     tools.check_no_null_nan_values(fullmtype_morph_map,
                                    "the full m-type morphology map")
 
+    printv('Merging recipe and morphology db tables')
     # contains layer, fullmtype, etype, morph_name
-    print('Merging recipe and morphology db tables')
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
     tools.check_no_null_nan_values(morph_fullmtype_etype_map,
                                    'morph_fullmtype_etype_map')
 
+    # Convenience pointers to all m-types and e-types
     fullmtypes = morph_fullmtype_etype_map.fullmtype.unique()
     etypes = morph_fullmtype_etype_map.etype.unique()
 
-    print('Creating emodel etype table')
+    printv('Creating emodel etype table')
     # contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
-    emodel_fullmtype_etype_map = parse_files.convert_emodel_etype_map(
-        original_emodel_etype_map, fullmtypes, etypes)
+    emodel_fullmtype_etype_map = convert_emodel_etype_map(
+        emodel_release.get_emodel_etype_map(), fullmtypes, etypes)
     tools.check_no_null_nan_values(emodel_fullmtype_etype_map,
                                    'e-model e-type map')
 
-    print('Creating full table by merging subtables')
+    printv('Creating full table by merging subtables')
     # contains layer, fullmtype, etype, morph_name, e_model, morph_regex
     full_map = morph_fullmtype_etype_map.merge(
         emodel_fullmtype_etype_map, on=['layer', 'etype', 'fullmtype'],
         how='left')
 
+    # Check if there are e-models for all rows
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
-
     if len(null_emodel_rows) > 0:
         raise Exception(
             'No e-models found for the following layer, etype, fullmtype'
             ' combinations: \n%s' %
             null_emodel_rows[['layer', 'etype', 'fullmtype']])
 
-    print("Filtering out morph_names that don't match regex")
+    printv("Filtering out morph_names that don't match regex")
     # contains layer, fullmtype, etype, morph_name, e_model
     full_map = remove_morph_regex_failures(full_map)
     tools.check_no_null_nan_values(full_map, "the full map")
 
-    print('Adding exemplar rows')
+    # Add columns with default values
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'is_repaired', True)
     full_map.insert(len(full_map.columns), 'is_original', False)
@@ -258,18 +233,68 @@ def create_mm_sqlite(
     full_map.insert(len(full_map.columns), 'exception', None)
     full_map.insert(len(full_map.columns), 'to_run', True)
 
+    printv('Adding exemplar rows')
     exemplar_rows = create_exemplar_rows(
-        final_dict,
+        emodel_release,
+        morph_release,
+        opt_morph_release,
         fullmtype_morph_map,
-        original_emodel_etype_map,
-        emodel_dirs,
         skip_repaired_exemplar=skip_repaired_exemplar)
 
-    # prepend exemplar rows to full_map
+    # prepend exemplar rows to full table
     full_map = pandas.concat([exemplar_rows, full_map], ignore_index=True)
 
     # write full table to sqlite database
-    with sqlite3.connect(output_filename) as conn:
+    with sqlite3.connect(db_path) as conn:
         full_map.to_sql('scores', conn, if_exists='replace')
 
-    print('Created sqlite db at %s' % output_filename)
+    printv('Created sqlite db at %s' % db_path)
+
+
+def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
+    """Resolve regular expressions in an e-model e-type map and convert the
+    result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
+    or "morph_name" in the e-model e-type map, the regular expression ".*" is
+    assumed.
+
+    Args:
+        emodel_etype_map: A dict mapping e-models to a dict with keys
+            "mm_recipe" and "layer". Optional additional keys are "etype",
+            "mtype", and "morph_name", which may contain regular expressions.
+            In absence of these keys, the regular expression ".*" is assumed.
+        fullmtypes: A set of unique full m-types
+        etypes: A set of unique e-types
+
+    Returns:
+        A pandas.DataFrame with fields 'emodel', 'layer', 'fullmtype', 'etype',
+        'morph_regex', and 'original_emodel'. Each row corresponds to a unique
+        e-model description.
+    """
+    morph_name_regexs_cache = {}
+
+    def read_records():
+        """Read records"""
+        for original_emodel, etype_map in emodel_etype_map.items():
+            etype_regex = re.compile(etype_map.get('etype', '.*'))
+            mtype_regex = re.compile(etype_map.get('mtype', '.*'))
+
+            morph_name_regex = etype_map.get('morph_name', '.*')
+            morph_name_regex = morph_name_regexs_cache.setdefault(
+                morph_name_regex, re.compile(morph_name_regex))
+
+            emodel = etype_map['gating_protocol']
+            for layer in etype_map['layer']:
+                for fullmtype in fullmtypes:
+                    if mtype_regex.match(fullmtype):
+                        for etype in etypes:
+                            if etype_regex.match(etype):
+                                yield (emodel,
+                                       layer,
+                                       fullmtype,
+                                       etype,
+                                       morph_name_regex,
+                                       original_emodel,)
+
+    columns = ['emodel', 'layer', 'fullmtype', 'etype', 'morph_regex',
+               'original_emodel']
+    return pandas.DataFrame(read_records(), columns=columns)

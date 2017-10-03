@@ -13,6 +13,8 @@ unit2: install_tox
 	tox -e py27-unit
 unit3: install_tox
 	tox -e py3-unit
+simple2: install_tox
+	tox -e py27-simple2
 func2: install_tox
 	tox -e py27-functional
 func3: install_tox
@@ -26,6 +28,7 @@ clean:
 	rm -rf dist
 	find . -name '*.pyc' -delete
 	rm -rf bluepymm/tests/examples/simple1/tmp
+	rm -rf bluepymm/tests/examples/simple2/tmp
 	rm -rf bluepymm/tests/examples/simple1/tmp_git
 	rm -rf bluepymm/tests/examples/simple1/output
 	rm -rf bluepymm/tests/examples/simple1/output_megate

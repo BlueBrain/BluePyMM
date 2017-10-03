@@ -24,7 +24,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import os
 
-from bluepymm import tools
+import bluepymm as bpmm
 from . import calculate_scores
 
 
@@ -41,24 +41,20 @@ def add_parser(action):
                         help='Path to ipyparallel profile')
 
 
-def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None):
+def run_combos_from_conf(run_conf, prepare_conf, ipyp=None, ipyp_profile=None):
     """Run combos from conf dictionary"""
-    output_dir = conf_dict['output_dir']
-    final_dict = tools.load_json(
-        os.path.join(
-            output_dir,
-            'final.json'))
-    emodel_dirs = tools.load_json(
-        os.path.join(
-            output_dir,
-            'emodel_dirs.json'))
-    scores_db_path = os.path.abspath(conf_dict['scores_db'])
+    emodel_release = bpmm.tools.conf_to_obj(prepare_conf['emodel_release'])
+    morph_release = bpmm.tools.conf_to_obj(prepare_conf['morph_release'])
+
+    scores_db_path = os.path.join(
+        prepare_conf['db_dirname'],
+        prepare_conf['db_filename'])
 
     print('Calculating scores')
     calculate_scores.calculate_scores(
-        final_dict,
-        emodel_dirs,
         scores_db_path,
+        emodel_release,
+        morph_release,
         use_ipyp=ipyp,
         ipyp_profile=ipyp_profile)
 
@@ -67,6 +63,14 @@ def run_combos(conf_filename, ipyp=None, ipyp_profile=None):
     """Run combos"""
 
     print('Reading configuration at %s' % conf_filename)
-    conf_dict = tools.load_json(conf_filename)
+    conf = bpmm.tools.load_json(conf_filename)
 
-    run_combos_from_conf(conf_dict, ipyp, ipyp_profile)
+    run_conf = conf['run']
+
+    if 'prepare_conf_filename' not in run_conf or \
+            run_conf['prepare_conf_filename'] is None:
+        prepare_conf = conf['prepare']
+    else:
+        prepare_conf = bpmm.tools.load_json(run_conf['prepare_conf_filename'])
+
+    run_combos_from_conf(run_conf, prepare_conf, ipyp, ipyp_profile)

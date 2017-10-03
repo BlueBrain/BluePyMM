@@ -1,0 +1,9 @@
+*.pyc
+x86_64
+*.bk
+/checkpoints/
+/responses.pkl
+test.log
+.ipython/
+file.patch
+file_.patch

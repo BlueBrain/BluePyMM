@@ -1,0 +1,12 @@
+{
+   "version": "1.0",
+   "run_config": "./simple1_conf_run.json",
+   "output_dir": "./output_megate",
+   "report_dir": "./report",
+   "to_skip_features": [],
+   "megate_thresholds": [
+       {"emodel": [".*"], "mtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
+   ],
+   "check_opt_scores": true,
+   "plot_emodels_per_morphology": true
+}

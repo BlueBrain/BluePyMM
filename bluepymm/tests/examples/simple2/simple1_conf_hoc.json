@@ -1,0 +1,7 @@
+{
+  "final_json_path": "./data/emodels_dir/subdir/final.json",
+  "emodels_tmp_dir": "./tmp/emodels",
+  "mecombo_emodel_filename": "output_megate_expected/mecombo_emodel.tsv",
+  "template_type": "neuron",
+  "hoc_output_dir": "hoc"
+}

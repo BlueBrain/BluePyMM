@@ -24,72 +24,48 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import os
 
-from bluepymm import tools
-from . import prepare_emodel_dirs as prepare_dirs
-from . import create_mm_sqlite
-
-
-def prepare_emodels(conf_dict, continu, scores_db_path):
-    """Prepare emodels"""
-
-    tmp_dir = conf_dict['tmp_dir']
-    emodels_dir = os.path.abspath(os.path.join(tmp_dir, 'emodels'))
-
-    # convert e-models input to BluePyMM file structure
-    emodels_in_repo = tools.check_is_git_repo_root_folder(
-        conf_dict['emodels_path'])
-    tmp_emodels_dir = prepare_dirs.convert_emodel_input(emodels_in_repo,
-                                                        conf_dict,
-                                                        continu)
-
-    # get information from emodels repo
-    print('Getting final emodels dict')
-    final_dict, emodel_etype_map, opt_dir = prepare_dirs.get_emodel_dicts(
-        tmp_emodels_dir, conf_dict['final_json_path'],
-        conf_dict['emodel_etype_map_path'])
-
-    print('Preparing emodels in %s' % emodels_dir)
-    emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
-    # clone the emodels repo and prepare the dirs for all the emodels
-    emodel_dirs = prepare_dirs.prepare_emodel_dirs(
-        final_dict, emodel_etype_map, emodels_dir, opt_dir, emodels_hoc_dir,
-        emodels_in_repo, continu=continu)
-
-    if not continu:
-        print('Creating sqlite db at %s' % scores_db_path)
-        skip_repaired_exemplar = conf_dict.get('skip_repaired_exemplar', False)
-        recipe_filename = conf_dict['recipe_path']
-        morph_db_path = os.path.abspath(conf_dict['morph_db_path'])
-
-        # create a sqlite3 db with all the combos
-        create_mm_sqlite.create_mm_sqlite(
-            scores_db_path,
-            recipe_filename,
-            morph_db_path,
-            emodel_etype_map,
-            final_dict,
-            emodel_dirs,
-            skip_repaired_exemplar=skip_repaired_exemplar)
-
-    return final_dict, emodel_dirs
+import bluepymm as bpmm
+from . import create_scores_db
 
 
 def prepare_combos(conf_filename, continu):
     """Prepare combos"""
 
+    # Load config file
     print('Reading configuration at %s' % conf_filename)
-    conf_dict = tools.load_json(conf_filename)
-    scores_db_path = os.path.abspath(conf_dict['scores_db'])
+    conf_dict = bpmm.tools.load_json(conf_filename)['prepare']
+    # Path to new scores database
+    db_filename = conf_dict['db_filename']
+    db_dirname = conf_dict['db_dirname']
+    db_path = os.path.join(db_dirname, db_filename)
+    skip_repaired_exemplar = conf_dict.get('skip_repaired_exemplar', False)
 
-    final_dict, emodel_dirs = prepare_emodels(
-        conf_dict, continu, scores_db_path)
+    # Load the emodel release
+    emodel_release = bpmm.tools.conf_to_obj(conf_dict['emodel_release'])
 
-    # Save output
-    # TODO: gather all output business here?
-    output_dir = conf_dict['output_dir']
-    tools.makedirs(output_dir)
-    tools.write_json(output_dir, 'final.json', final_dict)
-    tools.write_json(output_dir, 'emodel_dirs.json', emodel_dirs)
+    # Load the morphology release
+    morph_release = bpmm.tools.conf_to_obj(conf_dict['morph_release'])
+
+    # Load the morphology release used during the optimization
+    opt_morph_release = bpmm.tools.conf_to_obj(
+        conf_dict['opt_morph_release'])
+
+    # Load the circuit recipe
+    recipe = bpmm.tools.conf_to_obj(conf_dict['circuit_recipe'])
+
+    # Let the emodel release prepare itself for running protocols
+    emodel_release.prepare(conf_dict['tmp_dir'])
+
+    bpmm.tools.makedirs(db_dirname)
+
+    # Create the database that will contain the scores
+    create_scores_db.create_scores_db(
+        db_path,
+        emodel_release,
+        morph_release,
+        opt_morph_release,
+        recipe,
+        skip_repaired_exemplar=skip_repaired_exemplar)
 
 
 def add_parser(action):

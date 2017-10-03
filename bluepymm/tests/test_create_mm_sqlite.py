@@ -28,7 +28,7 @@ import json
 from nose.plugins.attrib import attr
 import nose.tools as nt
 
-from bluepymm.prepare_combos import create_mm_sqlite
+# from bluepymm.prepare_combos import create_mm_sqlite
 from bluepymm import tools
 
 

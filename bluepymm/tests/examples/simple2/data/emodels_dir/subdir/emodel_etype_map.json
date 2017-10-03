@@ -1,0 +1,12 @@
+{
+    "emodel1": {
+        "gating_protocol": "emodel1",
+        "etype": "etype1",
+        "layer": ["1","str1"]
+    },
+    "emodel2": {
+        "gating_protocol": "emodel2",
+        "etype": "etype2",
+        "layer": ["1","2"]
+    }
+}

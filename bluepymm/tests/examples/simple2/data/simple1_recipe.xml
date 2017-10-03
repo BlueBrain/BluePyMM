@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<Recipe>
+    <NeuronTypes>
+		<Layer id="1" percentage="1.037315">
+		  <StructuralType id="mtype1" percentage="17.7304964539">
+		    <ElectroType id="etype1" percentage="33.33"/>
+		    <ElectroType id="etype2" percentage="66.67"/>
+		  </StructuralType>
+          <StructuralType id="mtype2" percentage="20.5673758865">
+		    <ElectroType id="etype1" percentage="10.00"/>
+		  </StructuralType>
+        </Layer>
+
+		<Layer id="2" percentage="10.832282">
+            <StructuralType id="mtype1" percentage="67.7948717949">
+				<ElectroType id="etype2" percentage="100" />
+			</StructuralType>
+		</Layer>
+	</NeuronTypes>
+</Recipe>

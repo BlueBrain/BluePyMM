@@ -1,0 +1,57 @@
+{
+    "version": "2.0",
+    "prepare": {
+        "morph_release": {
+            "class_module": "bluepymm.releases.morphs",
+            "class_name": "XMLMorphRelease",
+            "config": {
+                "morph_db_path":  "./data/morphs/morph_db.json"
+            }
+        },
+        "opt_morph_release": {
+            "class_module": "bluepymm.releases.morphs",
+            "class_name": "XMLMorphRelease",
+            "config": {
+                "morph_db_path":  "./data/morphs/morph_db.json"
+            }
+        },
+        "emodel_release": {
+            "class_module": "bluepymm.releases.emodels",
+            "class_name": "FileEmodelRelease",
+            "config": {
+                "emodels_path": "./data/emodels_dir",
+                "emodel_etype_map_path": "subdir/emodel_etype_map.json",
+                "final_json_path": "subdir/final.json",
+                "make_template_name_compatible": true
+            }
+        },
+        "circuit_recipe": {
+            "class_module": "bluepymm.releases.circuitrecipe",
+            "class_name": "XMLCircuitRecipeRelease",
+            "config": {
+                "path": "./data/simple1_recipe.xml"
+            }
+        },
+        "tmp_dir": "./tmp",
+        "db_filename": "scores.sqlite",
+        "db_dirname": "./output/"
+    },
+    "run": {
+        "prepare_conf_filename": null
+    },
+    "select": {
+        "run_conf_filename": null,
+        "output_dir": "./output_megate",
+        "to_skip_features": [],
+        "megate_thresholds": [
+           {"emodel": [".*"], "mtype": [".*"], "etype": [".*"], "features": [".*"], "megate_threshold": 5}
+        ],
+        "check_opt_scores": true
+    },
+    "analyse": {
+        "reports": [
+            "report_dir": "./report",
+            "plot_emodels_per_morphology": true
+        ]
+    }
+}

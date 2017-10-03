@@ -28,6 +28,7 @@ from nose.plugins.attrib import attr
 import pandas
 import xml.etree.ElementTree as ET
 
+'''
 from bluepymm.prepare_combos import parse_files
 from bluepymm import tools
 
@@ -206,3 +207,5 @@ def test_convert_emodel_etype_map_morph_name_regex():
     etypes = ['etype1']
     _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
                                    layers)
+
+'''
