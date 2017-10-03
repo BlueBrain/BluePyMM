@@ -187,6 +187,7 @@ def create_mm_sqlite(
         output_filename,
         recipe_filename,
         morph_dir,
+        rep_morph_dir,
         original_emodel_etype_map,
         final_dict,
         emodel_dirs,
@@ -270,7 +271,7 @@ def create_mm_sqlite(
         fullmtype_morph_map,
         original_emodel_etype_map,
         emodel_dirs,
-        morph_dir,
+        rep_morph_dir,
         skip_repaired_exemplar=skip_repaired_exemplar)
 
     # Prepend exemplar rows to full_map
