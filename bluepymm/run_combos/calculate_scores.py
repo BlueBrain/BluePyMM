@@ -120,19 +120,40 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
-            evaluator = setup.evaluator.create(etype='%s' % emodel)
-            evaluator.cell_model.morphology.morphology_path = morph_path
+            if hasattr(setup, 'multieval'):
+                # use correct apical point section here
+                altmorph = [['mm', morph_path, None]]
+                evaluator = setup.evaluator.create(etype='%s' % emodel,
+                                                   altmorph=altmorph)
 
-            responses = evaluator.run_protocols(
-                evaluator.fitness_protocols.values(),
-                emodel_params)
-            scores = evaluator.fitness_calculator.calculate_scores(responses)
+                evaluator = evaluator.evaluators[0]  # only one evaluator
 
-            extra_values = {}
-            extra_values['holding_current'] = \
-                responses.get('bpo_holding_current', None)
-            extra_values['threshold_current'] = \
-                responses.get('bpo_threshold_current', None)
+                responses = evaluator.run_protocols(
+                    evaluator.fitness_protocols.values(),
+                    emodel_params)
+                scores = evaluator.fitness_calculator.calculate_scores(
+                    responses)
+
+                extra_values = {}
+                extra_values['holding_current'] = \
+                    responses.get('alt.bpo_holding_current', None)
+                extra_values['threshold_current'] = \
+                    responses.get('alt.bpo_holding_current', None)
+            else:
+                evaluator = setup.evaluator.create(etype='%s' % emodel)
+                evaluator.cell_model.morphology.morphology_path = morph_path
+
+                responses = evaluator.run_protocols(
+                    evaluator.fitness_protocols.values(),
+                    emodel_params)
+                scores = evaluator.fitness_calculator.calculate_scores(
+                    responses)
+
+                extra_values = {}
+                extra_values['holding_current'] = \
+                    responses.get('bpo_holding_current', None)
+                extra_values['threshold_current'] = \
+                    responses.get('bpo_threshold_current', None)
 
         return scores, extra_values
     except:
