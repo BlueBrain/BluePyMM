@@ -34,6 +34,6 @@ pip install tox --upgrade
 # Tests
 #####
 
-cd  ${WORKSPACE}/BGLibPy
+cd  ${WORKSPACE}/BluePyMM
 
 tox ${tox_args}
