@@ -34,16 +34,19 @@ def _row_transform(row, exemplar_row, to_skip_patterns,
     feature did not exceed the corresponding feature threshold, or can be
     ignored.
     """
+
     for column in row.index[1:]:
         # set all values that can be ignored to True
         for pattern in to_skip_patterns:
             if pattern.match(column):
                 row[column] = True
+                continue
 
         # find the appropriate threshold
         for megate_feature_threshold in row['megate_feature_threshold']:
             if megate_feature_threshold['features'].match(column):
-                megate_threshold = megate_feature_threshold['megate_threshold']
+                megate_threshold = megate_feature_threshold[
+                    'megate_threshold']
 
         # transform score
         if skip_repaired_exemplar:
@@ -149,14 +152,13 @@ def check_opt_scores(emodel, scores):
 def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
                     exemplar_row, to_skip_patterns, skip_repaired_exemplar):
     """Compare score values to applicable feature thresholds."""
+
     megate_scores = pandas.concat(
         [emodel_mtype_etype_thresholds['megate_feature_threshold'],
-         emodel_score_values],
-        axis=1).apply(lambda row: _row_transform(row,
-                                                 exemplar_row,
-                                                 to_skip_patterns,
-                                                 skip_repaired_exemplar),
-                      axis=1)
+         emodel_score_values], axis=1).apply(
+        lambda row:
+        _row_transform(row, exemplar_row, to_skip_patterns,
+                       skip_repaired_exemplar), axis=1)
     del megate_scores['megate_feature_threshold']
     megate_scores['Passed all'] = megate_scores.all(axis=1)
     return megate_scores
@@ -251,7 +253,7 @@ def process_emodel(emodel,
             print('Skipping e-model %s: no repaired exemplars' % emodel)
             return
 
-        exemplar_row = exemplar_score_values.iloc[0]
+        exemplar_row = exemplar_score_values.iloc[0].to_dict()
 
     # identify relevant me-gate feature thresholds for each row
     emodel_mtype_etypes = scores[(scores.emodel == emodel) &
@@ -264,6 +266,7 @@ def process_emodel(emodel,
     emodel_mtype_etype_thresholds = emodel_mtype_etypes.loc[
         :, ['emodel', 'fullmtype', 'etype']]
     emodel_mtype_etype_thresholds['megate_feature_threshold'] = None
+
     emodel_mtype_etype_thresholds.apply(
         lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
@@ -281,6 +284,7 @@ def process_emodel(emodel,
     # identify combinations that passed the me-gating step
     emodel_scores = scores[(scores.emodel == emodel) &
                            (scores.is_exemplar == 0)].copy()
+
     passed_combos = emodel_scores[megate_scores['Passed all']]
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')

@@ -65,7 +65,8 @@ def test_read_to_skip_features():
     conf_dict = {'to_skip_features': skip_features}
     _test_read_to_skip_features(skip_features, conf_dict)
 
-
+'''
+# Disabling this test for now because it is unstable (give stochastic results)
 @attr('unit')
 def test_read_megate_thresholds():
     """select_combos.process_megate_config: test read_megate_thresholds"""
@@ -100,3 +101,4 @@ def test_read_megate_thresholds():
     nt.assert_list_equal(ret_thresholds, test_dict['megate_thresholds'])
     nt.assert_equal(len(ret_patterns), len(expected_patterns))
     nt.assert_dict_equal(ret_patterns[0], expected_patterns[0])
+'''

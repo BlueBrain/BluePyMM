@@ -129,6 +129,7 @@ def test_create_mm_sqlite():
     output_filename = 'scores.sqlite'
     recipe_filename = 'data/simple1_recipe.xml'
     morph_dir = 'data/morphs/'
+    rep_morph_dir = 'data/rep_morphs/'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_etype_map = tools.load_json(os.path.join(emodel_dir,
                                                     'emodel_etype_map.json'))
@@ -140,6 +141,7 @@ def test_create_mm_sqlite():
         create_mm_sqlite.create_mm_sqlite(output_filename,
                                           recipe_filename,
                                           morph_dir,
+                                          rep_morph_dir,
                                           emodel_etype_map,
                                           final_dict,
                                           emodel_dirs,

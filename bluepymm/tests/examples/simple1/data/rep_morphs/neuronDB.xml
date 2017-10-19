@@ -1,0 +1,16 @@
+<neurondb>
+    <listing>
+        <morphology>
+            <name>morph1</name>
+            <mtype>mtype1</mtype>
+            <msubtype />
+            <layer>1</layer>
+        </morphology>
+        <morphology>
+            <name>morph2</name>
+            <mtype>mtype2</mtype>
+            <msubtype />
+            <layer>1</layer>
+        </morphology>
+    </listing>
+</neurondb>
