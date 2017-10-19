@@ -150,7 +150,10 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         old_stdout = sys.stdout
         try:
             sys.stdout = devnull
-            evaluator = setup.evaluator.create(emodel)
+            if hasattr(setup, 'multieval'):
+                evaluator = setup.evaluator.create(emodel).evaluators[0]
+            else:
+                evaluator = setup.evaluator.create(emodel)
 
             # set path to morphology
             if morph_path is not None:
