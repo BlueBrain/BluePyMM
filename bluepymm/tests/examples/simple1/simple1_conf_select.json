@@ -1,6 +1,7 @@
 {
    "version": "1.0",
    "scores_db": "./output/scores.sqlite",
+   "emodels_hoc_dir": "./output/emodels_hoc",
    "to_skip_features": [],
    "pdf_filename": "output_megate/megating.pdf",
    "megate_thresholds": [

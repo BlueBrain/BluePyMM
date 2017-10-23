@@ -22,11 +22,9 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640
 
-import os
-
 from bluepymm import tools
 
-from . import sqlite_io, reporting, megate_output, table_processing
+from . import sqlite_io, reporting, megate_output
 from . import process_megate_config as proc_config
 
 
@@ -77,9 +75,19 @@ def select_combos_from_conf(conf_dict):
 
     # write output files
     compliant = conf_dict.get('make_names_neuron_compliant', False)
-    megate_output.save_megate_results(ext_neurondb, output_dir,
-                                      sort_key='combo_name',
-                                      make_names_neuron_compliant=compliant)
+    extneurondb_path, mecombo_emodel_path = megate_output.save_megate_results(
+        ext_neurondb,
+        output_dir,
+        sort_key='combo_name',
+        make_names_neuron_compliant=compliant)
+
+    emodels_hoc_path = conf_dict['emodels_hoc_dir']
+
+    megate_output.write_mecomboreleasejson(
+        output_dir,
+        emodels_hoc_path,
+        extneurondb_path,
+        mecombo_emodel_path)
 
 
 def add_parser(action):

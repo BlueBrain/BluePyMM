@@ -42,6 +42,12 @@ def _verify_output(benchmark_dir, output_dir):
         print('Mismatch in files: {}'.format(matches[1]))
     nt.assert_equal(len(matches[0]), len(files))
 
+    nt.assert_true(
+        os.path.exists(
+            os.path.join(
+                output_dir,
+                'mecombo_release.json')))
+
 
 def _config_select_combos(config_template_path, tmp_dir):
     """Helper function to prepare input data for select_combos"""
@@ -53,6 +59,7 @@ def _config_select_combos(config_template_path, tmp_dir):
     config['scores_db'] = os.path.join(tmp_dir, 'scores.sqlite')
     config['pdf_filename'] = os.path.join(tmp_dir, 'megating.pdf')
     config['output_dir'] = os.path.join(tmp_dir, 'output')
+    config['emodels_hoc_dir'] = os.path.join(tmp_dir, 'output/emodels_hoc')
     return config
 
 

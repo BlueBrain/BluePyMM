@@ -36,7 +36,9 @@ Installation
 ```bash
 pip install bluepymm
 ```
-NOTE: Make sure you are using the latest version of pip (at least >9.0). Otherwise the ipython dependency will fail to install correctly.
+NOTES: 
+* Make sure you are using the latest version of pip (at least >9.0). Otherwise the ipython dependency will fail to install correctly.
+* Make sure you are using a new version of git (at least >=1.8). Otherwise some exceptions might be raised by the versioneer module.
 
 Quick Start
 ===========

@@ -81,8 +81,39 @@ def save_megate_results(extneurondb, output_dir,
 
     extneurondb_path = os.path.join(output_dir, extneurondb_filename)
     _write_extneurondbdat(extneurondb, extneurondb_path)
-    print('Wrote extended neuron database to {}'.format(extneurondb_path))
+    print('Wrote extneurondb.dat to {}'.format(extneurondb_path))
 
     mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
-    print('Wrote mecombo_emodel to {}'.format(mecombo_emodel_path))
+    print('Wrote mecombo_emodel tsv to {}'.format(mecombo_emodel_path))
+
+    return extneurondb_path, mecombo_emodel_path
+
+
+def write_mecomboreleasejson(
+        output_dir,
+        emodels_hoc_path,
+        extneurondb_path,
+        mecombo_emodel_path):
+    """Write json file contain info about release"""
+
+    release = {}
+
+    release['version'] = '1.0'
+
+    output_paths = {}
+    output_paths['emodels_hoc'] = emodels_hoc_path
+    output_paths['extneurondb.dat'] = extneurondb_path
+    output_paths['mecombo_emodel.tsv'] = mecombo_emodel_path
+    release['output_paths'] = output_paths
+
+    tools.write_json(
+        output_dir,
+        'mecombo_release.json',
+        release)
+
+    print(
+        'Wrote mecombo_release json to %s' %
+        os.path.join(
+            output_dir,
+            'mecombo_release.json'))
