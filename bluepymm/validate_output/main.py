@@ -22,9 +22,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640
 
-from bluepymm import tools
-
-# import bluepymm.tools as bpmmtools
+import bluepymm.tools as bpmmtools
 
 # from . import sqlite_io, reporting, megate_output
 # from . import process_megate_config as proc_config
@@ -33,15 +31,29 @@ from bluepymm import tools
 def validate_output(conf_filename):
     """Parse conf file and validate output"""
     # Parse configuration file
-    conf_dict = tools.load_json(conf_filename)
+    conf_dict = bpmmtools.load_json(conf_filename)
 
     mecombo_release_path = conf_dict['mecombo_release_path']
-    print mecombo_release_path
 
-    # extneurondbdat_path =
+    mecombo_release = bpmmtools.load_json(mecombo_release_path)
+
+    print mecombo_release
+
+    extneurondbdat_path = mecombo_release['output_paths']['extneurondb.dat']
+    mecombotsv_path = mecombo_release['output_paths']['mecombo_emodel.tsv']
+    emodelshoc_path = mecombo_release['output_paths']['emodels_hoc']
+
+    print extneurondbdat_path, mecombotsv_path, emodelshoc_path
 
     # extneurondbdat = read_extneurondb_dat(extneurondbdat_path)
 
+
+def add_parser(action):
+    """Add parser"""
+
+    parser = action.add_parser('validate',
+                               help='Validate me-combo output')
+    parser.add_argument('conf_filename')
 
 '''
 
@@ -109,11 +121,5 @@ def select_combos_from_conf(conf_dict):
         mecombo_emodel_path)
 
 
-def add_parser(action):
-    """Add parser"""
-
-    parser = action.add_parser('select',
-                               help='Select feasible me-combinations')
-    parser.add_argument('conf_filename')
 
 '''
