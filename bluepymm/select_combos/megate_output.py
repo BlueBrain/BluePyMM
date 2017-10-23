@@ -81,11 +81,15 @@ def save_megate_results(extneurondb, output_dir,
 
     extneurondb_path = os.path.join(output_dir, extneurondb_filename)
     _write_extneurondbdat(extneurondb, extneurondb_path)
-    print('Wrote extneurondb.dat to {}'.format(extneurondb_path))
+    print(
+        'Wrote extneurondb.dat to {}'.format(
+            os.path.abspath(extneurondb_path)))
 
     mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
-    print('Wrote mecombo_emodel tsv to {}'.format(mecombo_emodel_path))
+    print(
+        'Wrote mecombo_emodel tsv to {}'.format(
+            os.path.abspath(mecombo_emodel_path)))
 
     return extneurondb_path, mecombo_emodel_path
 
@@ -114,6 +118,6 @@ def write_mecomboreleasejson(
 
     print(
         'Wrote mecombo_release json to %s' %
-        os.path.join(
+        os.path.abspath(os.path.join(
             output_dir,
-            'mecombo_release.json'))
+            'mecombo_release.json')))
