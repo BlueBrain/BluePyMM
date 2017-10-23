@@ -24,7 +24,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 import sys
 import argparse
 
-from bluepymm import prepare_combos, run_combos, select_combos
+from bluepymm import prepare_combos, run_combos, select_combos, validate_output
 
 
 def get_parser():
@@ -57,6 +57,9 @@ def run(arg_list):
                               ipyp_profile=args.ipyp_profile)
     elif args.action == "select":
         select_combos.select_combos(conf_filename=args.conf_filename)
+
+    elif args.action == "validate":
+        validate_output.validate_output(conf_filename=args.conf_filename)
 
 
 def main():
