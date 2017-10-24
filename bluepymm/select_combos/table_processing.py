@@ -24,6 +24,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 import json
 import pandas
+import multiprocessing
 
 from bluepymm import tools
 
@@ -190,13 +191,33 @@ def _create_database_rows(selected_combinations):
     return emodel_ext_neurondb
 
 
-def process_emodel(emodel,
-                   scores,
-                   score_values,
-                   to_skip_patterns,
-                   megate_patterns,
-                   skip_repaired_exemplar,
-                   enable_check_opt_scores):
+def process_emodels(emodels,
+                    scores,
+                    score_values,
+                    to_skip_patterns,
+                    megate_patterns,
+                    skip_repaired_exemplar,
+                    enable_check_opt_scores):
+
+    arg_list = [(emodel,
+                 scores,
+                 score_values,
+                 to_skip_patterns,
+                 megate_patterns,
+                 skip_repaired_exemplar,
+                 enable_check_opt_scores) for emodel in emodels]
+
+    print('Parallelising selection processing of e-models')
+    pool = multiprocessing.Pool(maxtasksperchild=1)
+    emodel_infos = {}
+    for emodel, emodel_info in pool.map(process_emodel, arg_list, chunksize=1):
+        print('Received processed info from e-model %s' % emodel)
+        emodel_infos[emodel] = emodel_info
+
+    return emodel_infos
+
+
+def process_emodel(args):
     """Process scores and score values for indicated e-model and return data
     on the e-model performance as well as the selected combinations.
 
@@ -225,6 +246,9 @@ def process_emodel(emodel,
         Exception, skip_repaired_exemplar is set to False and more than one
         exemplars are found.
     """
+    emodel, scores, score_values, to_skip_patterns, megate_patterns, \
+        skip_repaired_exemplar, enable_check_opt_scores = args
+
     print('Processing e-model %s' % emodel)
 
     # check if opt_scores match with unrepaired exemplar runs
@@ -296,7 +320,12 @@ def process_emodel(emodel,
     mtypes = scores[(scores.emodel == emodel) &
                     (scores.is_exemplar == 0)].loc[:, 'mtype']
 
-    return emodel_ext_neurondb, megate_scores, emodel_score_values, mtypes
+    return (
+        emodel,
+        (emodel_ext_neurondb,
+         megate_scores,
+         emodel_score_values,
+         mtypes))
 
 
 def process_combo_name(data, log_filename):

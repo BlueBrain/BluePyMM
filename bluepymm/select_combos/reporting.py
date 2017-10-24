@@ -267,6 +267,8 @@ def create_final_db_and_write_report(pdf_filename,
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
 
+    emodel_infos = None
+
     with pdf_file(pdf_filename) as pp:
         # Plot input configuration details
         add_plot_to_report(pp, plot_dict, to_skip_features,
@@ -276,16 +278,18 @@ def create_final_db_and_write_report(pdf_filename,
 
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
-        for emodel in emodels:
-            emodel_ext_neurondb_rows, megate_scores, \
-                emodel_score_values, mtypes = table_processing.process_emodel(
-                    emodel,
-                    scores,
-                    score_values,
-                    to_skip_patterns,
-                    megate_patterns,
-                    skip_repaired_exemplar,
-                    check_opt_scores)
+
+        emodel_infos = table_processing.process_emodels(emodels,
+                                                        scores,
+                                                        score_values,
+                                                        to_skip_patterns,
+                                                        megate_patterns,
+                                                        skip_repaired_exemplar,
+                                                        check_opt_scores)
+
+        for emodel, emodel_info in emodel_infos.items():
+            emodel_ext_neurondb_rows, megate_scores, emodel_score_values, \
+                mtypes = emodel_info
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
             # Reporting per e-model

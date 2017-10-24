@@ -37,13 +37,13 @@ def validate_output(conf_filename):
 
     mecombo_release = bpmmtools.load_json(mecombo_release_path)
 
-    print mecombo_release
+    print(mecombo_release)
 
     extneurondbdat_path = mecombo_release['output_paths']['extneurondb.dat']
     mecombotsv_path = mecombo_release['output_paths']['mecombo_emodel.tsv']
     emodelshoc_path = mecombo_release['output_paths']['emodels_hoc']
 
-    print extneurondbdat_path, mecombotsv_path, emodelshoc_path
+    print(extneurondbdat_path, mecombotsv_path, emodelshoc_path)
 
     # extneurondbdat = read_extneurondb_dat(extneurondbdat_path)
 
