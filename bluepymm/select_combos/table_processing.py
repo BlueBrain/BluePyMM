@@ -43,7 +43,7 @@ def _row_transform(row, exemplar_row, to_skip_patterns,
                 row[column] = True
                 continue
 
-        # find the appropriate threshold
+        # find the appropriate threshold, use the last one that matches
         for megate_feature_threshold in row['megate_feature_threshold']:
             if megate_feature_threshold['features'].match(column):
                 megate_threshold = megate_feature_threshold[
@@ -154,14 +154,20 @@ def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
                     exemplar_row, to_skip_patterns, skip_repaired_exemplar):
     """Compare score values to applicable feature thresholds."""
 
-    megate_scores = pandas.concat(
+    # Add the thresholds as first column and create a new df
+    emodel_threshold_score_values = pandas.concat(
         [emodel_mtype_etype_thresholds['megate_feature_threshold'],
-         emodel_score_values], axis=1).apply(
+         emodel_score_values], axis=1)
+
+    megate_scores = emodel_threshold_score_values.apply(
         lambda row:
         _row_transform(row, exemplar_row, to_skip_patterns,
                        skip_repaired_exemplar), axis=1)
+
+    # After transform, remove threshold columns
     del megate_scores['megate_feature_threshold']
     megate_scores['Passed all'] = megate_scores.all(axis=1)
+
     return megate_scores
 
 
@@ -210,7 +216,8 @@ def process_emodels(emodels,
     print('Parallelising selection processing of e-models')
     pool = multiprocessing.Pool(maxtasksperchild=1)
     emodel_infos = {}
-    for emodel, emodel_info in pool.map(process_emodel, arg_list, chunksize=1):
+    for emodel, emodel_info in pool.imap(process_emodel, arg_list,
+                                         chunksize=1):
         print('Received processed info from e-model %s' % emodel)
         emodel_infos[emodel] = emodel_info
 

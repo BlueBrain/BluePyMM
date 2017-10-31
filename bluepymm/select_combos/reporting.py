@@ -274,7 +274,7 @@ def create_final_db_and_write_report(pdf_filename,
         add_plot_to_report(pp, plot_dict, to_skip_features,
                            'Ignored feature patterns')
         add_plot_to_report(pp, plot_dict, megate_thresholds,
-                           'MEGating thresholds')
+                           'MEGating thresholds (last match counts)')
 
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
