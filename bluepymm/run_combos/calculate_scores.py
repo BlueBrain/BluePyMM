@@ -107,10 +107,11 @@ def read_apical_point(morph_dir, morph_name):
     with open(json_filename) as json_file:
         apic_points = json.load(json_file)
 
-    print morph_name
-
     # Get apic_point isec from dict, if not found return None
-    return apic_points.get(morph_name, None)
+    if morph_name in apic_points:
+        return int(apic_points[morph_name])
+    else:
+        return None
 
 
 def run_emodel_morph(
