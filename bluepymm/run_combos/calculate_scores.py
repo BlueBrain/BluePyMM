@@ -50,7 +50,8 @@ def run_emodel_morph_isolated(input_args):
         Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
     """
 
-    uid, emodel, emodel_dir, emodel_params, morph_path = input_args
+    uid, emodel, emodel_dir, emodel_params, morph_path, morph_dir, morph_name \
+        = input_args
 
     return_dict = {}
     return_dict['uid'] = uid
@@ -60,7 +61,9 @@ def run_emodel_morph_isolated(input_args):
 
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
-            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
+            run_emodel_morph,
+            (emodel, emodel_dir, emodel_params, morph_path, morph_dir,
+             morph_name))
     except:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
@@ -96,7 +99,27 @@ class NestedPool(multiprocessing.pool.Pool):
     Process = NoDaemonProcess
 
 
-def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
+def read_apical_point(morph_dir, morph_name):
+    """Read apical point from apical point json file"""
+
+    json_filename = os.path.join(morph_dir, 'apical_points_isec.json')
+
+    with open(json_filename) as json_file:
+        apic_points = json.load(json_file)
+
+    print morph_name
+
+    # Get apic_point isec from dict, if not found return None
+    return apic_points.get(morph_name, None)
+
+
+def run_emodel_morph(
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path,
+        morph_dir,
+        morph_name):
     """Run e-model morphology combination.
 
     Args:
@@ -121,8 +144,12 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
             if hasattr(setup, 'multieval'):
-                # use correct apical point section here
-                altmorph = [['mm', morph_path, None]]
+                # morph_dir = os.path.dirname(morph_path)
+                # morph_name = os.path.splitext(os.path.basename(morph_path))[0]
+
+                apical_point_isec = read_apical_point(morph_dir, morph_name)
+
+                altmorph = [['mm', morph_path, apical_point_isec]]
                 evaluator = setup.evaluator.create(etype='%s' % emodel,
                                                    altmorph=altmorph)
 
@@ -186,7 +213,8 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
             index = row['index']
             morph_name = row['morph_name']
             morph_filename = '%s.asc' % morph_name
-            morph_path = os.path.abspath(os.path.join(row['morph_dir'],
+            morph_dir = row['morph_dir']
+            morph_path = os.path.abspath(os.path.join(morph_dir,
                                                       morph_filename))
             if row['to_run'] == 1:
                 emodel = row['emodel']
@@ -200,7 +228,9 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
-                        morph_path)
+                        morph_path,
+                        morph_dir,
+                        morph_name)
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))
