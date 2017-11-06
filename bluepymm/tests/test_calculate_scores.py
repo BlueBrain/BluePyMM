@@ -46,9 +46,18 @@ def test_run_emodel_morph_isolated():
     emodel = 'emodel1'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_params = {'cm': 1.0}
-    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+    morph_name = 'morph1'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
+    morph_path = os.path.join(morph_dir, '%s.asc' % morph_name)
 
-    input_args = (uid, emodel, emodel_dir, emodel_params, morph_path)
+    input_args = (
+        uid,
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path,
+        morph_dir,
+        morph_name)
     ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     expected_ret = {'exception': None,
@@ -68,10 +77,19 @@ def test_run_emodel_morph_isolated_exception():
     emodel = 'emodel_doesnt_exist'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_params = {'cm': 1.0}
-    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+    morph_name = 'morph1'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
+    morph_path = os.path.join(morph_dir, '%s.asc' % morph_name)
 
     # function call
-    input_args = (uid, emodel, emodel_dir, emodel_params, morph_path)
+    input_args = (
+        uid,
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path,
+        morph_dir,
+        morph_name)
     ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     # verify output: exception thrown because of non-existing e-model
@@ -91,13 +109,18 @@ def test_run_emodel_morph():
     emodel = 'emodel1'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_params = {'cm': 1.0}
-    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
+
+    morph_name = 'morph1'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
+    morph_path = os.path.join(morph_dir, '%s.asc' % morph_name)
 
     ret = run_combos.calculate_scores.run_emodel_morph(
         emodel,
         emodel_dir,
         emodel_params,
-        morph_path)
+        morph_path,
+        morph_dir,
+        morph_name)
 
     expected_scores = {'Step1.SpikeCount': 20.0}
     expected_extra_values = {'holding_current': None,
@@ -112,10 +135,20 @@ def test_run_emodel_morph_exception():
     emodel = 'emodel_doesnt_exist'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_params = {'cm': 1.0}
-    morph_path = os.path.join(TEST_DIR, 'data/morphs/morph1.asc')
 
-    nt.assert_raises(Exception, run_combos.calculate_scores.run_emodel_morph,
-                     emodel, emodel_dir, emodel_params, morph_path)
+    morph_name = 'morph1'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
+    morph_path = os.path.join(morph_dir, '%s.asc' % morph_name)
+
+    nt.assert_raises(
+        Exception,
+        run_combos.calculate_scores.run_emodel_morph,
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path,
+        morph_dir,
+        morph_name)
 
 
 def _write_test_scores_database(row, testsqlite_filename):
@@ -164,7 +197,7 @@ def test_create_arg_list():
                      emodel,
                      os.path.abspath(emodel_dirs[emodel]),
                      params,
-                     os.path.abspath(morph_path))]
+                     os.path.abspath(morph_path), morph_dir, morph_name)]
     nt.assert_list_equal(ret, expected_ret)
 
 

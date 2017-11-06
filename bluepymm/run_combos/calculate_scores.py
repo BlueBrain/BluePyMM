@@ -145,9 +145,6 @@ def run_emodel_morph(
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
             if hasattr(setup, 'multieval'):
-                # morph_dir = os.path.dirname(morph_path)
-                # morph_name = os.path.splitext(os.path.basename(morph_path))[0]
-
                 apical_point_isec = read_apical_point(morph_dir, morph_name)
 
                 altmorph = [['mm', morph_path, apical_point_isec]]
