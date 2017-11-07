@@ -43,8 +43,9 @@ def _write_extneurondbdat(extneurondb, filename):
     pure_extneuron_db.to_csv(filename, sep=' ', index=False, header=False)
 
 
-def save_megate_results(extneurondb, output_dir,
+def save_megate_results(extneurondb, failed_extneurondb, output_dir,
                         extneurondb_filename='extneurondb.dat',
+                        failed_extneurondb_filename='failed_extneurondb.dat',
                         mecombo_emodel_filename='mecombo_emodel.tsv',
                         sort_key=None,
                         make_names_neuron_compliant=False):
@@ -85,19 +86,28 @@ def save_megate_results(extneurondb, output_dir,
         'Wrote extneurondb.dat to {}'.format(
             os.path.abspath(extneurondb_path)))
 
+    failed_extneurondb_path = os.path.join(
+        output_dir,
+        failed_extneurondb_filename)
+    _write_extneurondbdat(failed_extneurondb, failed_extneurondb_path)
+    print(
+        'Wrote failed extneurondb.dat to {}'.format(
+            os.path.abspath(failed_extneurondb_path)))
+
     mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
     print(
         'Wrote mecombo_emodel tsv to {}'.format(
             os.path.abspath(mecombo_emodel_path)))
 
-    return extneurondb_path, mecombo_emodel_path
+    return extneurondb_path, failed_extneurondb_path, mecombo_emodel_path
 
 
 def write_mecomboreleasejson(
         output_dir,
         emodels_hoc_path,
         extneurondb_path,
+        failed_extneurondb_path,
         mecombo_emodel_path):
     """Write json file contain info about release"""
 
@@ -108,6 +118,8 @@ def write_mecomboreleasejson(
     output_paths = {}
     output_paths['emodels_hoc'] = os.path.abspath(emodels_hoc_path)
     output_paths['extneurondb.dat'] = os.path.abspath(extneurondb_path)
+    output_paths['failed_extneurondb.dat'] = os.path.abspath(
+        failed_extneurondb_path)
     output_paths['mecombo_emodel.tsv'] = os.path.abspath(mecombo_emodel_path)
     release['output_paths'] = output_paths
 

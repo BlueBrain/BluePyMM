@@ -63,25 +63,28 @@ def select_combos_from_conf(conf_dict):
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
     # create final database and write report
-    ext_neurondb = reporting.create_final_db_and_write_report(
-        pdf_filename,
-        to_skip_features,
-        to_skip_patterns,
-        megate_thresholds,
-        megate_patterns,
-        conf_dict.get('skip_repaired_exemplar', False),
-        conf_dict.get('check_opt_scores', True),
-        scores, score_values,
-        conf_dict.get('plot_emodels_per_morphology', False))
+    ext_neurondb, failed_ext_neurondb = \
+        reporting.create_final_db_and_write_report(
+            pdf_filename,
+            to_skip_features,
+            to_skip_patterns,
+            megate_thresholds,
+            megate_patterns,
+            conf_dict.get('skip_repaired_exemplar', False),
+            conf_dict.get('check_opt_scores', True),
+            scores, score_values,
+            conf_dict.get('plot_emodels_per_morphology', False))
     print('Wrote pdf to %s' % os.path.abspath(pdf_filename))
 
     # write output files
     compliant = conf_dict.get('make_names_neuron_compliant', False)
-    extneurondb_path, mecombo_emodel_path = megate_output.save_megate_results(
-        ext_neurondb,
-        output_dir,
-        sort_key='combo_name',
-        make_names_neuron_compliant=compliant)
+    extneurondb_path, failed_extneurondb_path, mecombo_emodel_path = \
+        megate_output.save_megate_results(
+            ext_neurondb,
+            failed_ext_neurondb,
+            output_dir,
+            sort_key='combo_name',
+            make_names_neuron_compliant=compliant)
 
     emodels_hoc_path = conf_dict['emodels_hoc_dir']
 
@@ -89,6 +92,7 @@ def select_combos_from_conf(conf_dict):
         output_dir,
         emodels_hoc_path,
         extneurondb_path,
+        failed_extneurondb_path,
         mecombo_emodel_path)
 
 

@@ -171,7 +171,7 @@ def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
     return megate_scores
 
 
-def _create_database_rows(selected_combinations):
+def _create_extneurondb_rows(selected_combinations):
     """Prepare rows for database based on selected combinations."""
     # 1. select relevant columns from db with successful combinations
     emodel_ext_neurondb = selected_combinations.ix[:, ('morph_name',
@@ -316,12 +316,15 @@ def process_emodel(args):
     emodel_scores = scores[(scores.emodel == emodel) &
                            (scores.is_exemplar == 0)].copy()
 
-    passed_combos = emodel_scores[megate_scores['Passed all']]
+    passed_combos = emodel_scores[megate_scores['Passed all'] == True]
+    failed_combos = emodel_scores[megate_scores['Passed all'] == False]
+
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')
 
     # prepare database rows for this e-model
-    emodel_ext_neurondb = _create_database_rows(passed_combos)
+    emodel_ext_neurondb = _create_extneurondb_rows(passed_combos)
+    emodel_failed_ext_neurondb = _create_extneurondb_rows(failed_combos)
 
     # identify m-types that were tested for this e-model
     mtypes = scores[(scores.emodel == emodel) &
@@ -330,6 +333,7 @@ def process_emodel(args):
     return (
         emodel,
         (emodel_ext_neurondb,
+         emodel_failed_ext_neurondb,
          megate_scores,
          emodel_score_values,
          mtypes))

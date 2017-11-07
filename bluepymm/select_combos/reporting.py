@@ -266,6 +266,7 @@ def create_final_db_and_write_report(pdf_filename,
                                      enable_plot_emodels_per_morphology):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
+    failed_ext_neurondb = pandas.DataFrame()
 
     emodel_infos = None
 
@@ -288,9 +289,11 @@ def create_final_db_and_write_report(pdf_filename,
                                                         check_opt_scores)
 
         for emodel, emodel_info in emodel_infos.items():
-            emodel_ext_neurondb_rows, megate_scores, emodel_score_values, \
-                mtypes = emodel_info
+            emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
+                megate_scores, emodel_score_values, mtypes = emodel_info
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+            failed_ext_neurondb = failed_ext_neurondb.append(
+                emodel_failed_ext_neurondb_rows)
 
             # Reporting per e-model
             add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
@@ -304,4 +307,4 @@ def create_final_db_and_write_report(pdf_filename,
                                ext_neurondb)
         add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
 
-    return ext_neurondb
+    return ext_neurondb, failed_ext_neurondb
