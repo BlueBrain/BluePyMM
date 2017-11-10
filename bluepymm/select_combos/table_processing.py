@@ -316,8 +316,8 @@ def process_emodel(args):
     emodel_scores = scores[(scores.emodel == emodel) &
                            (scores.is_exemplar == 0)].copy()
 
-    passed_combos = emodel_scores[megate_scores['Passed all'] == True]
-    failed_combos = emodel_scores[megate_scores['Passed all'] == False]
+    passed_combos = emodel_scores[megate_scores['Passed all'] == True] # NOQA
+    failed_combos = emodel_scores[megate_scores['Passed all'] == False] # NOQA
 
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')

@@ -120,7 +120,8 @@ def run_emodel_morph(
         emodel_params,
         morph_path,
         morph_dir,
-        morph_name):
+        morph_name,
+        extra_values_error=True):
     """Run e-model morphology combination.
 
     Args:
@@ -147,7 +148,9 @@ def run_emodel_morph(
             if hasattr(setup, 'multieval'):
                 apical_point_isec = read_apical_point(morph_dir, morph_name)
 
-                altmorph = [['mm', morph_path, apical_point_isec]]
+                prefix = 'mm'
+
+                altmorph = [[prefix, morph_path, apical_point_isec]]
                 evaluator = setup.evaluator.create(etype='%s' % emodel,
                                                    altmorph=altmorph)
 
@@ -160,10 +163,22 @@ def run_emodel_morph(
                     responses)
 
                 extra_values = {}
-                extra_values['holding_current'] = \
-                    responses.get('alt.bpo_holding_current', None)
-                extra_values['threshold_current'] = \
-                    responses.get('alt.bpo_holding_current', None)
+
+                for response_key, extra_values_key in [
+                        ('%s.bpo_holding_current' % prefix,
+                         'holding_current'),
+                        ('%s.bpo_threshold_current' % prefix,
+                         'threshold_current')]:
+                    if response_key in responses:
+                        extra_values[extra_values_key] = responses[
+                            response_key]
+                    else:
+                        if extra_values_error:
+                            raise ValueError(
+                                "Key %s not found in responses: %s" %
+                                (response_key, str(responses)))
+                        else:
+                            extra_values[extra_values_key] = None
             else:
                 evaluator = setup.evaluator.create(etype='%s' % emodel)
                 evaluator.cell_model.morphology.morphology_path = morph_path
