@@ -100,7 +100,7 @@ def save_megate_results(extneurondb, failed_extneurondb, output_dir,
     if extra_value_errors:
         for extra_values_key in ['holding_current', 'threshold_current']:
             null_rows = extneurondb[extra_values_key].isnull()
-            if len(null_rows.index) > 0:
+            if null_rows.sum() > 0:
                 raise ValueError(
                     "There are rows with None for "
                     "holding current: %s" % str(
