@@ -101,10 +101,15 @@ def save_megate_results(extneurondb, failed_extneurondb, output_dir,
         for extra_values_key in ['holding_current', 'threshold_current']:
             null_rows = extneurondb[extra_values_key].isnull()
             if null_rows.sum() > 0:
-                raise ValueError(
-                    "There are rows with None for "
+                # TODO reenable this for release !
+                # raise ValueError(
+                #    "There are rows with None for "
+                #    "holding current: %s" % str(
+                #        extneurondb[null_rows]))
+                print("WARNING ! There are rows with None for "
                     "holding current: %s" % str(
                         extneurondb[null_rows]))
+
 
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
     print(
