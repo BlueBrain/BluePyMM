@@ -48,7 +48,8 @@ def save_megate_results(extneurondb, failed_extneurondb, output_dir,
                         failed_extneurondb_filename='failed_extneurondb.dat',
                         mecombo_emodel_filename='mecombo_emodel.tsv',
                         sort_key=None,
-                        make_names_neuron_compliant=False):
+                        make_names_neuron_compliant=False,
+                        extra_value_errors=True):
     """Write results of megating to two files.
 
     Args:
@@ -95,6 +96,16 @@ def save_megate_results(extneurondb, failed_extneurondb, output_dir,
             os.path.abspath(failed_extneurondb_path)))
 
     mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
+
+    if extra_value_errors:
+        for extra_values_key in ['holding_current', 'threshold_current']:
+            null_rows = extneurondb[extra_values_key].isnull()
+            if len(null_rows.index) > 0:
+                raise ValueError(
+                    "There are rows with None for "
+                    "holding current: %s" % str(
+                        extneurondb[null_rows]))
+
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
     print(
         'Wrote mecombo_emodel tsv to {}'.format(
