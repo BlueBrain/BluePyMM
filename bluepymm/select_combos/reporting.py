@@ -288,18 +288,31 @@ def create_final_db_and_write_report(pdf_filename,
                                                         skip_repaired_exemplar,
                                                         check_opt_scores)
 
-        for emodel, emodel_info in emodel_infos.items():
-            emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
-                megate_scores, emodel_score_values, mtypes = emodel_info
-            ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
-            failed_ext_neurondb = failed_ext_neurondb.append(
-                emodel_failed_ext_neurondb_rows)
+        print("All emodels processed, generating output files")
 
-            # Reporting per e-model
-            add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
-                               megate_scores, emodel_score_values)
-            add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
-                               mtypes, megate_scores)
+        for emodel, emodel_info in emodel_infos.items():
+            if emodel_info is not None:
+                emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
+                    megate_scores, emodel_score_values, mtypes = emodel_info
+                ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+                failed_ext_neurondb = failed_ext_neurondb.append(
+                    emodel_failed_ext_neurondb_rows)
+
+                # Reporting per e-model
+                add_plot_to_report(
+                    pp,
+                    plot_morphs_per_feature_for_emodel,
+                    emodel,
+                    megate_scores,
+                    emodel_score_values)
+                add_plot_to_report(
+                    pp,
+                    plot_morphs_per_mtype_for_emodel,
+                    emodel,
+                    mtypes,
+                    megate_scores)
+            else:
+                print('WARNING: no info for emodel %s, skipping !' % emodel)
 
         # More reporting
         if enable_plot_emodels_per_morphology:

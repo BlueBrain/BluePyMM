@@ -292,7 +292,7 @@ def process_emodel(args):
     if len(emodel_mtype_etypes) == 0:
         print('Skipping e-model %s: was not run on any released morphology'
               % emodel)
-        return
+        return (emodel, None)
 
     emodel_mtype_etype_thresholds = emodel_mtype_etypes.loc[
         :, ['emodel', 'fullmtype', 'etype']]
