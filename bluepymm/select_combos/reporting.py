@@ -137,12 +137,12 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
         [BLUE, RED])
 
 
-def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
+def plot_morphs_per_mtype_for_emodel(emodel, fullmtypes, megate_scores):
     """Display number of tested morphologies per m-type for a given e-model.
 
     Args:
         emodel: string representing e-model, used for plot title
-        mtypes: pandas.DataFrame with m-types, one entry per run combo
+        fullmtypes: pandas.DataFrame with m-types, one entry per run combo
         megate_scores: pandas.DataFrame with megate scores, one entry per run
                        combo
 
@@ -151,8 +151,8 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
         colored blue and red, respectively.
     """
     sums = pandas.DataFrame()
-    for mtype in mtypes.unique():
-        megate_scores_mtype = megate_scores[mtypes == mtype]
+    for mtype in fullmtypes.unique():
+        megate_scores_mtype = megate_scores[fullmtypes == mtype]
         mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
         sums.ix[mtype, 'passed'] = len(mtype_passed)
         sums.ix[mtype, 'failed'] = (len(megate_scores_mtype) -
@@ -293,7 +293,8 @@ def create_final_db_and_write_report(pdf_filename,
         for emodel, emodel_info in emodel_infos.items():
             if emodel_info is not None:
                 emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
-                    megate_scores, emodel_score_values, mtypes = emodel_info
+                    megate_scores, emodel_score_values, fullmtypes = \
+                    emodel_info
                 ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
                 failed_ext_neurondb = failed_ext_neurondb.append(
                     emodel_failed_ext_neurondb_rows)
@@ -309,7 +310,7 @@ def create_final_db_and_write_report(pdf_filename,
                     pp,
                     plot_morphs_per_mtype_for_emodel,
                     emodel,
-                    mtypes,
+                    fullmtypes,
                     megate_scores)
             else:
                 print('WARNING: no info for emodel %s, skipping !' % emodel)

@@ -316,8 +316,8 @@ def process_emodel(args):
     emodel_scores = scores[(scores.emodel == emodel) &
                            (scores.is_exemplar == 0)].copy()
 
-    passed_combos = emodel_scores[megate_scores['Passed all'] == True] # NOQA
-    failed_combos = emodel_scores[megate_scores['Passed all'] == False] # NOQA
+    passed_combos = emodel_scores[megate_scores['Passed all'] == True]  # NOQA
+    failed_combos = emodel_scores[megate_scores['Passed all'] == False]  # NOQA
 
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')
@@ -327,8 +327,8 @@ def process_emodel(args):
     emodel_failed_ext_neurondb = _create_extneurondb_rows(failed_combos)
 
     # identify m-types that were tested for this e-model
-    mtypes = scores[(scores.emodel == emodel) &
-                    (scores.is_exemplar == 0)].loc[:, 'mtype']
+    fullmtypes = scores[(scores.emodel == emodel) &
+                        (scores.is_exemplar == 0)].loc[:, 'fullmtype']
 
     return (
         emodel,
@@ -336,7 +336,7 @@ def process_emodel(args):
          emodel_failed_ext_neurondb,
          megate_scores,
          emodel_score_values,
-         mtypes))
+         fullmtypes))
 
 
 def process_combo_name(data, log_filename):

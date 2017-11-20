@@ -107,9 +107,7 @@ def save_megate_results(extneurondb, failed_extneurondb, output_dir,
                 #    "holding current: %s" % str(
                 #        extneurondb[null_rows]))
                 print("WARNING ! There are rows with None for "
-                    "holding current: %s" % str(
-                        extneurondb[null_rows]))
-
+                      "holding current: %s" % str(extneurondb[null_rows]))
 
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
     print(
