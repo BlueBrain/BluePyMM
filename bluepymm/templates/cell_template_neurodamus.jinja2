@@ -62,7 +62,6 @@ proc setCCell(){
  * entity watching reference counts can work.
  */
 proc clear() { localobj nil
-    //CCellRef.CellRef = nil
     CellRef = nil
 }
 
@@ -97,11 +96,9 @@ proc init(/* args: morphology_dir, morphology_name */) {
   gid = $1
 
   if(numarg() >= 3) {
-    //print $s2, $s3
     load_morphology($s2, $s3)
   } else {
   {%- if morphology %}
-    //print $1, $s2, " {{morphology}} ", " {{template_name}} " , " static ", " {acceptable} ######\n"
     load_morphology($s2, "{{morphology}}")
   {%- else %}
     execerror("Template {{template_name}} requires morphology name to instantiate")
