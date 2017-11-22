@@ -169,6 +169,10 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
     # create hoc code
     if template_dir is None:
         template_dir = TEMPLATE_DIR
+
+    for mechanism in evaluator.cell_model.mechanisms:
+        if 'Stoch' in mechanism.prefix:
+            mechanism.deterministic = False
     hoc = evaluator.cell_model.create_hoc(emodel_params, template=template,
                                           template_dir=template_dir)
 
