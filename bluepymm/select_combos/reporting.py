@@ -88,7 +88,14 @@ def plot_dict(dict_data, title):
     return fig
 
 
-def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
+def plot_stacked_bars(
+        data,
+        xlabel,
+        ylabel,
+        title,
+        color_map,
+        log=False,
+        yticksize=None):
     """Plot stacked bars.
 
     Args:
@@ -101,11 +108,17 @@ def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
     Returns:
         Figure with plot of stacked bars
     """
-    ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=color_map)
-    ax.get_xaxis().set_major_locator(
-        matplotlib.ticker.MaxNLocator(integer=True))
+    ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=color_map,
+                   log=log)
+    if not log:
+        ax.get_xaxis().set_major_locator(
+            matplotlib.ticker.MaxNLocator(integer=True))
+    else:
+        plt.xlim(xmin=0.1)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    if yticksize is not None:
+        plt.yticks(fontsize=yticksize)
     plt.title(title)
     plt.tight_layout()
     plt.legend(loc='upper right')
@@ -137,12 +150,12 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
         [BLUE, RED])
 
 
-def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
+def plot_morphs_per_mtype_for_emodel(emodel, fullmtypes, megate_scores):
     """Display number of tested morphologies per m-type for a given e-model.
 
     Args:
         emodel: string representing e-model, used for plot title
-        mtypes: pandas.DataFrame with m-types, one entry per run combo
+        fullmtypes: pandas.DataFrame with m-types, one entry per run combo
         megate_scores: pandas.DataFrame with megate scores, one entry per run
                        combo
 
@@ -151,8 +164,8 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
         colored blue and red, respectively.
     """
     sums = pandas.DataFrame()
-    for mtype in mtypes.unique():
-        megate_scores_mtype = megate_scores[mtypes == mtype]
+    for mtype in fullmtypes.unique():
+        megate_scores_mtype = megate_scores[fullmtypes == mtype]
         mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
         sums.ix[mtype, 'passed'] = len(mtype_passed)
         sums.ix[mtype, 'failed'] = (len(megate_scores_mtype) -
@@ -250,7 +263,7 @@ def plot_emodels_per_metype(data, final_db):
     return plot_stacked_bars(
         sums, '# tested (e-model, morphology) combinations', 'me-type',
         'Number of tested (e-model, morphology) combinations per me-type',
-        [BLUE, YELLOW, RED])
+        [BLUE, YELLOW, RED], log=True, yticksize=3)
 
 
 # TODO: can this function be split into processing and reporting?
@@ -266,33 +279,54 @@ def create_final_db_and_write_report(pdf_filename,
                                      enable_plot_emodels_per_morphology):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
+    failed_ext_neurondb = pandas.DataFrame()
+
+    emodel_infos = None
 
     with pdf_file(pdf_filename) as pp:
         # Plot input configuration details
         add_plot_to_report(pp, plot_dict, to_skip_features,
                            'Ignored feature patterns')
         add_plot_to_report(pp, plot_dict, megate_thresholds,
-                           'MEGating thresholds')
+                           'MEGating thresholds (last match counts)')
 
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
-        for emodel in emodels:
-            emodel_ext_neurondb_rows, megate_scores, \
-                emodel_score_values, mtypes = table_processing.process_emodel(
-                    emodel,
-                    scores,
-                    score_values,
-                    to_skip_patterns,
-                    megate_patterns,
-                    skip_repaired_exemplar,
-                    check_opt_scores)
-            ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
 
-            # Reporting per e-model
-            add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
-                               megate_scores, emodel_score_values)
-            add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
-                               mtypes, megate_scores)
+        emodel_infos = table_processing.process_emodels(emodels,
+                                                        scores,
+                                                        score_values,
+                                                        to_skip_patterns,
+                                                        megate_patterns,
+                                                        skip_repaired_exemplar,
+                                                        check_opt_scores)
+
+        print("All emodels processed, generating output files")
+
+        for emodel, emodel_info in emodel_infos.items():
+            if emodel_info is not None:
+                emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
+                    megate_scores, emodel_score_values, fullmtypes = \
+                    emodel_info
+                ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+                failed_ext_neurondb = failed_ext_neurondb.append(
+                    emodel_failed_ext_neurondb_rows)
+
+                # Reporting per e-model
+                add_plot_to_report(
+                    pp,
+                    plot_morphs_per_feature_for_emodel,
+                    emodel,
+                    megate_scores,
+                    emodel_score_values)
+                add_plot_to_report(
+                    pp,
+                    plot_morphs_per_mtype_for_emodel,
+                    emodel,
+                    fullmtypes,
+                    megate_scores)
+            else:
+                print('WARNING: no info for emodel %s, skipping !' % emodel)
 
         # More reporting
         if enable_plot_emodels_per_morphology:
@@ -300,4 +334,4 @@ def create_final_db_and_write_report(pdf_filename,
                                ext_neurondb)
         add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
 
-    return ext_neurondb
+    return ext_neurondb, failed_ext_neurondb

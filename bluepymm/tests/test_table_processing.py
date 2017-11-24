@@ -152,9 +152,11 @@ def test_process_emodel():
     enable_check_opt_scores = True
 
     # run function
-    ret = table_processing.process_emodel(
+    emodel_ret, ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores)
+        skip_repaired_exemplar, enable_check_opt_scores))
+
+    nt.assert_equal(emodel, emodel)
 
     # expected results
     columns = ['morph_name', 'layer', 'fullmtype', 'etype', 'emodel',
@@ -222,9 +224,9 @@ def test_process_emodel_no_exemplars():
     enable_check_opt_scores = True
 
     # run function
-    ret = table_processing.process_emodel(
+    ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores)
+        skip_repaired_exemplar, enable_check_opt_scores))
 
     # verify results
     nt.assert_is_none(ret)
@@ -307,9 +309,9 @@ def test_process_emodel_no_released_morphologies():
     enable_check_opt_scores = True
 
     # run function
-    ret = table_processing.process_emodel(
+    ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores)
+        skip_repaired_exemplar, enable_check_opt_scores))
 
     # verify results
     nt.assert_is_none(ret)

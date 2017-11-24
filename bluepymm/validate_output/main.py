@@ -22,13 +22,42 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640
 
-import os
+import bluepymm.tools as bpmmtools
 
-from bluepymm import tools
+# from . import sqlite_io, reporting, megate_output
+# from . import process_megate_config as proc_config
 
-from . import sqlite_io, reporting, megate_output
-from . import process_megate_config as proc_config
 
+def validate_output(conf_filename):
+    """Parse conf file and validate output"""
+    # Parse configuration file
+    conf_dict = bpmmtools.load_json(conf_filename)
+
+    mecombo_release_path = conf_dict['mecombo_release_path']
+
+    mecombo_release = bpmmtools.load_json(mecombo_release_path)
+
+    print(mecombo_release)
+
+    extneurondbdat_path = mecombo_release['output_paths']['extneurondb.dat']
+    mecombotsv_path = mecombo_release['output_paths']['mecombo_emodel.tsv']
+    emodelshoc_path = mecombo_release['output_paths']['emodels_hoc']
+
+    print(extneurondbdat_path, mecombotsv_path, emodelshoc_path)
+
+    # extneurondbdat = read_extneurondb_dat(extneurondbdat_path)
+
+
+def add_parser(action):
+    """Add parser"""
+
+    parser = action.add_parser('validate',
+                               help='Validate me-combo output')
+    parser.add_argument('conf_filename')
+
+'''
+
+    select_combos_from_conf(conf_dict)
 
 def select_combos(conf_filename):
     """Parse conf file and run select combos"""
@@ -63,28 +92,25 @@ def select_combos_from_conf(conf_dict):
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
     # create final database and write report
-    ext_neurondb, failed_ext_neurondb = \
-        reporting.create_final_db_and_write_report(
-            pdf_filename,
-            to_skip_features,
-            to_skip_patterns,
-            megate_thresholds,
-            megate_patterns,
-            conf_dict.get('skip_repaired_exemplar', False),
-            conf_dict.get('check_opt_scores', True),
-            scores, score_values,
-            conf_dict.get('plot_emodels_per_morphology', False))
-    print('Wrote pdf to %s' % os.path.abspath(pdf_filename))
+    ext_neurondb = reporting.create_final_db_and_write_report(
+        pdf_filename,
+        to_skip_features,
+        to_skip_patterns,
+        megate_thresholds,
+        megate_patterns,
+        conf_dict.get('skip_repaired_exemplar', False),
+        conf_dict.get('check_opt_scores', True),
+        scores, score_values,
+        conf_dict.get('plot_emodels_per_morphology', False))
+    print('Wrote pdf to %s' % pdf_filename)
 
     # write output files
     compliant = conf_dict.get('make_names_neuron_compliant', False)
-    extneurondb_path, failed_extneurondb_path, mecombo_emodel_path = \
-        megate_output.save_megate_results(
-            ext_neurondb,
-            failed_ext_neurondb,
-            output_dir,
-            sort_key='combo_name',
-            make_names_neuron_compliant=compliant)
+    extneurondb_path, mecombo_emodel_path = megate_output.save_megate_results(
+        ext_neurondb,
+        output_dir,
+        sort_key='combo_name',
+        make_names_neuron_compliant=compliant)
 
     emodels_hoc_path = conf_dict['emodels_hoc_dir']
 
@@ -92,13 +118,8 @@ def select_combos_from_conf(conf_dict):
         output_dir,
         emodels_hoc_path,
         extneurondb_path,
-        failed_extneurondb_path,
         mecombo_emodel_path)
 
 
-def add_parser(action):
-    """Add parser"""
 
-    parser = action.add_parser('select',
-                               help='Select feasible me-combinations')
-    parser.add_argument('conf_filename')
+'''

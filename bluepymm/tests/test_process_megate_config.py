@@ -32,7 +32,7 @@ from bluepymm.select_combos import process_megate_config as proc_config
 def test_join_regex():
     """select_combos.process_megate_config: test join_regex"""
     test_list = ['one', '.*', 'three']
-    joined_list = '(one)|(.*)|(three)'
+    joined_list = '(one$)|(.*$)|(three$)'
     ret = proc_config.join_regex(test_list)
     nt.assert_equal(ret, re.compile(joined_list))
 

@@ -50,7 +50,8 @@ def run_emodel_morph_isolated(input_args):
         Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
     """
 
-    uid, emodel, emodel_dir, emodel_params, morph_path = input_args
+    uid, emodel, emodel_dir, emodel_params, morph_path, morph_dir, morph_name \
+        = input_args
 
     return_dict = {}
     return_dict['uid'] = uid
@@ -60,7 +61,9 @@ def run_emodel_morph_isolated(input_args):
 
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
-            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
+            run_emodel_morph,
+            (emodel, emodel_dir, emodel_params, morph_path, morph_dir,
+             morph_name))
     except:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
@@ -96,7 +99,29 @@ class NestedPool(multiprocessing.pool.Pool):
     Process = NoDaemonProcess
 
 
-def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
+def read_apical_point(morph_dir, morph_name):
+    """Read apical point from apical point json file"""
+
+    json_filename = os.path.join(morph_dir, 'apical_points_isec.json')
+
+    with open(json_filename) as json_file:
+        apic_points = json.load(json_file)
+
+    # Get apic_point isec from dict, if not found return None
+    if morph_name in apic_points:
+        return int(apic_points[morph_name])
+    else:
+        return None
+
+
+def run_emodel_morph(
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path,
+        morph_dir,
+        morph_name,
+        extra_values_error=True):
     """Run e-model morphology combination.
 
     Args:
@@ -120,19 +145,55 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
-            evaluator = setup.evaluator.create(etype='%s' % emodel)
-            evaluator.cell_model.morphology.morphology_path = morph_path
+            if hasattr(setup, 'multieval'):
+                apical_point_isec = read_apical_point(morph_dir, morph_name)
 
-            responses = evaluator.run_protocols(
-                evaluator.fitness_protocols.values(),
-                emodel_params)
-            scores = evaluator.fitness_calculator.calculate_scores(responses)
+                prefix = 'mm'
 
-            extra_values = {}
-            extra_values['holding_current'] = \
-                responses.get('bpo_holding_current', None)
-            extra_values['threshold_current'] = \
-                responses.get('bpo_threshold_current', None)
+                altmorph = [[prefix, morph_path, apical_point_isec]]
+                evaluator = setup.evaluator.create(etype='%s' % emodel,
+                                                   altmorph=altmorph)
+
+                evaluator = evaluator.evaluators[0]  # only one evaluator
+
+                responses = evaluator.run_protocols(
+                    evaluator.fitness_protocols.values(),
+                    emodel_params)
+                scores = evaluator.fitness_calculator.calculate_scores(
+                    responses)
+
+                extra_values = {}
+
+                for response_key, extra_values_key in [
+                        ('%s.bpo_holding_current' % prefix,
+                         'holding_current'),
+                        ('%s.bpo_threshold_current' % prefix,
+                         'threshold_current')]:
+                    if response_key in responses:
+                        extra_values[extra_values_key] = responses[
+                            response_key]
+                    else:
+                        if extra_values_error:
+                            raise ValueError(
+                                "Key %s not found in responses: %s" %
+                                (response_key, str(responses)))
+                        else:
+                            extra_values[extra_values_key] = None
+            else:
+                evaluator = setup.evaluator.create(etype='%s' % emodel)
+                evaluator.cell_model.morphology.morphology_path = morph_path
+
+                responses = evaluator.run_protocols(
+                    evaluator.fitness_protocols.values(),
+                    emodel_params)
+                scores = evaluator.fitness_calculator.calculate_scores(
+                    responses)
+
+                extra_values = {}
+                extra_values['holding_current'] = \
+                    responses.get('bpo_holding_current', None)
+                extra_values['threshold_current'] = \
+                    responses.get('bpo_threshold_current', None)
 
         return scores, extra_values
     except:
@@ -165,7 +226,8 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
             index = row['index']
             morph_name = row['morph_name']
             morph_filename = '%s.asc' % morph_name
-            morph_path = os.path.abspath(os.path.join(row['morph_dir'],
+            morph_dir = row['morph_dir']
+            morph_path = os.path.abspath(os.path.join(morph_dir,
                                                       morph_filename))
             if row['to_run'] == 1:
                 emodel = row['emodel']
@@ -179,7 +241,9 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
-                        morph_path)
+                        morph_path,
+                        morph_dir,
+                        morph_name)
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))
