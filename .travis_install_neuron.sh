@@ -10,14 +10,16 @@ then
     echo 'Neuron was not fully installed in previous build, installing ...'
     mkdir -p ${SRC_DIR}
     cd ${SRC_DIR}
-    echo "Downloading NEURON 7.4 ..."
-    wget -q http://www.neuron.yale.edu/ftp/neuron/versions/v7.4/nrn-7.4.tar.gz
-    tar xzf nrn-7.4.tar.gz
-    cd nrn-7.4
+    echo "Downloading NEURON 7.5 ..."
+    wget -q http://www.neuron.yale.edu/ftp/neuron/versions/v7.5/nrn-7.5.tar.gz
+    tar xzf nrn-7.5.tar.gz
+    cd nrn-7.5
     echo "Configuring NEURON ..."
     ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython --disable-rx3d >configure.log 2>&1
+    echo "Building NEURON ..."
+    make -j4 >make.log 2>&1
     echo "Installing NEURON ..."
-    make -j4 install >makeinstall.log 2>&1
+    make -j4 install >install.log 2>&1
 
     export PATH="${INSTALL_DIR}/x86_64/bin":${PATH}
     export PYTHONPATH="${INSTALL_DIR}/lib/python":${PYTHONPATH}
