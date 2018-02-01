@@ -88,7 +88,14 @@ def plot_dict(dict_data, title):
     return fig
 
 
-def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
+def plot_stacked_bars(
+        data,
+        xlabel,
+        ylabel,
+        title,
+        color_map,
+        log=False,
+        yticksize=None):
     """Plot stacked bars.
 
     Args:
@@ -101,11 +108,21 @@ def plot_stacked_bars(data, xlabel, ylabel, title, color_map):
     Returns:
         Figure with plot of stacked bars
     """
-    ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=color_map)
-    ax.get_xaxis().set_major_locator(
-        matplotlib.ticker.MaxNLocator(integer=True))
+    ax = data.plot(
+        kind='barh',
+        figsize=FIGSIZE,
+        stacked=True,
+        color=color_map,
+        log=log)
+    if not log:
+        ax.get_xaxis().set_major_locator(
+            matplotlib.ticker.MaxNLocator(integer=True))
+    else:
+        plt.xlim(xmin=0.1)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    if yticksize is not None:
+        plt.yticks(fontsize=yticksize)
     plt.title(title)
     plt.tight_layout()
     plt.legend(loc='upper right')
@@ -250,7 +267,7 @@ def plot_emodels_per_metype(data, final_db):
     return plot_stacked_bars(
         sums, '# tested (e-model, morphology) combinations', 'me-type',
         'Number of tested (e-model, morphology) combinations per me-type',
-        [BLUE, YELLOW, RED])
+        [BLUE, YELLOW, RED], log=True, yticksize=3)
 
 
 # TODO: can this function be split into processing and reporting?
