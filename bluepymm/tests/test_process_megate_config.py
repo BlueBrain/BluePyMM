@@ -65,6 +65,7 @@ def test_read_to_skip_features():
     conf_dict = {'to_skip_features': skip_features}
     _test_read_to_skip_features(skip_features, conf_dict)
 
+
 '''
 # Disabling this test for now because it is unstable (give stochastic results)
 @attr('unit')

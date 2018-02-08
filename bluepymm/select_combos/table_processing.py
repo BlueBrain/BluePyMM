@@ -288,8 +288,6 @@ def process_emodel(emodel,
                                        (combos.is_exemplar == 0)].copy()
     emodel_score_values.dropna(axis=1, how='all', inplace=True)
 
-    emodel_median_scores = emodel_score_values.median(axis=1, skipna=True)
-
     # me-gating: compare score values to applicable feature thresholds
     emodel_megate_pass = _apply_megating(
         emodel_mtype_etype_thresholds,
@@ -303,8 +301,7 @@ def process_emodel(emodel,
                            (combos.is_exemplar == 0)].copy()
 
     passed_combos = emodel_combos[emodel_megate_pass['Passed all']]
-    passed_median_scores = emodel_median_scores[
-        emodel_megate_pass['Passed all']]
+    emodel_megate_passed_all = emodel_megate_pass[['Passed all']]
 
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')
@@ -317,7 +314,7 @@ def process_emodel(emodel,
                     (combos.is_exemplar == 0)].loc[:, 'mtype']
 
     return emodel_ext_neurondb, emodel_megate_pass, emodel_score_values, \
-        mtypes, passed_median_scores
+        mtypes, emodel_megate_passed_all
 
 
 def process_combo_name(data, log_filename):

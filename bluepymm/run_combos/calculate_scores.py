@@ -61,7 +61,7 @@ def run_emodel_morph_isolated(input_args):
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
             run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
-    except:
+    except Exception:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
         return_dict['exception'] = "".join(traceback.format_exception(
@@ -135,7 +135,7 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
                 responses.get('bpo_threshold_current', None)
 
         return scores, extra_values
-    except:
+    except Exception:
         # Make sure exception and backtrace are thrown back to parent process
         raise Exception(
             "".join(traceback.format_exception(*sys.exc_info())))

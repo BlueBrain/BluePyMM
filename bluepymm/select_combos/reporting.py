@@ -22,8 +22,10 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640, W0633
 
-import pandas
 import os
+
+import pandas
+import numpy
 
 import matplotlib
 matplotlib.use('Agg')
@@ -270,7 +272,49 @@ def plot_emodels_per_metype(data, final_db):
         [BLUE, YELLOW, RED], log=True, yticksize=3)
 
 
+def create_metype(x):
+    """Create me-type from m-type and e-type"""
+    return '%s_%s' % (x['etype'], x['fullmtype'])
+
+
+def plot_median_per_metype(combos, passed_median_scores):
+    """Display result median score per me-type"""
+
+    metype_medians = passed_median_scores.join(combos)[
+        ['mtype', 'etype', 'median_score']]
+
+    metype_medians = metype_medians.groupby(
+        ['mtype', 'etype']).median().reset_index()
+
+    metype_medians = metype_medians.pivot(
+        index='mtype',
+        columns='etype',
+        values='median_score')
+
+    import matplotlib.pyplot as plt
+
+    ax = plt.pcolor(metype_medians)
+    ax = plt.gca()
+    cbar = plt.colorbar()
+    cbar.ax.text(
+        4, .5, 'median Z score', rotation=270, verticalalignment='center')
+
+    plt.xlabel('e-type')
+    plt.ylabel('m-type')
+
+    ax.set_xticks(numpy.arange(metype_medians.shape[1]) + 0.5, minor=False)
+    ax.set_yticks(numpy.arange(metype_medians.shape[0]) + 0.5, minor=False)
+    ax.set_xticklabels(metype_medians.columns, rotation=90)
+    ax.set_yticklabels(metype_medians.index)
+    plt.tight_layout()
+
+    plt.title('Median Z scores of me-types')
+
+    return plt.gcf()
+
 # TODO: can this function be split into processing and reporting?
+
+
 def create_final_db_and_write_report(pdf_filename,
                                      to_skip_features,
                                      to_skip_patterns,
@@ -283,7 +327,11 @@ def create_final_db_and_write_report(pdf_filename,
                                      enable_plot_emodels_per_morphology):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
-    median_scores = pandas.DataFrame()
+    megate_passed_all = pandas.DataFrame()
+
+    median_scores = score_values.median(
+        axis=1,
+        skipna=True).to_frame(name='median_score')
 
     with pdf_file(pdf_filename) as pp:
         # Plot input configuration details
@@ -295,8 +343,8 @@ def create_final_db_and_write_report(pdf_filename,
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
         for emodel in emodels:
-            emodel_ext_neurondb_rows, megate_scores, \
-                emodel_score_values, mtypes, emodel_median_scores = \
+            emodel_ext_neurondb_rows, emodel_megate_pass, \
+                emodel_score_values, mtypes, emodel_megate_passed_all = \
                 table_processing.process_emodel(
                     emodel,
                     scores,
@@ -306,20 +354,31 @@ def create_final_db_and_write_report(pdf_filename,
                     skip_repaired_exemplar,
                     check_opt_scores)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
-            median_scores = median_scores.append(emodel_median_scores)
+            megate_passed_all = megate_passed_all.append(
+                emodel_megate_passed_all)
 
             # Reporting per e-model
             add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
-                               megate_scores, emodel_score_values)
+                               emodel_megate_pass, emodel_score_values)
             add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
-                               mtypes, megate_scores)
+                               mtypes, emodel_megate_pass)
+
+        # Get median score for every passed combo
+        passed_median_scores = megate_passed_all.join(median_scores)
+        passed_median_scores = passed_median_scores[
+            passed_median_scores['Passed all']]
+        del passed_median_scores['Passed all']
+
+        add_plot_to_report(
+            pp,
+            plot_median_per_metype,
+            scores,
+            passed_median_scores)
 
         # More reporting
         if enable_plot_emodels_per_morphology:
             add_plot_to_report(pp, plot_emodels_per_morphology, scores,
                                ext_neurondb)
         add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
-
-        print median_scores
 
     return ext_neurondb
