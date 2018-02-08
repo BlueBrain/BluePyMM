@@ -31,13 +31,8 @@ from . import table_processing
 def _write_extneurondbdat(extneurondb, filename):
     """Write extneurondb.dat"""
     pure_extneuron_db = extneurondb.copy()
-    if 'threshold_current' in pure_extneuron_db:
-        del pure_extneuron_db['threshold_current']
-    if 'holding_current' in pure_extneuron_db:
-        del pure_extneuron_db['holding_current']
-    if 'emodel' in pure_extneuron_db:
-        del pure_extneuron_db['emodel']
 
+    # Select the correct columns
     column_order = ['morph_name', 'layer', 'fullmtype', 'etype', 'combo_name']
     pure_extneuron_db = pure_extneuron_db[column_order]
     pure_extneuron_db.to_csv(filename, sep=' ', index=False, header=False)

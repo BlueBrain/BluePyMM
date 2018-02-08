@@ -283,6 +283,7 @@ def create_final_db_and_write_report(pdf_filename,
                                      enable_plot_emodels_per_morphology):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
+    median_scores = pandas.DataFrame()
 
     with pdf_file(pdf_filename) as pp:
         # Plot input configuration details
@@ -295,7 +296,8 @@ def create_final_db_and_write_report(pdf_filename,
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
         for emodel in emodels:
             emodel_ext_neurondb_rows, megate_scores, \
-                emodel_score_values, mtypes = table_processing.process_emodel(
+                emodel_score_values, mtypes, emodel_median_scores = \
+                table_processing.process_emodel(
                     emodel,
                     scores,
                     score_values,
@@ -304,6 +306,7 @@ def create_final_db_and_write_report(pdf_filename,
                     skip_repaired_exemplar,
                     check_opt_scores)
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+            median_scores = median_scores.append(emodel_median_scores)
 
             # Reporting per e-model
             add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
@@ -316,5 +319,7 @@ def create_final_db_and_write_report(pdf_filename,
             add_plot_to_report(pp, plot_emodels_per_morphology, scores,
                                ext_neurondb)
         add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
+
+        print median_scores
 
     return ext_neurondb
