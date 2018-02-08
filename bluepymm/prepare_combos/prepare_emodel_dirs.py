@@ -238,7 +238,7 @@ def prepare_emodel_dir(input_args):
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
                         'cell_template_neurodamus.jinja2')
 
-    except:
+    except Exception:
         raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
 
     return {emodel: emodel_dir, original_emodel: emodel_dir}

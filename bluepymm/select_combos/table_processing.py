@@ -153,15 +153,27 @@ def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
                     exemplar_row, to_skip_patterns, skip_repaired_exemplar):
     """Compare score values to applicable feature thresholds."""
 
-    megate_scores = pandas.concat(
+    # Add a column with the thresholds
+    emodel_score_values_thresholds = pandas.concat(
         [emodel_mtype_etype_thresholds['megate_feature_threshold'],
-         emodel_score_values], axis=1).apply(
-        lambda row:
-        _row_transform(row, exemplar_row, to_skip_patterns,
-                       skip_repaired_exemplar), axis=1)
-    del megate_scores['megate_feature_threshold']
-    megate_scores['Passed all'] = megate_scores.all(axis=1)
-    return megate_scores
+         emodel_score_values], axis=1)
+
+    # Apply the thresholds
+    # Creates a table show which columns (objectives) pass for each combo
+    emodel_megate_pass = emodel_score_values_thresholds.apply(
+        lambda row: _row_transform(
+            row,
+            exemplar_row,
+            to_skip_patterns,
+            skip_repaired_exemplar),
+        axis=1)
+
+    # Remove the threshold column
+    del emodel_megate_pass['megate_feature_threshold']
+
+    # Detect which rows (combos) pass in all columns
+    emodel_megate_pass['Passed all'] = emodel_megate_pass.all(axis=1)
+    return emodel_megate_pass
 
 
 def _create_database_rows(selected_combinations):
@@ -191,7 +203,7 @@ def _create_database_rows(selected_combinations):
 
 
 def process_emodel(emodel,
-                   scores,
+                   combos,
                    score_values,
                    to_skip_patterns,
                    megate_patterns,
@@ -202,7 +214,7 @@ def process_emodel(emodel,
 
     Args:
         emodel: e-model name
-        scores: pandas.DataFrame with score data
+        combos: pandas.DataFrame with combo data
         score_values: pandas.DataFrame with score values
         to_skip_patterns: list of compiled regular expressions
         megate_patterns: list of dictionaries with megate patterns
@@ -212,7 +224,7 @@ def process_emodel(emodel,
     Returns:
         4-tuple with megate results for the e-model:
         - emodel_ext_neurondb: pandas.DataFrame with database rows
-        - megate_scores: pandas.DataFrame with megate scores (fail/success)
+        - emodel_megate_pass: pandas.DataFrame with megate fail/success
         - emodel_score_values: pandas.DataFrame with score values
         - mtypes: pandas.DataFrame with tested m-types
 
@@ -229,18 +241,18 @@ def process_emodel(emodel,
 
     # check if opt_scores match with unrepaired exemplar runs
     if enable_check_opt_scores:
-        check_opt_scores(emodel, scores)
+        check_opt_scores(emodel, combos)
 
-    # if applicable, extract exemplar row from scores and score values
+    # if applicable, skip exemplar rows from combos and score values
     exemplar_row = None
     if not skip_repaired_exemplar:
-        exemplar_morph = scores[scores.emodel == emodel].morph_name.values[0]
+        exemplar_morph = combos[combos.emodel == emodel].morph_name.values[0]
         exemplar_score_values = score_values[
-            (scores.emodel == emodel) &
-            (scores.is_exemplar == 1) &
-            (scores.is_repaired == 1) &
-            (scores.is_original == 0) &
-            (scores.morph_name == exemplar_morph)]
+            (combos.emodel == emodel) &
+            (combos.is_exemplar == 1) &
+            (combos.is_repaired == 1) &
+            (combos.is_original == 0) &
+            (combos.morph_name == exemplar_morph)]
 
         if len(exemplar_score_values) > 1:
             raise Exception('Too many exemplars found for e-model %s: %s' %
@@ -256,8 +268,8 @@ def process_emodel(emodel,
         exemplar_row = exemplar_score_values.iloc[0].to_dict()
 
     # identify relevant me-gate feature thresholds for each row
-    emodel_mtype_etypes = scores[(scores.emodel == emodel) &
-                                 (scores.is_exemplar == 0)].copy()
+    emodel_mtype_etypes = combos[(combos.emodel == emodel) &
+                                 (combos.is_exemplar == 0)].copy()
     if len(emodel_mtype_etypes) == 0:
         print('Skipping e-model %s: was not run on any released morphology'
               % emodel)
@@ -272,20 +284,25 @@ def process_emodel(emodel,
         axis=1)
 
     # select score values relevant to this e-model
-    emodel_score_values = score_values[(scores.emodel == emodel) &
-                                       (scores.is_exemplar == 0)].copy()
+    emodel_score_values = score_values[(combos.emodel == emodel) &
+                                       (combos.is_exemplar == 0)].copy()
     emodel_score_values.dropna(axis=1, how='all', inplace=True)
 
     # me-gating: compare score values to applicable feature thresholds
-    megate_scores = _apply_megating(emodel_mtype_etype_thresholds,
-                                    emodel_score_values, exemplar_row,
-                                    to_skip_patterns, skip_repaired_exemplar)
+    emodel_megate_pass = _apply_megating(
+        emodel_mtype_etype_thresholds,
+        emodel_score_values,
+        exemplar_row,
+        to_skip_patterns,
+        skip_repaired_exemplar)
 
     # identify combinations that passed the me-gating step
-    emodel_scores = scores[(scores.emodel == emodel) &
-                           (scores.is_exemplar == 0)].copy()
+    emodel_combos = combos[(combos.emodel == emodel) &
+                           (combos.is_exemplar == 0)].copy()
 
-    passed_combos = emodel_scores[megate_scores['Passed all']]
+    passed_combos = emodel_combos[emodel_megate_pass['Passed all']]
+    emodel_megate_passed_all = emodel_megate_pass[['Passed all']]
+
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
         raise Exception('Something went wrong during row indexing in megating')
 
@@ -293,10 +310,11 @@ def process_emodel(emodel,
     emodel_ext_neurondb = _create_database_rows(passed_combos)
 
     # identify m-types that were tested for this e-model
-    mtypes = scores[(scores.emodel == emodel) &
-                    (scores.is_exemplar == 0)].loc[:, 'mtype']
+    mtypes = combos[(combos.emodel == emodel) &
+                    (combos.is_exemplar == 0)].loc[:, 'mtype']
 
-    return emodel_ext_neurondb, megate_scores, emodel_score_values, mtypes
+    return emodel_ext_neurondb, emodel_megate_pass, emodel_score_values, \
+        mtypes, emodel_megate_passed_all
 
 
 def process_combo_name(data, log_filename):
