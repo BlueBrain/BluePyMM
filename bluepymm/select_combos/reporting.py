@@ -379,7 +379,7 @@ def create_final_db_and_write_report(pdf_filename,
 
         extra_data_dir = os.path.join(output_dir, 'extra_data')
         if not os.path.exists(extra_data_dir):
-            os.mkdir(extra_data_dir)
+            os.makedirs(extra_data_dir)
 
         median_csv_path = os.path.join(
             extra_data_dir,
