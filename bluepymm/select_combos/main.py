@@ -22,11 +22,9 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640
 
-import os
-
 from bluepymm import tools
 
-from . import sqlite_io, reporting, megate_output, table_processing
+from . import sqlite_io, reporting, megate_output
 from . import process_megate_config as proc_config
 
 
@@ -72,7 +70,8 @@ def select_combos_from_conf(conf_dict):
         conf_dict.get('skip_repaired_exemplar', False),
         conf_dict.get('check_opt_scores', True),
         scores, score_values,
-        conf_dict.get('plot_emodels_per_morphology', False))
+        conf_dict.get('plot_emodels_per_morphology', False),
+        output_dir)
     print('Wrote pdf to %s' % pdf_filename)
 
     # write output files

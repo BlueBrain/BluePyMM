@@ -237,7 +237,6 @@ def process_emodel(emodel,
         Exception, skip_repaired_exemplar is set to False and more than one
         exemplars are found.
     """
-    print('Processing e-model %s' % emodel)
 
     # check if opt_scores match with unrepaired exemplar runs
     if enable_check_opt_scores:

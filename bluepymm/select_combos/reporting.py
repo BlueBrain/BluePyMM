@@ -277,7 +277,7 @@ def create_metype(x):
     return '%s_%s' % (x['etype'], x['fullmtype'])
 
 
-def plot_median_per_metype(combos, passed_median_scores):
+def plot_median_per_metype(combos, passed_median_scores, csv_path):
     """Display result median score per me-type"""
 
     metype_medians = passed_median_scores.join(combos)[
@@ -290,6 +290,9 @@ def plot_median_per_metype(combos, passed_median_scores):
         index='mtype',
         columns='etype',
         values='median_score')
+
+    metype_medians.to_csv(csv_path)
+    print('Wrote me-type median scores to %s' % csv_path)
 
     import matplotlib.pyplot as plt
 
@@ -324,7 +327,8 @@ def create_final_db_and_write_report(pdf_filename,
                                      check_opt_scores,
                                      scores,
                                      score_values,
-                                     enable_plot_emodels_per_morphology):
+                                     enable_plot_emodels_per_morphology,
+                                     output_dir):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
     megate_passed_all = pandas.DataFrame()
@@ -342,7 +346,11 @@ def create_final_db_and_write_report(pdf_filename,
 
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
-        for emodel in emodels:
+        for counter, emodel in enumerate(emodels, 1):
+            print(
+                'Processing e-model %s (%d of %d)' %
+                (emodel, counter, len(emodels)))
+
             emodel_ext_neurondb_rows, emodel_megate_pass, \
                 emodel_score_values, mtypes, emodel_megate_passed_all = \
                 table_processing.process_emodel(
@@ -369,11 +377,19 @@ def create_final_db_and_write_report(pdf_filename,
             passed_median_scores['Passed all']]
         del passed_median_scores['Passed all']
 
+        extra_data_dir = os.path.join(output_dir, 'extra_data')
+        if not os.path.exists(extra_data_dir):
+            os.makedirs(extra_data_dir)
+
+        median_csv_path = os.path.join(
+            extra_data_dir,
+            'metype_median_scores.csv')
         add_plot_to_report(
             pp,
             plot_median_per_metype,
             scores,
-            passed_median_scores)
+            passed_median_scores,
+            median_csv_path)
 
         # More reporting
         if enable_plot_emodels_per_morphology:
