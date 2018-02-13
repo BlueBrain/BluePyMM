@@ -61,7 +61,7 @@ def check_morphology_existence(morph_name, morph_type, morph_path):
 
 def create_exemplar_rows(
         final_dict,
-        fullmtype_morph_map,
+        rep_fullmtype_morph_map,
         emodel_etype_map,
         emodel_dirs,
         rep_morph_dir,
@@ -70,7 +70,7 @@ def create_exemplar_rows(
 
     Args:
         final_dict: final e-model map
-        fullmtype_morph_map: pandas.DataFrame with morphology database
+        rep_fullmtype_morph_map: pandas.DataFrame with morphology database
         emodel_etype_map: e-model e-type map
         emodel_dirs: a dict mapping e-models to prepared e-model directories
         rep_morph_dir: directory with repaired morphologies
@@ -111,8 +111,8 @@ def create_exemplar_rows(
             combos = [(emodel, False, False),
                       (original_emodel, True, False)]
         else:
-            morph_info_list = fullmtype_morph_map[
-                fullmtype_morph_map['morph_name'] == morph_name].values
+            morph_info_list = rep_fullmtype_morph_map[
+                rep_fullmtype_morph_map['morph_name'] == morph_name].values
             if len(morph_info_list) == 0:
                 raise Exception(
                     'Morphology %s for %s e-model not found in morphology '
@@ -206,6 +206,7 @@ def create_mm_sqlite(
             skipped. Default value is False.
     """
     neurondb_filename = os.path.join(morph_dir, 'neuronDB.xml')
+    rep_neurondb_filename = os.path.join(rep_morph_dir, 'neuronDB.xml')
 
     # Contains layer, fullmtype, etype
     print('Reading recipe at %s' % recipe_filename)
@@ -217,6 +218,15 @@ def create_mm_sqlite(
     print('Reading neuronDB at %s' % neurondb_filename)
     fullmtype_morph_map = parse_files.read_mtype_morph_map(neurondb_filename)
     tools.check_no_null_nan_values(fullmtype_morph_map,
+                                   "the full m-type morphology map")
+
+    # Contains layer, fullmtype, mtype, submtype, morph_name
+    print(
+        'Reading repaired-morphologies neuronDB at %s' %
+        rep_neurondb_filename)
+    rep_fullmtype_morph_map = parse_files.read_mtype_morph_map(
+        rep_neurondb_filename)
+    tools.check_no_null_nan_values(rep_fullmtype_morph_map,
                                    "the full m-type morphology map")
 
     # Contains layer, fullmtype, etype, morph_name
@@ -268,7 +278,7 @@ def create_mm_sqlite(
 
     exemplar_rows = create_exemplar_rows(
         final_dict,
-        fullmtype_morph_map,
+        rep_fullmtype_morph_map,
         original_emodel_etype_map,
         emodel_dirs,
         rep_morph_dir,
