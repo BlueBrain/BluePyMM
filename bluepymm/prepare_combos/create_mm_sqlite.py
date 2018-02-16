@@ -95,7 +95,7 @@ def create_exemplar_rows(
         opt_scores = original_emodel_dict['fitness']
 
         morph_filename = os.path.basename(original_emodel_dict['morph_path'])
-        morph_name, _ = os.path.splitext(morph_filename)
+        morph_name, morph_ext = os.path.splitext(morph_filename)
         unrep_morph_dir = os.path.dirname(os.path.abspath(
             os.path.join(
                 emodel_dirs[emodel],
@@ -136,6 +136,7 @@ def create_exemplar_rows(
                 'msubtype': msubtype,
                 'etype': emodel_etype_map[original_emodel]['etype'],
                 'morph_name': morph_name,
+                'morph_ext': morph_ext,
                 'emodel': stored_emodel,
                 'original_emodel': original_emodel,
                 'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
@@ -267,6 +268,7 @@ def create_mm_sqlite(
 
     print('Adding exemplar rows')
     full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
+    full_map.insert(len(full_map.columns), 'morph_ext', None)
     full_map.insert(len(full_map.columns), 'is_exemplar', False)
     full_map.insert(len(full_map.columns), 'is_repaired', True)
     full_map.insert(len(full_map.columns), 'is_original', False)
