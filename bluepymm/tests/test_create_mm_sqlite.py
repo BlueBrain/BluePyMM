@@ -89,17 +89,31 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
     unrep_morph_dir = os.path.dirname(
         os.path.join(emodel_dirs[emodel], final_dict[emodel]['morph_path']))
     data = [(None, None, None, None, emodel_etype_map[emodel]['etype'],
-             'morph1', emodel, emodel, unrep_morph_dir, None,
+             'morph1', '.asc', emodel, emodel, unrep_morph_dir, None,
              json.dumps(final_dict[emodel]['fitness']), None, True, True,
              False, False),
             (None, None, None, None, emodel_etype_map[emodel]['etype'],
-             'morph1', emodel, emodel, unrep_morph_dir, None,
+             'morph1', '.asc', emodel, emodel, unrep_morph_dir, None,
              json.dumps(final_dict[emodel]['fitness']), None, True, True,
              False, True)]
-    columns = ['layer', 'fullmtype', 'mtype', 'msubtype', 'etype',
-               'morph_name', 'emodel', 'original_emodel', 'morph_dir',
-               'scores', 'opt_scores', 'exception', 'to_run', 'is_exemplar',
-               'is_repaired', 'is_original']
+    columns = [
+        'layer',
+        'fullmtype',
+        'mtype',
+        'msubtype',
+        'etype',
+        'morph_name',
+        'morph_ext',
+        'emodel',
+        'original_emodel',
+        'morph_dir',
+        'scores',
+        'opt_scores',
+        'exception',
+        'to_run',
+        'is_exemplar',
+        'is_repaired',
+        'is_original']
     expected_ret = pandas.DataFrame(data, columns=columns)
     expected_ret.sort_index(axis=1, inplace=True)
 
