@@ -164,7 +164,12 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
         for row in scores_cursor.fetchall():
             index = row['index']
             morph_name = row['morph_name']
-            morph_filename = '%s.asc' % morph_name
+            morph_ext = row['morph_ext']
+
+            if morph_ext is None:
+                morph_ext = '.asc'
+
+            morph_filename = morph_name + morph_ext
             morph_path = os.path.abspath(os.path.join(row['morph_dir'],
                                                       morph_filename))
             if row['to_run'] == 1:
