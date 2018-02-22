@@ -220,8 +220,8 @@ def select_passed_combos(
                 metype_inds[
                     metype_inds.values == metype].index]
             metype_scores_nonan = metype_scores.dropna(axis=0)
-            metype_scores_nonan_no250 = metype_scores_nonan
-            # [metype_scores_nonan['median_score'] < 250.0]
+            metype_scores_nonan_no250 = metype_scores_nonan[
+                metype_scores_nonan['median_score'] < 250.0]
             # metype_scores_nonan = metype_scores
             metype_scores_nonan_no250_sorted = \
                 metype_scores_nonan_no250.sort_values(
