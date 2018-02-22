@@ -76,8 +76,10 @@ def save_megate_results(extneurondb, output_dir,
 
     extneurondb_path = os.path.join(output_dir, extneurondb_filename)
     _write_extneurondbdat(extneurondb, extneurondb_path)
-    print('Wrote extended neuron database to {}'.format(extneurondb_path))
+    print(
+        'Wrote extended neuron database to %s' %
+        os.path.abspath(extneurondb_path))
 
     mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
-    print('Wrote mecombo_emodel to {}'.format(mecombo_emodel_path))
+    print('Wrote mecombo_emodel to %s' % os.path.abspath(mecombo_emodel_path))

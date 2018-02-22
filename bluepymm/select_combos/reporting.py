@@ -292,7 +292,7 @@ def plot_median_per_metype(combos, passed_median_scores, csv_path):
         values='median_score')
 
     metype_medians.to_csv(csv_path)
-    print('Wrote me-type median scores to %s' % csv_path)
+    print('Wrote me-type median scores to %s' % os.path.abspath(csv_path))
 
     import matplotlib.pyplot as plt
 
@@ -332,10 +332,14 @@ def create_final_db_and_write_report(pdf_filename,
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
     megate_passed_all = pandas.DataFrame()
+    median_scores = pandas.DataFrame()
+    passed_combos = pandas.DataFrame()
 
+    '''
     median_scores = score_values.median(
         axis=1,
         skipna=True).to_frame(name='median_score')
+    '''
 
     with pdf_file(pdf_filename) as pp:
         # Plot input configuration details
@@ -352,7 +356,8 @@ def create_final_db_and_write_report(pdf_filename,
                 (emodel, counter, len(emodels)))
 
             emodel_ext_neurondb_rows, emodel_megate_pass, \
-                emodel_score_values, mtypes, emodel_megate_passed_all = \
+                emodel_score_values, mtypes, emodel_megate_passed_all, \
+                emodel_median_scores, emodel_passed_combos = \
                 table_processing.process_emodel(
                     emodel,
                     scores,
@@ -364,24 +369,42 @@ def create_final_db_and_write_report(pdf_filename,
             ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
             megate_passed_all = megate_passed_all.append(
                 emodel_megate_passed_all)
+            median_scores = median_scores.append(emodel_median_scores)
+            passed_combos = passed_combos.append(emodel_passed_combos)
 
             # Reporting per e-model
             add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
                                emodel_megate_pass, emodel_score_values)
             add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
                                mtypes, emodel_megate_pass)
+            plt.close('all')
 
         # Get median score for every passed combo
-        passed_median_scores = megate_passed_all.join(median_scores)
-        passed_median_scores = passed_median_scores[
-            passed_median_scores['Passed all']]
-        del passed_median_scores['Passed all']
+        passed_median_scores = median_scores.loc[passed_combos.index]
 
         extra_data_dir = os.path.join(output_dir, 'extra_data')
         if not os.path.exists(extra_data_dir):
             os.makedirs(extra_data_dir)
 
-        median_csv_path = os.path.join(
+        all_median_csv_path = os.path.join(
+            extra_data_dir,
+            'all_median_scores.csv')
+        scores[scores['is_exemplar'] == 0].join(median_scores)[
+            ['fullmtype',
+             'etype',
+             'emodel',
+             'median_score']].to_csv(all_median_csv_path)
+
+        passed_median_csv_path = os.path.join(
+            extra_data_dir,
+            'passed_median_scores.csv')
+        scores[
+            scores['is_exemplar'] == 0].join(
+            passed_median_scores, how='right')[
+            ['fullmtype', 'etype', 'emodel', 'median_score']].to_csv(
+            passed_median_csv_path)
+
+        metype_median_csv_path = os.path.join(
             extra_data_dir,
             'metype_median_scores.csv')
         add_plot_to_report(
@@ -389,7 +412,7 @@ def create_final_db_and_write_report(pdf_filename,
             plot_median_per_metype,
             scores,
             passed_median_scores,
-            median_csv_path)
+            metype_median_csv_path)
 
         # More reporting
         if enable_plot_emodels_per_morphology:

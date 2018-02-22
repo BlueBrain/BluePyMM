@@ -21,7 +21,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640
 
-
+import math
 import json
 import pandas
 
@@ -36,17 +36,10 @@ def _row_transform(row, exemplar_row, to_skip_patterns,
     """
 
     for column in row.index[1:]:
-        # set all values that can be ignored to True
-        for pattern in to_skip_patterns:
-            if pattern.match(column):
-                row[column] = True
-                continue
-
         # find the appropriate threshold
         for megate_feature_threshold in row['megate_feature_threshold']:
             if megate_feature_threshold['features'].match(column):
-                megate_threshold = megate_feature_threshold[
-                    'megate_threshold']
+                megate_threshold = megate_feature_threshold['megate_threshold']
 
         # transform score
         if skip_repaired_exemplar:
@@ -54,6 +47,7 @@ def _row_transform(row, exemplar_row, to_skip_patterns,
         else:
             row[column] = row[column] <= max(
                 megate_threshold, megate_threshold * exemplar_row[column])
+
     return row
 
 
@@ -160,13 +154,20 @@ def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
 
     # Apply the thresholds
     # Creates a table show which columns (objectives) pass for each combo
-    emodel_megate_pass = emodel_score_values_thresholds.apply(
-        lambda row: _row_transform(
-            row,
-            exemplar_row,
-            to_skip_patterns,
-            skip_repaired_exemplar),
-        axis=1)
+
+    non_skipped_columns = [
+        column
+        for column in
+        emodel_score_values_thresholds.columns
+        if not any([pattern.match(column) for pattern in to_skip_patterns])]
+
+    emodel_megate_pass = \
+        emodel_score_values_thresholds[non_skipped_columns].apply(
+            _row_transform, args=(
+                exemplar_row,
+                to_skip_patterns,
+                skip_repaired_exemplar),
+            axis=1)
 
     # Remove the threshold column
     del emodel_megate_pass['megate_feature_threshold']
@@ -200,6 +201,62 @@ def _create_database_rows(selected_combinations):
         del emodel_ext_neurondb['extra_values']
 
     return emodel_ext_neurondb
+
+
+def select_passed_combos(
+        emodel,
+        emodel_combos,
+        emodel_megate_pass,
+        emodel_megate_scores,
+        select_perc_best=.1):
+    """Select which combos pass"""
+
+    passed_indices = pandas.DataFrame()
+
+    if select_perc_best is not None:
+        metype_inds = emodel_combos['etype'] + emodel_combos['fullmtype']
+        for metype in metype_inds.unique():
+            metype_scores = emodel_megate_scores.loc[
+                metype_inds[
+                    metype_inds.values == metype].index]
+            metype_scores_nonan = metype_scores.dropna(axis=0)
+            metype_scores_nonan_no250 = metype_scores_nonan
+            # [metype_scores_nonan['median_score'] < 250.0]
+            # metype_scores_nonan = metype_scores
+            metype_scores_nonan_no250_sorted = \
+                metype_scores_nonan_no250.sort_values(
+                    'median_score')
+            n_of_combos = len(metype_scores_nonan_no250_sorted.index)
+            n_of_best = int(math.ceil(select_perc_best * n_of_combos))
+
+            passed_indices = passed_indices.append(
+                metype_scores_nonan_no250_sorted.head(n_of_best))
+
+            if len(passed_indices) == 0:
+                print(
+                    'WARNING: no combos for me-type %s in emodel %s' %
+                    (metype, emodel))
+    else:
+        passed_indices = emodel_megate_pass['Passed all']
+
+    return emodel_combos.loc[passed_indices.index]
+
+
+def calc_median_scores(emodel_score_values, to_skip_patterns):
+    """Calculate scores for every me-combo"""
+
+    columns = emodel_score_values.columns
+
+    non_skipped_columns = [
+        column
+        for column in
+        columns
+        if not any([pattern.match(column) for pattern in to_skip_patterns])]
+
+    emodel_median_scores = emodel_score_values[non_skipped_columns].median(
+        axis=1, skipna=True).to_frame('median_score')
+
+    return emodel_median_scores
 
 
 def process_emodel(emodel,
@@ -278,6 +335,7 @@ def process_emodel(emodel,
         :, ['emodel', 'fullmtype', 'etype']]
     emodel_mtype_etype_thresholds['megate_feature_threshold'] = None
 
+    print('Getting megating thresholds for emodel %s' % emodel)
     emodel_mtype_etype_thresholds.apply(
         lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
@@ -287,6 +345,7 @@ def process_emodel(emodel,
                                        (combos.is_exemplar == 0)].copy()
     emodel_score_values.dropna(axis=1, how='all', inplace=True)
 
+    print('Applying megating to emodel %s' % emodel)
     # me-gating: compare score values to applicable feature thresholds
     emodel_megate_pass = _apply_megating(
         emodel_mtype_etype_thresholds,
@@ -295,11 +354,21 @@ def process_emodel(emodel,
         to_skip_patterns,
         skip_repaired_exemplar)
 
-    # identify combinations that passed the me-gating step
+    print('Calculating median scores for emodel %s' % emodel)
+
+    emodel_median_scores = calc_median_scores(
+        emodel_score_values,
+        to_skip_patterns)
+
     emodel_combos = combos[(combos.emodel == emodel) &
                            (combos.is_exemplar == 0)].copy()
 
-    passed_combos = emodel_combos[emodel_megate_pass['Passed all']]
+    # identify combinations that passed the me-gating step
+    passed_combos = select_passed_combos(
+        emodel,
+        emodel_combos,
+        emodel_megate_pass,
+        emodel_median_scores)
     emodel_megate_passed_all = emodel_megate_pass[['Passed all']]
 
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
@@ -313,7 +382,7 @@ def process_emodel(emodel,
                     (combos.is_exemplar == 0)].loc[:, 'mtype']
 
     return emodel_ext_neurondb, emodel_megate_pass, emodel_score_values, \
-        mtypes, emodel_megate_passed_all
+        mtypes, emodel_megate_passed_all, emodel_median_scores, passed_combos
 
 
 def process_combo_name(data, log_filename):

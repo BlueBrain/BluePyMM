@@ -22,6 +22,8 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 # pylint: disable=R0914, C0325, W0640
 
+import os
+
 from bluepymm import tools
 
 from . import sqlite_io, reporting, megate_output
@@ -47,6 +49,7 @@ def select_combos_from_conf(conf_dict):
     pdf_filename = conf_dict['pdf_filename']
     output_dir = conf_dict['output_dir']
 
+    print('Reading configuration files')
     # read skip features
     to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
         conf_dict)
@@ -55,11 +58,15 @@ def select_combos_from_conf(conf_dict):
     megate_patterns, megate_thresholds = proc_config.read_megate_thresholds(
         conf_dict)
 
+    print('Reading tables from sqlite')
     # read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_db_filename)
+
+    print('Checking if all combos have run')
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
+    print('Start creation of ext_neurondb')
     # create final database and write report
     ext_neurondb = reporting.create_final_db_and_write_report(
         pdf_filename,
@@ -72,7 +79,7 @@ def select_combos_from_conf(conf_dict):
         scores, score_values,
         conf_dict.get('plot_emodels_per_morphology', False),
         output_dir)
-    print('Wrote pdf to %s' % pdf_filename)
+    print('Wrote pdf to %s' % os.path.abspath(pdf_filename))
 
     # write output files
     compliant = conf_dict.get('make_names_neuron_compliant', False)
