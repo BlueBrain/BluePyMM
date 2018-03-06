@@ -21,9 +21,12 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 # pylint: disable=R0914, C0325, W0640, W0633
+# pylama: ignore=E402
+
+import os
 
 import pandas
-import os
+import numpy
 
 import matplotlib
 matplotlib.use('Agg')
@@ -108,8 +111,12 @@ def plot_stacked_bars(
     Returns:
         Figure with plot of stacked bars
     """
-    ax = data.plot(kind='barh', figsize=FIGSIZE, stacked=True, color=color_map,
-                   log=log)
+    ax = data.plot(
+        kind='barh',
+        figsize=FIGSIZE,
+        stacked=True,
+        color=color_map,
+        log=log)
     if not log:
         ax.get_xaxis().set_major_locator(
             matplotlib.ticker.MaxNLocator(integer=True))
@@ -266,7 +273,52 @@ def plot_emodels_per_metype(data, final_db):
         [BLUE, YELLOW, RED], log=True, yticksize=3)
 
 
+def create_metype(x):
+    """Create me-type from m-type and e-type"""
+    return '%s_%s' % (x['etype'], x['fullmtype'])
+
+
+def plot_median_per_metype(combos, passed_median_scores, csv_path):
+    """Display result median score per me-type"""
+
+    metype_medians = passed_median_scores.join(combos)[
+        ['mtype', 'etype', 'median_score']]
+
+    metype_medians = metype_medians.groupby(
+        ['mtype', 'etype']).median().reset_index()
+
+    metype_medians = metype_medians.pivot(
+        index='mtype',
+        columns='etype',
+        values='median_score')
+
+    metype_medians.to_csv(csv_path)
+    print('Wrote me-type median scores to %s' % csv_path)
+
+    import matplotlib.pyplot as plt
+
+    ax = plt.pcolor(metype_medians)
+    ax = plt.gca()
+    cbar = plt.colorbar()
+    cbar.ax.text(
+        4, .5, 'median Z score', rotation=270, verticalalignment='center')
+
+    plt.xlabel('e-type')
+    plt.ylabel('m-type')
+
+    ax.set_xticks(numpy.arange(metype_medians.shape[1]) + 0.5, minor=False)
+    ax.set_yticks(numpy.arange(metype_medians.shape[0]) + 0.5, minor=False)
+    ax.set_xticklabels(metype_medians.columns, rotation=90)
+    ax.set_yticklabels(metype_medians.index)
+    plt.tight_layout()
+
+    plt.title('Median Z scores of me-types')
+
+    return plt.gcf()
+
 # TODO: can this function be split into processing and reporting?
+
+
 def create_final_db_and_write_report(pdf_filename,
                                      to_skip_features,
                                      to_skip_patterns,
@@ -276,12 +328,18 @@ def create_final_db_and_write_report(pdf_filename,
                                      check_opt_scores,
                                      scores,
                                      score_values,
-                                     enable_plot_emodels_per_morphology):
+                                     enable_plot_emodels_per_morphology,
+                                     output_dir):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
     failed_ext_neurondb = pandas.DataFrame()
 
     emodel_infos = None
+    megate_passed_all = pandas.DataFrame()
+
+    median_scores = score_values.median(
+        axis=1,
+        skipna=True).to_frame(name='median_score')
 
     with pdf_file(pdf_filename) as pp:
         # Plot input configuration details
@@ -306,12 +364,15 @@ def create_final_db_and_write_report(pdf_filename,
         for emodel, emodel_info in emodel_infos.items():
             if emodel_info is not None:
                 emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
-                    megate_scores, emodel_score_values, fullmtypes = \
+                    megate_scores, emodel_score_values, fullmtypes, \
+                    emodel_megate_passed_all = \
                     emodel_info
                 ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
                 failed_ext_neurondb = failed_ext_neurondb.append(
                     emodel_failed_ext_neurondb_rows)
 
+                megate_passed_all = megate_passed_all.append(
+                    emodel_megate_passed_all)
                 # Reporting per e-model
                 add_plot_to_report(
                     pp,
@@ -327,6 +388,26 @@ def create_final_db_and_write_report(pdf_filename,
                     megate_scores)
             else:
                 print('WARNING: no info for emodel %s, skipping !' % emodel)
+
+        # Get median score for every passed combo
+        passed_median_scores = megate_passed_all.join(median_scores)
+        passed_median_scores = passed_median_scores[
+            passed_median_scores['Passed all']]
+        del passed_median_scores['Passed all']
+
+        extra_data_dir = os.path.join(output_dir, 'extra_data')
+        if not os.path.exists(extra_data_dir):
+            os.makedirs(extra_data_dir)
+
+        median_csv_path = os.path.join(
+            extra_data_dir,
+            'metype_median_scores.csv')
+        add_plot_to_report(
+            pp,
+            plot_median_per_metype,
+            scores,
+            passed_median_scores,
+            median_csv_path)
 
         # More reporting
         if enable_plot_emodels_per_morphology:

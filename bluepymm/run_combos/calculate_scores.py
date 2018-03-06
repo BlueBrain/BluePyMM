@@ -21,6 +21,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 # pylint: disable=C0325, W0223
+# pylama: ignore=E402
 
 import sys
 import os
@@ -50,8 +51,7 @@ def run_emodel_morph_isolated(input_args):
         Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
     """
 
-    uid, emodel, emodel_dir, emodel_params, morph_path, morph_dir, morph_name \
-        = input_args
+    uid, emodel, emodel_dir, emodel_params, morph_path = input_args
 
     return_dict = {}
     return_dict['uid'] = uid
@@ -61,10 +61,8 @@ def run_emodel_morph_isolated(input_args):
 
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
-            run_emodel_morph,
-            (emodel, emodel_dir, emodel_params, morph_path, morph_dir,
-             morph_name))
-    except:
+            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
+    except Exception:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
         return_dict['exception'] = "".join(traceback.format_exception(
@@ -119,8 +117,6 @@ def run_emodel_morph(
         emodel_dir,
         emodel_params,
         morph_path,
-        morph_dir,
-        morph_name,
         extra_values_error=True):
     """Run e-model morphology combination.
 
@@ -146,7 +142,9 @@ def run_emodel_morph(
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
             if hasattr(setup, 'multieval'):
-                apical_point_isec = read_apical_point(morph_dir, morph_name)
+                apical_point_isec = read_apical_point(
+                    os.path.dirname(morph_path), os.path.splitext(
+                        os.path.basename(morph_path))[0])
 
                 prefix = 'mm'
 
@@ -196,7 +194,7 @@ def run_emodel_morph(
                     responses.get('bpo_threshold_current', None)
 
         return scores, extra_values
-    except:
+    except Exception:
         # Make sure exception and backtrace are thrown back to parent process
         raise Exception(
             "".join(traceback.format_exception(*sys.exc_info())))
@@ -225,9 +223,13 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
         for row in scores_cursor.fetchall():
             index = row['index']
             morph_name = row['morph_name']
-            morph_filename = '%s.asc' % morph_name
-            morph_dir = row['morph_dir']
-            morph_path = os.path.abspath(os.path.join(morph_dir,
+            morph_ext = row['morph_ext']
+
+            if morph_ext is None:
+                morph_ext = '.asc'
+
+            morph_filename = morph_name + morph_ext
+            morph_path = os.path.abspath(os.path.join(row['morph_dir'],
                                                       morph_filename))
             if row['to_run'] == 1:
                 emodel = row['emodel']
@@ -241,9 +243,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
-                        morph_path,
-                        morph_dir,
-                        morph_name)
+                        morph_path)
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))

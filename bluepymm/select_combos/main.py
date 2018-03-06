@@ -21,6 +21,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 # pylint: disable=R0914, C0325, W0640
+# pylama: ignore=E402
 
 import os
 

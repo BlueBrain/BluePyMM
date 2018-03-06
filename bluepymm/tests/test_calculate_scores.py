@@ -172,6 +172,7 @@ def test_create_arg_list():
     emodel = 'emodel'
     row = {'index': index,
            'morph_name': morph_name,
+           'morph_ext': None,
            'morph_dir': morph_dir,
            'mtype': mtype,
            'etype': etype,
@@ -215,6 +216,7 @@ def test_create_arg_list_exception():
     emodel = None
     row = {'index': index,
            'morph_name': morph_name,
+           'morph_ext': None,
            'morph_dir': morph_dir,
            'mtype': mtype,
            'etype': etype,
@@ -345,6 +347,7 @@ def test_calculate_scores():
     emodel = 'emodel1'
     exception = None
     row = {'morph_name': morph_name,
+           'morph_ext': None,
            'morph_dir': morph_dir,
            'mtype': mtype,
            'etype': etype,
@@ -371,6 +374,7 @@ def test_calculate_scores():
     extra_values = {'holding_current': None, 'threshold_current': None}
     expected_db_row = {'index': 0,
                        'morph_name': morph_name,
+                       'morph_ext': None,
                        'morph_dir': morph_dir,
                        'mtype': mtype,
                        'etype': etype,
