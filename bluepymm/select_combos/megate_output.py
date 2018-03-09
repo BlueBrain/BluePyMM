@@ -42,7 +42,8 @@ def save_megate_results(extneurondb, output_dir,
                         extneurondb_filename='extneurondb.dat',
                         mecombo_emodel_filename='mecombo_emodel.tsv',
                         sort_key=None,
-                        make_names_neuron_compliant=False):
+                        make_names_neuron_compliant=False,
+                        extra_value_errors=True):
     """Write results of megating to two files.
 
     Args:
@@ -77,9 +78,55 @@ def save_megate_results(extneurondb, output_dir,
     extneurondb_path = os.path.join(output_dir, extneurondb_filename)
     _write_extneurondbdat(extneurondb, extneurondb_path)
     print(
-        'Wrote extended neuron database to %s' %
-        os.path.abspath(extneurondb_path))
+        'Wrote extneurondb.dat to {}'.format(
+            os.path.abspath(extneurondb_path)))
 
     mecombo_emodel_path = os.path.join(output_dir, mecombo_emodel_filename)
+
+    if extra_value_errors:
+        for extra_values_key in ['holding_current', 'threshold_current']:
+            null_rows = extneurondb[extra_values_key].isnull()
+            if null_rows.sum() > 0:
+                # TODO reenable this for release !
+                # raise ValueError(
+                #    "There are rows with None for "
+                #    "holding current: %s" % str(
+                #        extneurondb[null_rows]))
+                print("WARNING ! There are rows with None for "
+                      "holding current: %s" % str(extneurondb[null_rows]))
+
     extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
-    print('Wrote mecombo_emodel to %s' % os.path.abspath(mecombo_emodel_path))
+    print(
+        'Wrote mecombo_emodel tsv to {}'.format(
+            os.path.abspath(mecombo_emodel_path)))
+
+    return extneurondb_path, mecombo_emodel_path
+
+
+def write_mecomboreleasejson(
+        output_dir,
+        emodels_hoc_path,
+        extneurondb_path,
+        mecombo_emodel_path):
+    """Write json file contain info about release"""
+
+    release = {}
+
+    release['version'] = '1.0'
+
+    output_paths = {}
+    output_paths['emodels_hoc'] = os.path.abspath(emodels_hoc_path)
+    output_paths['extneurondb.dat'] = os.path.abspath(extneurondb_path)
+    output_paths['mecombo_emodel.tsv'] = os.path.abspath(mecombo_emodel_path)
+    release['output_paths'] = output_paths
+
+    tools.write_json(
+        output_dir,
+        'mecombo_release.json',
+        release)
+
+    print(
+        'Wrote mecombo_release json to %s' %
+        os.path.abspath(os.path.join(
+            output_dir,
+            'mecombo_release.json')))

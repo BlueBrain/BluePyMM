@@ -21,6 +21,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 # pylint: disable=C0325, W0223
+# pylama: ignore=E402
 
 import sys
 import os
@@ -96,7 +97,27 @@ class NestedPool(multiprocessing.pool.Pool):
     Process = NoDaemonProcess
 
 
-def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
+def read_apical_point(morph_dir, morph_name):
+    """Read apical point from apical point json file"""
+
+    json_filename = os.path.join(morph_dir, 'apical_points_isec.json')
+
+    with open(json_filename) as json_file:
+        apic_points = json.load(json_file)
+
+    # Get apic_point isec from dict, if not found return None
+    if morph_name in apic_points:
+        return int(apic_points[morph_name])
+    else:
+        return None
+
+
+def run_emodel_morph(
+        emodel,
+        emodel_dir,
+        emodel_params,
+        morph_path,
+        extra_values_error=True):
     """Run e-model morphology combination.
 
     Args:
@@ -120,19 +141,57 @@ def run_emodel_morph(emodel, emodel_dir, emodel_params, morph_path):
 
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
-            evaluator = setup.evaluator.create(etype='%s' % emodel)
-            evaluator.cell_model.morphology.morphology_path = morph_path
+            if hasattr(setup, 'multieval'):
+                apical_point_isec = read_apical_point(
+                    os.path.dirname(morph_path), os.path.splitext(
+                        os.path.basename(morph_path))[0])
 
-            responses = evaluator.run_protocols(
-                evaluator.fitness_protocols.values(),
-                emodel_params)
-            scores = evaluator.fitness_calculator.calculate_scores(responses)
+                prefix = 'mm'
 
-            extra_values = {}
-            extra_values['holding_current'] = \
-                responses.get('bpo_holding_current', None)
-            extra_values['threshold_current'] = \
-                responses.get('bpo_threshold_current', None)
+                altmorph = [[prefix, morph_path, apical_point_isec]]
+                evaluator = setup.evaluator.create(etype='%s' % emodel,
+                                                   altmorph=altmorph)
+
+                evaluator = evaluator.evaluators[0]  # only one evaluator
+
+                responses = evaluator.run_protocols(
+                    evaluator.fitness_protocols.values(),
+                    emodel_params)
+                scores = evaluator.fitness_calculator.calculate_scores(
+                    responses)
+
+                extra_values = {}
+
+                for response_key, extra_values_key in [
+                        ('%s.bpo_holding_current' % prefix,
+                         'holding_current'),
+                        ('%s.bpo_threshold_current' % prefix,
+                         'threshold_current')]:
+                    if response_key in responses:
+                        extra_values[extra_values_key] = responses[
+                            response_key]
+                    else:
+                        if extra_values_error:
+                            raise ValueError(
+                                "Key %s not found in responses: %s" %
+                                (response_key, str(responses)))
+                        else:
+                            extra_values[extra_values_key] = None
+            else:
+                evaluator = setup.evaluator.create(etype='%s' % emodel)
+                evaluator.cell_model.morphology.morphology_path = morph_path
+
+                responses = evaluator.run_protocols(
+                    evaluator.fitness_protocols.values(),
+                    emodel_params)
+                scores = evaluator.fitness_calculator.calculate_scores(
+                    responses)
+
+                extra_values = {}
+                extra_values['holding_current'] = \
+                    responses.get('bpo_holding_current', None)
+                extra_values['threshold_current'] = \
+                    responses.get('bpo_threshold_current', None)
 
         return scores, extra_values
     except Exception:

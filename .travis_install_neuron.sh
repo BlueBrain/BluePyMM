@@ -10,10 +10,11 @@ then
     echo 'Neuron was not fully installed in previous build, installing ...'
     mkdir -p ${SRC_DIR}
     cd ${SRC_DIR}
-    echo "Downloading NEURON 7.5 ..."
-    wget -q http://www.neuron.yale.edu/ftp/neuron/versions/v7.5/nrn-7.5.tar.gz
-    tar xzf nrn-7.5.tar.gz
-    cd nrn-7.5
+    echo "Downloading NEURON ..."
+	git clone --depth 1 https://github.com/nrnhines/nrn.git >download.log 2>&1
+	cd nrn
+    echo "Preparing NEURON ..."
+	./build.sh >prepare.log 2>&1
     echo "Configuring NEURON ..."
     ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython --disable-rx3d >configure.log 2>&1
     echo "Building NEURON ..."

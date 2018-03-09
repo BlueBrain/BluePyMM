@@ -21,6 +21,7 @@ Copyright (c) 2017, EPFL/Blue Brain Project
 
 
 # pylint: disable=R0914, C0325, W0640, W0633
+# pylama: ignore=E402
 
 import os
 
@@ -156,12 +157,12 @@ def plot_morphs_per_feature_for_emodel(emodel, megate_scores,
         [BLUE, RED])
 
 
-def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
+def plot_morphs_per_mtype_for_emodel(emodel, fullmtypes, megate_scores):
     """Display number of tested morphologies per m-type for a given e-model.
 
     Args:
         emodel: string representing e-model, used for plot title
-        mtypes: pandas.DataFrame with m-types, one entry per run combo
+        fullmtypes: pandas.DataFrame with m-types, one entry per run combo
         megate_scores: pandas.DataFrame with megate scores, one entry per run
                        combo
 
@@ -170,8 +171,8 @@ def plot_morphs_per_mtype_for_emodel(emodel, mtypes, megate_scores):
         colored blue and red, respectively.
     """
     sums = pandas.DataFrame()
-    for mtype in mtypes.unique():
-        megate_scores_mtype = megate_scores[mtypes == mtype]
+    for mtype in fullmtypes.unique():
+        megate_scores_mtype = megate_scores[fullmtypes == mtype]
         mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
         sums.ix[mtype, 'passed'] = len(mtype_passed)
         sums.ix[mtype, 'failed'] = (len(megate_scores_mtype) -
@@ -328,9 +329,12 @@ def create_final_db_and_write_report(pdf_filename,
                                      scores,
                                      score_values,
                                      enable_plot_emodels_per_morphology,
-                                     output_dir):
+                                     output_dir,
+                                     select_perc_best):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
+
+    emodel_infos = None
     megate_passed_all = pandas.DataFrame()
     median_scores = pandas.DataFrame()
     passed_combos = pandas.DataFrame()
@@ -346,38 +350,52 @@ def create_final_db_and_write_report(pdf_filename,
         add_plot_to_report(pp, plot_dict, to_skip_features,
                            'Ignored feature patterns')
         add_plot_to_report(pp, plot_dict, megate_thresholds,
-                           'MEGating thresholds')
+                           'MEGating thresholds (last match counts)')
 
         # Process all the e-models
         emodels = sorted(scores[scores.is_original == 0].emodel.unique())
-        for counter, emodel in enumerate(emodels, 1):
-            print(
-                'Processing e-model %s (%d of %d)' %
-                (emodel, counter, len(emodels)))
 
-            emodel_ext_neurondb_rows, emodel_megate_pass, \
-                emodel_score_values, mtypes, emodel_megate_passed_all, \
-                emodel_median_scores, emodel_passed_combos = \
-                table_processing.process_emodel(
+        emodel_infos = table_processing.process_emodels(emodels,
+                                                        scores,
+                                                        score_values,
+                                                        to_skip_patterns,
+                                                        megate_patterns,
+                                                        skip_repaired_exemplar,
+                                                        check_opt_scores,
+                                                        select_perc_best)
+
+        print("All emodels processed, generating output files")
+
+        for emodel, emodel_info in emodel_infos.items():
+            if emodel_info is not None:
+                emodel_ext_neurondb_rows, \
+                    megate_scores, emodel_score_values, fullmtypes, \
+                    emodel_megate_passed_all, emodel_median_scores, \
+                    emodel_passed_combos = \
+                    emodel_info
+                ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+
+                megate_passed_all = megate_passed_all.append(
+                    emodel_megate_passed_all)
+                median_scores = median_scores.append(emodel_median_scores)
+                passed_combos = passed_combos.append(emodel_passed_combos)
+
+                # Reporting per e-model
+                add_plot_to_report(
+                    pp,
+                    plot_morphs_per_feature_for_emodel,
                     emodel,
-                    scores,
-                    score_values,
-                    to_skip_patterns,
-                    megate_patterns,
-                    skip_repaired_exemplar,
-                    check_opt_scores)
-            ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
-            megate_passed_all = megate_passed_all.append(
-                emodel_megate_passed_all)
-            median_scores = median_scores.append(emodel_median_scores)
-            passed_combos = passed_combos.append(emodel_passed_combos)
-
-            # Reporting per e-model
-            add_plot_to_report(pp, plot_morphs_per_feature_for_emodel, emodel,
-                               emodel_megate_pass, emodel_score_values)
-            add_plot_to_report(pp, plot_morphs_per_mtype_for_emodel, emodel,
-                               mtypes, emodel_megate_pass)
-            plt.close('all')
+                    megate_scores,
+                    emodel_score_values)
+                add_plot_to_report(
+                    pp,
+                    plot_morphs_per_mtype_for_emodel,
+                    emodel,
+                    fullmtypes,
+                    megate_scores)
+                plt.close('all')
+            else:
+                print('WARNING: no info for emodel %s, skipping !' % emodel)
 
         # Get median score for every passed combo
         passed_median_scores = median_scores.loc[passed_combos.index]
