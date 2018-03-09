@@ -327,8 +327,6 @@ def process_emodel(args):
                            (combos.is_exemplar == 0)].copy()
 
     passed_combos = emodel_combos[emodel_megate_pass['Passed all']]
-    failed_combos = \
-            emodel_combos[emodel_megate_pass['Passed all'] == False]  # NOQA
     emodel_megate_passed_all = emodel_megate_pass[['Passed all']]
 
     if len(passed_combos[passed_combos['emodel'] != emodel]) > 0:
@@ -336,15 +334,14 @@ def process_emodel(args):
 
     # prepare database rows for this e-model
     emodel_ext_neurondb = _create_extneurondb_rows(passed_combos)
-    emodel_failed_ext_neurondb = _create_extneurondb_rows(failed_combos)
 
     # identify m-types that were tested for this e-model
     mtypes = combos[(combos.emodel == emodel) &
                     (combos.is_exemplar == 0)].loc[:, 'fullmtype']
 
-    return emodel_ext_neurondb, emodel_failed_ext_neurondb, \
-        emodel_megate_pass, emodel_score_values, \
-        mtypes, emodel_megate_passed_all
+    return emodel, (emodel_ext_neurondb,
+                    emodel_megate_pass, emodel_score_values,
+                    mtypes, emodel_megate_passed_all)
 
 
 def process_combo_name(data, log_filename):

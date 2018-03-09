@@ -332,7 +332,6 @@ def create_final_db_and_write_report(pdf_filename,
                                      output_dir):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
-    failed_ext_neurondb = pandas.DataFrame()
 
     emodel_infos = None
     megate_passed_all = pandas.DataFrame()
@@ -363,13 +362,11 @@ def create_final_db_and_write_report(pdf_filename,
 
         for emodel, emodel_info in emodel_infos.items():
             if emodel_info is not None:
-                emodel_ext_neurondb_rows, emodel_failed_ext_neurondb_rows, \
+                emodel_ext_neurondb_rows, \
                     megate_scores, emodel_score_values, fullmtypes, \
                     emodel_megate_passed_all = \
                     emodel_info
                 ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
-                failed_ext_neurondb = failed_ext_neurondb.append(
-                    emodel_failed_ext_neurondb_rows)
 
                 megate_passed_all = megate_passed_all.append(
                     emodel_megate_passed_all)
@@ -415,4 +412,4 @@ def create_final_db_and_write_report(pdf_filename,
                                ext_neurondb)
         add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
 
-    return ext_neurondb, failed_ext_neurondb
+    return ext_neurondb
