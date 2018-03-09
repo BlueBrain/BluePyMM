@@ -80,14 +80,15 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
     rep_morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     skip_repaired_exemplar = True
 
-    with tools.cd(TEST_DIR):
-        ret = create_mm_sqlite.create_exemplar_rows(
-            final_dict, fullmtype_morph_map, emodel_etype_map, emodel_dirs,
-            rep_morph_dir, skip_repaired_exemplar)
-
     # construct expected output
     unrep_morph_dir = os.path.dirname(
         os.path.join(emodel_dirs[emodel], final_dict[emodel]['morph_path']))
+
+    with tools.cd(TEST_DIR):
+        ret = create_mm_sqlite.create_exemplar_rows(
+            final_dict, fullmtype_morph_map, emodel_etype_map, emodel_dirs,
+            rep_morph_dir, unrep_morph_dir, skip_repaired_exemplar)
+
     data = [(None, None, None, None, emodel_etype_map[emodel]['etype'],
              'morph1', '.asc', emodel, emodel, unrep_morph_dir, None,
              json.dumps(final_dict[emodel]['fitness']), None, True, True,
@@ -155,6 +156,7 @@ def test_create_mm_sqlite():
         create_mm_sqlite.create_mm_sqlite(output_filename,
                                           recipe_filename,
                                           morph_dir,
+                                          rep_morph_dir,
                                           rep_morph_dir,
                                           emodel_etype_map,
                                           final_dict,

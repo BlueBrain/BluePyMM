@@ -65,6 +65,7 @@ def create_exemplar_rows(
         emodel_etype_map,
         emodel_dirs,
         rep_morph_dir,
+        unrep_morph_dir,
         skip_repaired_exemplar=False):
     """Create exemplar rows.
 
@@ -96,11 +97,18 @@ def create_exemplar_rows(
 
         morph_filename = os.path.basename(original_emodel_dict['morph_path'])
         morph_name, morph_ext = os.path.splitext(morph_filename)
-        unrep_morph_dir = os.path.dirname(os.path.abspath(
-            os.path.join(
-                emodel_dirs[emodel],
-                original_emodel_dict['morph_path'])))
-        morph_path = os.path.join(unrep_morph_dir, morph_filename)
+
+        # Warning: use this_ prefix, next iteration in for loop will pick up
+        # previous step
+        if unrep_morph_dir is None:
+            this_unrep_morph_dir = os.path.dirname(os.path.abspath(
+                os.path.join(
+                    emodel_dirs[emodel],
+                    original_emodel_dict['morph_path'])))
+        else:
+            this_unrep_morph_dir = unrep_morph_dir
+        morph_path = os.path.join(this_unrep_morph_dir, morph_filename)
+
         check_morphology_existence(morph_filename, 'unrepaired', morph_path)
 
         if skip_repaired_exemplar:
@@ -139,7 +147,8 @@ def create_exemplar_rows(
                 'morph_ext': morph_ext,
                 'emodel': stored_emodel,
                 'original_emodel': original_emodel,
-                'morph_dir': rep_morph_dir if repaired else unrep_morph_dir,
+                'morph_dir':
+                rep_morph_dir if repaired else this_unrep_morph_dir,
                 'scores': None,
                 'opt_scores': json.dumps(opt_scores) if not repaired else None,
                 'exception': None,
@@ -189,6 +198,7 @@ def create_mm_sqlite(
         recipe_filename,
         morph_dir,
         rep_morph_dir,
+        unrep_morph_dir,
         original_emodel_etype_map,
         final_dict,
         emodel_dirs,
@@ -284,6 +294,7 @@ def create_mm_sqlite(
         original_emodel_etype_map,
         emodel_dirs,
         rep_morph_dir,
+        unrep_morph_dir,
         skip_repaired_exemplar=skip_repaired_exemplar)
 
     # Prepend exemplar rows to full_map

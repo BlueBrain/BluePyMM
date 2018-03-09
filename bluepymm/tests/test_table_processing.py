@@ -151,10 +151,14 @@ def test_process_emodel():
     skip_repaired_exemplar = False
     enable_check_opt_scores = True
 
-    # run function
-    ret = table_processing.process_emodel(
-        emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores)
+    emodel, (emodel_ext_neurondb,
+             emodel_megate_pass, emodel_score_values, mtypes,
+             emodel_megate_passed_all) = table_processing.process_emodel((
+                 emodel, scores, score_values, to_skip_patterns,
+                 megate_patterns,
+                 skip_repaired_exemplar, enable_check_opt_scores))
+
+    nt.assert_equal(emodel, emodel)
 
     # expected results
     columns = ['morph_name', 'layer', 'fullmtype', 'etype', 'emodel',
@@ -177,13 +181,15 @@ def test_process_emodel():
 
     exp_score_values = pandas.DataFrame({'Step1.SpikeCount': 2.0}, index=[1])
 
-    exp_mtypes = pandas.Series('mtype2', index=[1], name='mtype')
+    exp_mtypes = pandas.Series('mtype2', index=[1], name='fullmtype')
 
     # verify results
-    pandas.util.testing.assert_frame_equal(ret[0], exp_db)
-    pandas.util.testing.assert_frame_equal(ret[1], exp_megate_scores)
-    pandas.util.testing.assert_frame_equal(ret[2], exp_score_values)
-    pandas.util.testing.assert_series_equal(ret[3], exp_mtypes)
+    pandas.util.testing.assert_frame_equal(emodel_ext_neurondb, exp_db)
+    pandas.util.testing.assert_frame_equal(
+        emodel_megate_pass, exp_megate_scores)
+    pandas.util.testing.assert_frame_equal(
+        emodel_score_values, exp_score_values)
+    pandas.util.testing.assert_series_equal(mtypes, exp_mtypes)
 
 
 @attr('unit')
@@ -222,9 +228,9 @@ def test_process_emodel_no_exemplars():
     enable_check_opt_scores = True
 
     # run function
-    ret = table_processing.process_emodel(
+    ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores)
+        skip_repaired_exemplar, enable_check_opt_scores))
 
     # verify results
     nt.assert_is_none(ret)
@@ -307,12 +313,12 @@ def test_process_emodel_no_released_morphologies():
     enable_check_opt_scores = True
 
     # run function
-    ret = table_processing.process_emodel(
+    ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores)
+        skip_repaired_exemplar, enable_check_opt_scores))
 
     # verify results
-    nt.assert_is_none(ret)
+    nt.assert_equal(ret, ('emodel1', None))
 
 
 @attr('unit')

@@ -29,7 +29,14 @@ def join_regex(list_regex):
     """Create regular expresssion that matches one of a given list of regular
     expressions."""
 
-    return re.compile('(' + ')|('.join(list_regex) + ')')
+    list_regex_dollar = []
+    for regex in list_regex:
+        if regex[-1] != '$':
+            regex_dollar = regex + '$'
+
+        list_regex_dollar.append(regex_dollar)
+
+    return re.compile('(' + ')|('.join(list_regex_dollar) + ')')
 
 
 def read_to_skip_features(conf_dict):
@@ -65,6 +72,13 @@ def read_megate_thresholds(conf_dict):
 
     megate_patterns = []
     for megate_threshold_dict in megate_thresholds:
+        for key in megate_threshold_dict:
+            if key not in {'emodel', 'etype', 'fullmtype',
+                           'features', 'megate_threshold'}:
+                raise ValueError(
+                    'Invalid key in megate thresholds: %s in %s' %
+                    (key, megate_threshold_dict))
+
         megate_pattern = {}
         megate_pattern['megate_feature_threshold'] = {
             'megate_threshold': megate_threshold_dict['megate_threshold'],
@@ -74,7 +88,7 @@ def read_megate_thresholds(conf_dict):
             if key in megate_threshold_dict:
                 megate_pattern[key] = join_regex(megate_threshold_dict[key])
             else:
-                megate_pattern[key] = re.compile('.*')
+                megate_pattern[key] = re.compile('.*$')
 
         megate_patterns.append(megate_pattern)
 
