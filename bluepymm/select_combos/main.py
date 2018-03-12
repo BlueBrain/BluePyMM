@@ -28,7 +28,7 @@ import os
 from bluepymm import tools
 
 from . import sqlite_io, reporting, megate_output
-from . import process_megate_config
+from . import process_megate_config as proc_config
 
 
 def select_combos(conf_filename):
@@ -53,12 +53,12 @@ def select_combos_from_conf(conf_dict):
     print('Reading configuration files')
     # read skip features
     to_skip_patterns, to_skip_features = \
-        process_megate_config.proc_config.read_to_skip_features(
+        proc_config.read_to_skip_features(
             conf_dict)
 
     # read megate thresholds
     megate_patterns, megate_thresholds = \
-        process_megate_config.proc_config.read_megate_thresholds(
+        proc_config.read_megate_thresholds(
             conf_dict)
 
     select_perc_best = conf_dict.get('select_perc_best', None)

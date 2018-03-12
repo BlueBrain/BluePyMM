@@ -151,12 +151,15 @@ def test_process_emodel():
     skip_repaired_exemplar = False
     enable_check_opt_scores = True
 
-    emodel, (emodel_ext_neurondb,
-             emodel_megate_pass, emodel_score_values, mtypes,
-             emodel_megate_passed_all) = table_processing.process_emodel((
-                 emodel, scores, score_values, to_skip_patterns,
-                 megate_patterns,
-                 skip_repaired_exemplar, enable_check_opt_scores))
+    select_best_perc = None
+
+    emodel, emodel_info = table_processing.process_emodel(
+        (emodel, scores, score_values, to_skip_patterns, megate_patterns,
+         skip_repaired_exemplar, enable_check_opt_scores, select_best_perc))
+
+    (emodel_ext_neurondb, emodel_megate_pass, emodel_score_values,
+     mtypes, emodel_megate_passed_all, emodel_median_scores,
+     passed_combos) = emodel_info
 
     nt.assert_equal(emodel, emodel)
 
@@ -227,10 +230,12 @@ def test_process_emodel_no_exemplars():
     skip_repaired_exemplar = False
     enable_check_opt_scores = True
 
+    select_best_perc = None
+
     # run function
     ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores))
+        skip_repaired_exemplar, enable_check_opt_scores, select_best_perc))
 
     # verify results
     nt.assert_is_none(ret)
@@ -312,10 +317,11 @@ def test_process_emodel_no_released_morphologies():
     skip_repaired_exemplar = True
     enable_check_opt_scores = True
 
+    select_best_perc = None
     # run function
     ret = table_processing.process_emodel((
         emodel, scores, score_values, to_skip_patterns, megate_patterns,
-        skip_repaired_exemplar, enable_check_opt_scores))
+        skip_repaired_exemplar, enable_check_opt_scores, select_best_perc))
 
     # verify results
     nt.assert_equal(ret, ('emodel1', None))
