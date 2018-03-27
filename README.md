@@ -53,9 +53,9 @@ License
 =======
 
 BluePyMM is licensed under the LGPL, unless noted otherwise, e.g., for external 
-dependencies. See file LGPL.txt for the full license
+dependencies. See file LGPL.txt for the full license.
 
 Funding
 =======
-This work has been partially funded by the European Union Seventh Framework Program (FP7/2007-2013) under grant agreement no. 604102 (HBP)
-SGA1 (H2020) grant.
+This work has been partially funded by the European Union Seventh Framework Programme (FP7/2007-2013) under grant agreement No. 604102 (HBP) and by the European Union’s Horizon 2020 Framework Programme for Research and Innovation under Grant Agreement No. 720270 (Human Brain Project SGA1).
+
