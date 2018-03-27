@@ -1,7 +1,7 @@
 """Tests for functionality in bluepymm/select_combos/sqlite_io.py"""
 
 """
-Copyright (c) 2017, EPFL/Blue Brain Project
+Copyright (c) 2018, EPFL/Blue Brain Project
 
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
 

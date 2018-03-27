@@ -1,7 +1,7 @@
 """Functions to process tables produced by BluePyMM."""
 
 """
-Copyright (c) 2017, EPFL/Blue Brain Project
+Copyright (c) 2018, EPFL/Blue Brain Project
 
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
 

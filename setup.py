@@ -1,7 +1,7 @@
 """bluepymm  setup """
 
 """
-Copyright (c) 2017, EPFL/Blue Brain Project
+Copyright (c) 2018, EPFL/Blue Brain Project
 
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
 
@@ -47,7 +47,8 @@ setuptools.setup(
         'Operating System :: POSIX',
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities',
-        'License :: Other/Proprietary License'],
+        'License :: OSI Approved :: GNU Lesser General Public '
+        'License v3 (LGPLv3)'],
     entry_points={'console_scripts': ['bluepymm=bluepymm.main:main'], },
     package_data={
         'bluepymm': ['templates/cell_template_neuron.jinja2',
