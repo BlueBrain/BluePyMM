@@ -57,5 +57,5 @@ dependencies. See file LGPL.txt for the full license
 
 Funding
 =======
-European Union Seventh Framework Program (FP7/2007-2013) under grant agreement no. 604102 (HBP)
+This work has been partially funded by the European Union Seventh Framework Program (FP7/2007-2013) under grant agreement no. 604102 (HBP)
 SGA1 (H2020) grant.
