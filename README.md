@@ -14,6 +14,11 @@ This process is called Cell Model Management (MM). It takes as input a morpholog
 Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination.
 Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.
 
+Support
+=======
+
+We are providing support using a chat channel on [Gitter](https://gitter.im/BlueBrain/BluePyMM).
+
 Requirements
 ============
 
@@ -47,7 +52,7 @@ https://github.com/BlueBrain/BluePyMM/blob/master/notebook/BluePyMM.ipynb
 License
 =======
 
-BluePyOpt is licensed under the LGPL, unless noted otherwise, e.g., for external 
+BluePyMM is licensed under the LGPL, unless noted otherwise, e.g., for external 
 dependencies. See file LGPL.txt for the full license
 
 Funding
