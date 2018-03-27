@@ -5,7 +5,7 @@ Introduction
 ============
 
 When building a network simulation, biophysically detailed electrical models (e-models) need to be tested for every morphology that is possibly used in the circuit.
-E-models can e.g. be obtained using [https://github.com/BlueBrain/BluePyOpt](BluePyOpt) by data-driven model parameter optimisation.
+E-models can e.g. be obtained using [BluePyOpt](https://github.com/BlueBrain/BluePyOpt) by data-driven model parameter optimisation.
 Developing e-models can take a lot of time and computing resources. Therefore, these models are not reoptimized for every morphology in the network.
 Instead we want to test if an existing e-model matches that particular morphology `well enough'.
 This process is called Cell Model Management (MM). It takes as input a morphology release, a circuit recipe and a set of e-models with some extra information.
@@ -42,13 +42,13 @@ An IPython notebook with a simple test example can be found in:
 
 https://github.com/BlueBrain/BluePyMM/blob/master/notebook/BluePyMM.ipynb
 
-LICENSE
+License
 =======
 
 BluePyOpt is licensed under the LGPL, unless noted otherwise, e.g., for external 
 dependencies. See file LGPL.txt for the full license
 
-FUNDING
+Funding
 =======
 European Union Seventh Framework Program (FP7/2007-2013) under grant agreement no. 604102 (HBP)
 SGA1 (H2020) grant.
