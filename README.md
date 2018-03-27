@@ -5,9 +5,11 @@ Introduction
 ============
 
 When building a network simulation, biophysically detailed electrical models (e-models) need to be tested for every morphology that is possibly used in the circuit.
+
 E-models can e.g. be obtained using [BluePyOpt](https://github.com/BlueBrain/BluePyOpt) by data-driven model parameter optimisation.
 Developing e-models can take a lot of time and computing resources. Therefore, these models are not reoptimized for every morphology in the network.
 Instead we want to test if an existing e-model matches that particular morphology `well enough'.
+
 This process is called Cell Model Management (MM). It takes as input a morphology release, a circuit recipe and a set of e-models with some extra information.
 Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination.
 Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.
