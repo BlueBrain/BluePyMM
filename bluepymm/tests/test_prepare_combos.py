@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 """
-Copyright (c) 2017, EPFL/Blue Brain Project
+Copyright (c) 2018, EPFL/Blue Brain Project
 
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
 
