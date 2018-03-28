@@ -34,16 +34,15 @@ setuptools.setup(
     author_email="werner.vangeit@epfl.ch",
     description="Model Management Python Library (bluepymm)",
     long_description="Model Management Python Library (bluepymm)",
-    keywords=(
+    keywords=[
         'optimisation',
         'neuroscience',
-        'BlueBrainProject'),
+        'BlueBrainProject'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
-        'License v3 (LGPLv3)',
         'Operating System :: POSIX',
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities',
