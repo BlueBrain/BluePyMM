@@ -95,7 +95,8 @@ def check_all_combos_have_run(database, description):
     if database['to_run'].any():
         raise Exception('At least one me-combination of database "{}" has not'
                         ' been run'.format(description))
-    return True
+    else:
+        return True
 
 
 def load_module(name, path):
