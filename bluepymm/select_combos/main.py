@@ -50,19 +50,28 @@ def select_combos_from_conf(conf_dict):
     pdf_filename = conf_dict['pdf_filename']
     output_dir = conf_dict['output_dir']
 
+    print('Reading configuration files')
     # read skip features
-    to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
-        conf_dict)
+    to_skip_patterns, to_skip_features = \
+        proc_config.read_to_skip_features(
+            conf_dict)
 
     # read megate thresholds
-    megate_patterns, megate_thresholds = proc_config.read_megate_thresholds(
-        conf_dict)
+    megate_patterns, megate_thresholds = \
+        proc_config.read_megate_thresholds(
+            conf_dict)
 
+    select_perc_best = conf_dict.get('select_perc_best', None)
+
+    print('Reading tables from sqlite')
     # read score tables
     scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
         scores_db_filename)
+
+    print('Checking if all combos have run')
     tools.check_all_combos_have_run(scores, scores_db_filename)
 
+    print('Start creation of ext_neurondb')
     # create final database and write report
     ext_neurondb = \
         reporting.create_final_db_and_write_report(
@@ -75,7 +84,8 @@ def select_combos_from_conf(conf_dict):
             conf_dict.get('check_opt_scores', True),
             scores, score_values,
             conf_dict.get('plot_emodels_per_morphology', False),
-            output_dir)
+            output_dir,
+            select_perc_best)
     print('Wrote pdf to %s' % os.path.abspath(pdf_filename))
 
     # write output files
