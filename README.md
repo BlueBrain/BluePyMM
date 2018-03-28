@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/BlueBrain/BluePyMM.svg?branch=master)](https://travis-ci.org/BlueBrain/BluePyMM)
 [![codecov](https://codecov.io/gh/BlueBrain/BluePyMM/branch/master/graph/badge.svg?token=G2d5ZWJbyY)](https://codecov.io/gh/BlueBrain/BluePyMM)
+[![Documentation Status](https://readthedocs.org/projects/bluepymm/badge/?version=latest)](http://bluepymm.readthedocs.io/en/latest/?badge=latest)
 
 Introduction
 ============
@@ -48,6 +49,10 @@ Quick Start
 An IPython notebook with a simple test example can be found in:
 
 https://github.com/BlueBrain/BluePyMM/blob/master/notebook/BluePyMM.ipynb
+
+API documentation
+==================
+The API documentation can be found on [ReadTheDocs](http://bluepymm.readthedocs.io/en/latest/).
 
 License
 =======

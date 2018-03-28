@@ -1,14 +1,14 @@
 language: python
 python:
-- '2.7'
-- '3.6'
+    - '2.7'
+    - '3.6'
 before_install:
-- pip install tox --upgrade
-- pip install codecov
+    - pip install tox --upgrade
+    - pip install codecov
 script: tox -e "$(echo py$TRAVIS_PYTHON_VERSION | tr -d .)-unit-functional"
 after_success:
-- codecov -F unit -f cov_reports/unit.coverage.xml
-- codecov -F functional -f cov_reports/functional.coverage.xml
+    - codecov -F unit -f cov_reports/unit.coverage.xml
+    - codecov -F functional -f cov_reports/functional.coverage.xml
 cache:
   pip: true
   directories:
@@ -19,6 +19,6 @@ deploy:
   provider: pypi
   user: wvangeit
   on:
-    condition: "$TRAVIS_EVENT_TYPE != cron AND $TRAVIS_PYTHON_VERSION == 2.7"
+    condition: "$TRAVIS_EVENT_TYPE != cron && $TRAVIS_PYTHON_VERSION == 2.7"
   password:
     secure: hqZB/xxITIzfRWzWNG0V1LDwNPUIe9rJw2BiXfsBMwEyHCVityirVjY1xkT+rgXcdZAzMgQgjyvLeN89ququPFzcyerR2C3iNTVfdzwyEAHCGnTAnUW68cBcyaru6GnBfRs0XoXlmPh2u1S+7w+tGqQDDu2FqGUEPQTxLVgEcNiJIYLVw1xzMi+cMV6F1lXS08ZvvYIBFKF8G0lYGj51HW/B1iFvUaml4MEOXbd5SfQMmjhssNZ23wKDEVHytCCsGtcTkrv6IAGKdn9eF4cY2ZpCl01M8kNXzVrDhmXy5E6XuhJIgw0joNeumK3uHscaa/nHaCIhBlMyGX9mhJuBzvTmmm2os5i9W2sw1IgfU2E5Pqd/Z8KJt2DwBhbJ7NlZJPSOk48YJ8JTzqH1tdH6u+3URHiDfCGHsUZAN7O1xxq27PcR4f5msg9BQNi8tFYFHakNXE4HlFBthLKMvh+7c4+AjsHKZtGtY0vzD6UXWz3V37nM1I+thAqyn4n5DW9Ejpp0NJfcCD9d3cVB1MgasvHYxxRjhwyjRe6Z4pF6Td/p9mq2C9Hke5xrTcZhz0jExn8m261aKshyp5l49P/bR9f9JZnvMggdd5oFb5jPZnLs8R1DNG4XUpVVy/B432ucizgvbCPvmajQXN0dt0gqDTVyCnSe1dJu55w7MtVXymI=
