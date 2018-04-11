@@ -3,7 +3,7 @@
 set -e
 set -x
 
-tox_args='--recreate -e py27-unit-functional'
+tox_args='--recreate -e py27-style-unit-functional'
 
 if [ "${os}" = "cscsviz" ]
 then
