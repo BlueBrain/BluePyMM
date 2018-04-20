@@ -75,6 +75,7 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
         'etype': 'etype1',
         'layer': ['1', 'str1']
     }}
+    emodels = ['emodel1']
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_dirs = {emodel: emodel_dir}
     rep_morph_dir = os.path.join(TEST_DIR, 'data/morphs')
@@ -86,8 +87,9 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
 
     with tools.cd(TEST_DIR):
         ret = create_mm_sqlite.create_exemplar_rows(
-            final_dict, fullmtype_morph_map, emodel_etype_map, emodel_dirs,
-            rep_morph_dir, unrep_morph_dir, skip_repaired_exemplar)
+            final_dict, fullmtype_morph_map, emodel_etype_map, emodels,
+            emodel_dirs, rep_morph_dir, unrep_morph_dir,
+            skip_repaired_exemplar)
 
     data = [(None, None, None, None, emodel_etype_map[emodel]['etype'],
              'morph1', '.asc', emodel, emodel, unrep_morph_dir, None,

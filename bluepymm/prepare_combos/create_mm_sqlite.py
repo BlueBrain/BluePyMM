@@ -63,6 +63,7 @@ def create_exemplar_rows(
         final_dict,
         rep_fullmtype_morph_map,
         emodel_etype_map,
+        emodels,
         emodel_dirs,
         rep_morph_dir,
         unrep_morph_dir,
@@ -87,7 +88,7 @@ def create_exemplar_rows(
 
     exemplar_rows = []
 
-    for original_emodel in emodel_etype_map:
+    for original_emodel in emodels:
         emodel = emodel_etype_map[original_emodel]['mm_recipe']
         print('Adding exemplar row for e-model %s' % emodel)
 
@@ -271,6 +272,8 @@ def create_mm_sqlite(
             ' combinations: \n%s' %
             null_emodel_rows[['layer', 'etype', 'fullmtype']])
 
+    emodels = full_map['emodel'].unique().tolist()
+
     print('Filtering out morp_names that dont match regex')
     # Contains layer, fullmtype, etype, morph_name, e_model
     full_map = remove_morph_regex_failures(full_map)
@@ -292,6 +295,7 @@ def create_mm_sqlite(
         final_dict,
         rep_fullmtype_morph_map,
         original_emodel_etype_map,
+        emodels,
         emodel_dirs,
         rep_morph_dir,
         unrep_morph_dir,
