@@ -238,7 +238,9 @@ def select_passed_combos(
                     'WARNING: no combos for me-type %s in emodel %s' %
                     (metype, emodel))
     else:
-        passed_indices = emodel_megate_pass['Passed all']
+        passed_indices = \
+                emodel_megate_pass[
+                emodel_megate_pass['Passed all'] == True]  # NOQA
 
     return emodel_combos.loc[passed_indices.index]
 
