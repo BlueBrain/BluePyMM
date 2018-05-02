@@ -88,76 +88,86 @@ def create_exemplar_rows(
 
     exemplar_rows = []
 
-    for original_emodel in emodels:
+    for original_emodel in emodel_etype_map:
         emodel = emodel_etype_map[original_emodel]['mm_recipe']
-        print('Adding exemplar row for e-model %s' % emodel)
+        if emodel in emodels:
+            print('Adding exemplar row for e-model %s' % emodel)
 
-        original_emodel_dict = final_dict[original_emodel]
+            original_emodel_dict = final_dict[original_emodel]
 
-        opt_scores = original_emodel_dict['fitness']
+            opt_scores = original_emodel_dict['fitness']
 
-        morph_filename = os.path.basename(original_emodel_dict['morph_path'])
-        morph_name, morph_ext = os.path.splitext(morph_filename)
+            morph_filename = os.path.basename(
+                original_emodel_dict['morph_path'])
+            morph_name, morph_ext = os.path.splitext(morph_filename)
 
-        # Warning: use this_ prefix, next iteration in for loop will pick up
-        # previous step
-        if unrep_morph_dir is None:
-            this_unrep_morph_dir = os.path.dirname(os.path.abspath(
-                os.path.join(
-                    emodel_dirs[emodel],
-                    original_emodel_dict['morph_path'])))
-        else:
-            this_unrep_morph_dir = unrep_morph_dir
-        morph_path = os.path.join(this_unrep_morph_dir, morph_filename)
-
-        check_morphology_existence(morph_filename, 'unrepaired', morph_path)
-
-        if skip_repaired_exemplar:
-            fullmtype = None
-            mtype = None
-            msubtype = None
-            # Don't run repaired version
-            combos = [(emodel, False, False),
-                      (original_emodel, True, False)]
-        else:
-            morph_info_list = rep_fullmtype_morph_map[
-                rep_fullmtype_morph_map['morph_name'] == morph_name].values
-            if len(morph_info_list) == 0:
-                raise Exception(
-                    'Morphology %s for %s e-model not found in morphology '
-                    'release' % (morph_name, original_emodel))
+            # Warning: use this_ prefix, next iteration in for loop will
+            # pick up previous step
+            if unrep_morph_dir is None:
+                this_unrep_morph_dir = os.path.dirname(os.path.abspath(
+                    os.path.join(
+                        emodel_dirs[emodel],
+                        original_emodel_dict['morph_path'])))
             else:
-                _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
+                this_unrep_morph_dir = unrep_morph_dir
+            morph_path = os.path.join(this_unrep_morph_dir, morph_filename)
 
-            morph_path = os.path.join(rep_morph_dir, morph_filename)
-            check_morphology_existence(morph_filename, 'repaired', morph_path)
-            # Run repaired version
-            combos = [(emodel, False, True),
-                      (original_emodel, True, True),
-                      (emodel, False, False),
-                      (original_emodel, True, False)]
+            check_morphology_existence(
+                morph_filename, 'unrepaired', morph_path)
 
-        for (stored_emodel, original, repaired) in combos:
-            new_row_dict = {
-                'layer': None,
-                'fullmtype': fullmtype,
-                'mtype': mtype,
-                'msubtype': msubtype,
-                'etype': emodel_etype_map[original_emodel]['etype'],
-                'morph_name': morph_name,
-                'morph_ext': morph_ext,
-                'emodel': stored_emodel,
-                'original_emodel': original_emodel,
-                'morph_dir':
-                rep_morph_dir if repaired else this_unrep_morph_dir,
-                'scores': None,
-                'opt_scores': json.dumps(opt_scores) if not repaired else None,
-                'exception': None,
-                'to_run': True,
-                'is_exemplar': True,
-                'is_repaired': repaired,
-                'is_original': original}
-            exemplar_rows.append(new_row_dict)
+            if skip_repaired_exemplar:
+                fullmtype = None
+                mtype = None
+                msubtype = None
+                # Don't run repaired version
+                combos = [(emodel, False, False),
+                          (original_emodel, True, False)]
+            else:
+                morph_info_list = rep_fullmtype_morph_map[
+                    rep_fullmtype_morph_map['morph_name'] == morph_name].values
+                if len(morph_info_list) == 0:
+                    raise Exception(
+                        'Morphology %s for %s e-model not found in morphology '
+                        'release' % (morph_name, original_emodel))
+                else:
+                    _, fullmtype, mtype, msubtype, _ = morph_info_list[0]
+
+                morph_path = os.path.join(rep_morph_dir, morph_filename)
+                check_morphology_existence(
+                    morph_filename, 'repaired', morph_path)
+                # Run repaired version
+                combos = [(emodel, False, True),
+                          (original_emodel, True, True),
+                          (emodel, False, False),
+                          (original_emodel, True, False)]
+
+            for (stored_emodel, original, repaired) in combos:
+                new_row_dict = {
+                    'layer': None,
+                    'fullmtype': fullmtype,
+                    'mtype': mtype,
+                    'msubtype': msubtype,
+                    'etype': emodel_etype_map[original_emodel]['etype'],
+                    'morph_name': morph_name,
+                    'morph_ext': morph_ext,
+                    'emodel': stored_emodel,
+                    'original_emodel': original_emodel,
+                    'morph_dir': rep_morph_dir if repaired
+                    else this_unrep_morph_dir,
+                    'scores': None,
+                    'opt_scores': json.dumps(opt_scores) if not repaired
+                    else None,
+                    'exception': None,
+                    'to_run': True,
+                    'is_exemplar': True,
+                    'is_repaired': repaired,
+                    'is_original': original}
+                exemplar_rows.append(new_row_dict)
+        else:
+            print(
+                'Skipping exemplar row for e-model %s, '
+                'not part of me-model db ' %
+                emodel)
 
     return pandas.DataFrame(exemplar_rows)
 
