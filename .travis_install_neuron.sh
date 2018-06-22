@@ -11,22 +11,17 @@ then
     mkdir -p ${SRC_DIR}
     cd ${SRC_DIR}
     echo "Downloading NEURON ..."
-	# git clone --depth 1 https://github.com/nrnhines/nrn.git >download.log 2>&1
     rm -rf nrn
-	git clone --depth 1 https://github.com/nrnhines/nrn.git
+	git clone --depth 1 https://github.com/nrnhines/nrn.git >download.log 2>&1
 	cd nrn
     echo "Preparing NEURON ..."
-	# ./build.sh >prepare.log 2>&1
-	./build.sh
+	./build.sh >prepare.log 2>&1
     echo "Configuring NEURON ..."
-    # ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython=python --disable-rx3d >configure.log 2>&1
-    ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython=python --disable-rx3d
+    ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython=python --disable-rx3d >configure.log 2>&1
     echo "Building NEURON ..."
-    # make -j4 >make.log 2>&1
-    make -j4
+    make -j4 >make.log 2>&1
     echo "Installing NEURON ..."
-    # make -j4 install >install.log 2>&1
-    make -j4 install
+    make -j4 install >install.log 2>&1
 
     export PATH="${INSTALL_DIR}/x86_64/bin":${PATH}
     export PYTHONPATH="${INSTALL_DIR}/lib/python":${PYTHONPATH}
