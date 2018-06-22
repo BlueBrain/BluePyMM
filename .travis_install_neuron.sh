@@ -16,7 +16,7 @@ then
     echo "Preparing NEURON ..."
 	./build.sh >prepare.log 2>&1
     echo "Configuring NEURON ..."
-    ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython --disable-rx3d >configure.log 2>&1
+    ./configure --prefix=${INSTALL_DIR} --without-x --with-nrnpython=python --disable-rx3d >configure.log 2>&1
     echo "Building NEURON ..."
     make -j4 >make.log 2>&1
     echo "Installing NEURON ..."
