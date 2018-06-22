@@ -12,6 +12,7 @@ then
     cd ${SRC_DIR}
     echo "Downloading NEURON ..."
 	# git clone --depth 1 https://github.com/nrnhines/nrn.git >download.log 2>&1
+    rm -rf nrn
 	git clone --depth 1 https://github.com/nrnhines/nrn.git
 	cd nrn
     echo "Preparing NEURON ..."
