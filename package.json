@@ -1,0 +1,16 @@
+{
+  "name": "BluePyMM",
+  "description": "Blue Brain Python Cell Model Management",
+  "version": "0.6.32",
+  "scripts": {
+    "build_doc": "echo 'bluepymm.readthedocs.io'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BlueBrain/BluePyMM/releases",
+    "issuesurl": "https://github.com/BlueBrain/BluePyMM/issues"
+  },
+  "author": "Werner Van Geit (werner.vangeit@epfl.ch)",
+  "contributors": ["Werner Van Geit", "Liesbeth Vanherpe", "James King"],
+  "license": "LGPL/BSD"
+}
