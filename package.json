@@ -11,6 +11,6 @@
     "issuesurl": "https://github.com/BlueBrain/BluePyMM/issues"
   },
   "author": "Werner Van Geit (werner.vangeit@epfl.ch)",
-  "contributors": ["Werner Van Geit", "Liesbeth Vanherpe", "James King"],
+  "contributors": ["Werner Van Geit", "Liesbeth Vanherpe", "James King", "Mike Gevaert", "Christian Roessert"],
   "license": "LGPL/BSD"
 }
