@@ -204,6 +204,115 @@ def remove_morph_regex_failures(full_map):
     return full_map.reset_index(drop=True)
 
 
+def create_mm_sqlite_circuitmvd3(
+        output_filename,
+        circuitmvd3_path,
+        morph_dir,
+        rep_morph_dir,
+        unrep_morph_dir,
+        original_emodel_etype_map,
+        final_dict,
+        emodel_dirs,
+        skip_repaired_exemplar=False):
+    """Create SQLite database using circuit.mvd3.
+
+    Args:
+        output_filename
+        circuitmvd3_filename
+        morph_dir: directory with morphology release, contains neuronDB.xml
+            file
+        original_emodel_etype_map
+        final_dict: e-model parameters
+        emodel_dirs: prepared e-model directories
+        skip_repaired_exemplar: indicates whether repaired exemplar should be
+            skipped. Default value is False.
+    """
+    rep_neurondb_filename = os.path.join(rep_morph_dir, 'neuronDB.xml')
+
+    # Contains layer, fullmtype, mtype, submtype, morph_name
+    print(
+        'Reading repaired-morphologies neuronDB at %s' %
+        rep_neurondb_filename)
+    rep_fullmtype_morph_map = parse_files.read_mtype_morph_map(
+        rep_neurondb_filename)
+    tools.check_no_null_nan_values(rep_fullmtype_morph_map,
+                                   "the full m-type morphology map")
+
+    # Contains layer, fullmtype, etype, morph_name
+    morph_fullmtype_etype_map = parse_files.read_circuitmvd3(
+        circuitmvd3_path)
+
+    tools.check_no_null_nan_values(morph_fullmtype_etype_map,
+                                   "morph_fullmtype_etype_map")
+
+    fullmtypes = morph_fullmtype_etype_map.fullmtype.unique()
+    etypes = morph_fullmtype_etype_map.etype.unique()
+
+    print('Creating emodel etype table')
+    # Contains layer, fullmtype, etype, emodel, morph_regex, original_emodel
+    emodel_fullmtype_etype_map = parse_files.convert_emodel_etype_map(
+        original_emodel_etype_map, fullmtypes, etypes)
+    tools.check_no_null_nan_values(emodel_fullmtype_etype_map,
+                                   "e-model e-type map")
+
+    print('Creating full table by merging subtables')
+    # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
+    full_map = morph_fullmtype_etype_map.merge(
+        emodel_fullmtype_etype_map,
+        on=['layer', 'etype', 'fullmtype'], how='left')
+
+    print(morph_fullmtype_etype_map)
+    print(emodel_fullmtype_etype_map)
+
+    null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
+
+    if len(null_emodel_rows) > 0:
+        raise Exception(
+            'No emodels found for the following layer, etype, fullmtype'
+            ' combinations: \n%s' %
+            null_emodel_rows[['layer', 'etype', 'fullmtype']])
+
+    emodels = full_map['emodel'].unique().tolist()
+
+    print('Filtering out morp_names that dont match regex')
+    # Contains layer, fullmtype, etype, morph_name, e_model
+    full_map = remove_morph_regex_failures(full_map)
+    tools.check_no_null_nan_values(full_map, "the full map")
+
+    print('Adding exemplar rows')
+    full_map.insert(len(full_map.columns), 'morph_dir', morph_dir)
+    full_map.insert(len(full_map.columns), 'morph_ext', None)
+    full_map.insert(len(full_map.columns), 'is_exemplar', False)
+    full_map.insert(len(full_map.columns), 'is_repaired', True)
+    full_map.insert(len(full_map.columns), 'is_original', False)
+    full_map.insert(len(full_map.columns), 'scores', None)
+    full_map.insert(len(full_map.columns), 'opt_scores', None)
+    full_map.insert(len(full_map.columns), 'extra_values', None)
+    full_map.insert(len(full_map.columns), 'exception', None)
+    full_map.insert(len(full_map.columns), 'to_run', True)
+
+    exemplar_rows = create_exemplar_rows(
+        final_dict,
+        rep_fullmtype_morph_map,
+        original_emodel_etype_map,
+        emodels,
+        emodel_dirs,
+        rep_morph_dir,
+        unrep_morph_dir,
+        skip_repaired_exemplar=skip_repaired_exemplar)
+
+    # Prepend exemplar rows to full_map
+    full_map = pandas.concat(
+        [exemplar_rows, full_map],
+        ignore_index=True)
+
+    # Write full table to sqlite database
+    with sqlite3.connect(output_filename) as conn:
+        full_map.to_sql('scores', conn, if_exists='replace')
+
+    print('Created sqlite db at %s' % output_filename)
+
+
 def create_mm_sqlite(
         output_filename,
         recipe_filename,
@@ -312,7 +421,9 @@ def create_mm_sqlite(
         skip_repaired_exemplar=skip_repaired_exemplar)
 
     # Prepend exemplar rows to full_map
-    full_map = pandas.concat([exemplar_rows, full_map], ignore_index=True)
+    full_map = pandas.concat(
+        [exemplar_rows, full_map],
+        ignore_index=True, sort=False)
 
     # Write full table to sqlite database
     with sqlite3.connect(output_filename) as conn:

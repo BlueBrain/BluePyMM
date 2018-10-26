@@ -140,6 +140,43 @@ def read_mtype_morph_map(neurondb_filename):
                             columns=column_labels)
 
 
+def read_circuitmvd3(circuitmvd3_path):
+    """Read data from circuit.mvd3"""
+
+    print("Reading circuit.mvd3 at %s" % circuitmvd3_path)
+
+    import h5py
+
+    circuitmvd3_file = h5py.File(circuitmvd3_path, 'r')
+
+    cell_etype_ids = circuitmvd3_file['cells']['properties']['etype'].value
+    cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'].value
+    cell_morph_ids = \
+        circuitmvd3_file['cells']['properties']['morphology'].value
+
+    # Layer number or stored without library in the h5
+    cell_layers = [
+        str(layer)
+        for layer in circuitmvd3_file['cells']['properties']['layer'].value]
+
+    mtype_ids = circuitmvd3_file['library']['mtype'].value
+    etype_ids = circuitmvd3_file['library']['etype'].value
+    morph_ids = circuitmvd3_file['library']['morphology'].value
+
+    cell_mtypes = [mtype_ids[cell_mtype_id]
+                   for cell_mtype_id in cell_mtype_ids]
+    cell_etypes = [etype_ids[cell_etype_id]
+                   for cell_etype_id in cell_etype_ids]
+    cell_morphs = [morph_ids[cell_morph_id]
+                   for cell_morph_id in cell_morph_ids]
+
+    # Write out in order layer, fullmtype, etype, morph
+
+    cells = zip(cell_layers, cell_mtypes, cell_etypes, cell_morphs)
+    return pandas.DataFrame(
+        cells, columns=['layer', 'fullmtype', 'etype', 'morph_name'])
+
+
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     """Resolve regular expressions in an e-model e-type map and convert the
     result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
