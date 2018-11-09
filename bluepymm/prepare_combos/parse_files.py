@@ -140,6 +140,15 @@ def read_mtype_morph_map(neurondb_filename):
                             columns=column_labels)
 
 
+def fullmatch(regex, string):
+    """Make sure string matches regex fully"""
+
+    match = regex.match(string)
+
+    if match and match.span()[1] == len(string):
+        return match
+
+
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     """Resolve regular expressions in an e-model e-type map and convert the
     result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
@@ -174,9 +183,9 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
             emodel = etype_map['mm_recipe']
             for layer in etype_map['layer']:
                 for fullmtype in fullmtypes:
-                    if mtype_regex.match(fullmtype):
+                    if fullmatch(mtype_regex, fullmtype):
                         for etype in etypes:
-                            if etype_regex.match(etype):
+                            if fullmatch(etype_regex, etype):
                                 yield (emodel,
                                        str(layer),
                                        fullmtype,
