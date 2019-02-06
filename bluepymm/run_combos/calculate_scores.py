@@ -34,7 +34,15 @@ import traceback
 import pandas
 
 from bluepymm import tools
-from bluepyopt.ephys.responses import TimeVoltageResponseEncoder
+from bluepyopt.ephys.responses import TimeVoltageResponse
+
+
+class TimeVoltageResponseEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, TimeVoltageResponse):
+            return obj.response.to_json()
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
 
 
 def run_emodel_morph_isolated(input_args):
@@ -194,8 +202,14 @@ def run_emodel_morph(
                 extra_values['threshold_current'] = \
                     responses.get('bpo_threshold_current', None)
 
-            name = os.path.join('/home/bcoste/workspace/morphology/model-management', 'my_dump_{}_{}.json'.format(emodel, os.path.basename(morph_path)))
-            with open(name, 'w') as f:
+            name = 'my_dump_{}_{}.json'.format(emodel, os.path.basename(morph_path))
+            path = os.path.join(emodel_dir, '..', '..', '..', 'output', 'traces')
+            try:
+                os.mkdir(path)
+            except:
+                pass
+
+            with open(os.path.join(path, name), 'w') as f:
                 json.dump(responses, f, cls=TimeVoltageResponseEncoder)
 
         return scores, extra_values
@@ -311,6 +325,10 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
     score_values = scores['scores'].apply(
         lambda json_str: pandas.Series
         (json.loads(json_str)) if json_str else pandas.Series())
+
+
+    scores.to_csv('output/scores.csv')
+    score_values.to_csv('output/score_values.csv')
 
     with sqlite3.connect(scores_sqlite_filename) as conn:
         score_values.to_sql('score_values', conn, if_exists='replace',
