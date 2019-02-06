@@ -34,6 +34,7 @@ import traceback
 import pandas
 
 from bluepymm import tools
+from bluepyopt.ephys.responses import TimeVoltageResponseEncoder
 
 
 def run_emodel_morph_isolated(input_args):
@@ -146,7 +147,7 @@ def run_emodel_morph(
                     os.path.dirname(morph_path), os.path.splitext(
                         os.path.basename(morph_path))[0])
 
-                prefix = 'mm'
+                prefix = '_'
 
                 altmorph = [[prefix, morph_path, apical_point_isec]]
                 evaluator = setup.evaluator.create(etype='%s' % emodel,
@@ -192,6 +193,10 @@ def run_emodel_morph(
                     responses.get('bpo_holding_current', None)
                 extra_values['threshold_current'] = \
                     responses.get('bpo_threshold_current', None)
+
+            name = os.path.join('/home/bcoste/workspace/morphology/model-management', 'my_dump_{}_{}.json'.format(emodel, os.path.basename(morph_path)))
+            with open(name, 'w') as f:
+                json.dump(responses, f, cls=TimeVoltageResponseEncoder)
 
         return scores, extra_values
     except Exception:
@@ -359,7 +364,7 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
 
         print('Saved scores for uid %s (%d out of %d) %s' %
               (uid, uids_received, len(arg_list),
-               'with exception' if exception else ''))
+               'with exception: {}'.format(exception) if exception else ''))
         sys.stdout.flush()
 
     print('Converting score json strings to scores values ...')

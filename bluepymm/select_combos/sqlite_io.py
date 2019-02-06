@@ -48,6 +48,9 @@ def read_and_process_sqlite_score_tables(scores_sqlite_filename):
         scores = pandas.read_sql('SELECT * FROM scores', conn)
         score_values = pandas.read_sql('SELECT * FROM score_values', conn)
 
+        scores.to_csv('scores.csv')
+        score_values.to_csv('score_values.csv')
+
     if len(score_values.index) != len(scores.index):
         raise Exception("Score and score values tables don't have same number"
                         " of entries!")
