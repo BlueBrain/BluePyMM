@@ -149,19 +149,19 @@ def read_circuitmvd3(circuitmvd3_path):
 
     circuitmvd3_file = h5py.File(circuitmvd3_path, 'r')
 
-    cell_etype_ids = circuitmvd3_file['cells']['properties']['etype'].value
-    cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'].value
+    cell_etype_ids = circuitmvd3_file['cells']['properties']['etype'][()]
+    cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'][()]
     cell_morph_ids = \
-        circuitmvd3_file['cells']['properties']['morphology'].value
+        circuitmvd3_file['cells']['properties']['morphology'][()]
 
     # Layer number or stored without library in the h5
     cell_layers = [
         str(layer)
-        for layer in circuitmvd3_file['cells']['properties']['layer'].value]
+        for layer in circuitmvd3_file['cells']['properties']['layer'][()]]
 
-    mtype_ids = circuitmvd3_file['library']['mtype'].value
-    etype_ids = circuitmvd3_file['library']['etype'].value
-    morph_ids = circuitmvd3_file['library']['morphology'].value
+    mtype_ids = circuitmvd3_file['library']['mtype'][()]
+    etype_ids = circuitmvd3_file['library']['etype'][()]
+    morph_ids = circuitmvd3_file['library']['morphology'][()]
 
     cell_mtypes = [mtype_ids[cell_mtype_id]
                    for cell_mtype_id in cell_mtype_ids]

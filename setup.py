@@ -28,7 +28,7 @@ setuptools.setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     install_requires=['sh', 'bluepyopt', 'matplotlib', 'pandas', 'numpy',
-                      'ipyparallel', 'lxml'],
+                      'ipyparallel', 'lxml', 'h5py'],
     packages=setuptools.find_packages(exclude=('notebook',)),
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",

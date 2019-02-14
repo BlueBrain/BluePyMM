@@ -64,6 +64,9 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
         print('Using unrepaired exemplar morph path: %s' % unrep_morph_dir)
 
         if 'circuitmvd3_path' in conf_dict:
+            if 'recipe_path' in conf_dict:
+                raise ValueError('Impossible to specify both recipe_path '
+                                 'and circuitmvd3_path in config file')
             circuitmvd3_path = conf_dict['circuitmvd3_path']
 
             create_mm_sqlite.create_mm_sqlite_circuitmvd3(
