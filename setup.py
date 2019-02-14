@@ -34,6 +34,7 @@ setuptools.setup(
     author_email="werner.vangeit@epfl.ch",
     description="Model Management Python Library (bluepymm)",
     long_description="Model Management Python Library (bluepymm)",
+    url='https://github.com/BlueBrain/BluePyMM',
     keywords=[
         'optimisation',
         'neuroscience',
