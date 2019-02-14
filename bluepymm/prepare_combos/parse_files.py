@@ -140,6 +140,43 @@ def read_mtype_morph_map(neurondb_filename):
                             columns=column_labels)
 
 
+def read_circuitmvd3(circuitmvd3_path):
+    """Read data from circuit.mvd3"""
+
+    print("Reading circuit.mvd3 at %s" % circuitmvd3_path)
+
+    import h5py
+
+    circuitmvd3_file = h5py.File(circuitmvd3_path, 'r')
+
+    cell_etype_ids = circuitmvd3_file['cells']['properties']['etype'][()]
+    cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'][()]
+    cell_morph_ids = \
+        circuitmvd3_file['cells']['properties']['morphology'][()]
+
+    # Layer number or stored without library in the h5
+    cell_layers = [
+        str(layer)
+        for layer in circuitmvd3_file['cells']['properties']['layer'][()]]
+
+    mtype_ids = circuitmvd3_file['library']['mtype'][()]
+    etype_ids = circuitmvd3_file['library']['etype'][()]
+    morph_ids = circuitmvd3_file['library']['morphology'][()]
+
+    cell_mtypes = [mtype_ids[cell_mtype_id]
+                   for cell_mtype_id in cell_mtype_ids]
+    cell_etypes = [etype_ids[cell_etype_id]
+                   for cell_etype_id in cell_etype_ids]
+    cell_morphs = [morph_ids[cell_morph_id]
+                   for cell_morph_id in cell_morph_ids]
+
+    # Write out in order layer, fullmtype, etype, morph
+
+    cells = zip(cell_layers, cell_mtypes, cell_etypes, cell_morphs)
+    return pandas.DataFrame(
+        cells, columns=['layer', 'fullmtype', 'etype', 'morph_name'])
+
+
 def fullmatch(regex, string):
     """Make sure string matches regex fully"""
 
