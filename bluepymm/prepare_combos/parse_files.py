@@ -153,11 +153,19 @@ def read_circuitmvd3(circuitmvd3_path):
     cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'][()]
     cell_morph_ids = \
         circuitmvd3_file['cells']['properties']['morphology'][()]
+    cell_layer_ids = \
+        circuitmvd3_file['cells']['properties']['layer'][()]
 
     # Layer number or stored without library in the h5
-    cell_layers = [
-        str(layer)
-        for layer in circuitmvd3_file['cells']['properties']['layer'][()]]
+    if 'layer' in circuitmvd3_file['library']:
+        layer_ids = circuitmvd3_file['library']['layer'][()]
+        cell_layers = [layer_ids[cell_layer_id]
+                       for cell_layer_id in cell_layer_ids]
+
+    else:
+        cell_layers = [
+            str(layer)
+            for layer in circuitmvd3_file['cells']['properties']['layer'][()]]
 
     mtype_ids = circuitmvd3_file['library']['mtype'][()]
     etype_ids = circuitmvd3_file['library']['etype'][()]
