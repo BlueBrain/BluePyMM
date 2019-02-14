@@ -63,16 +63,36 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
         print('Using repaired exemplar morph path: %s' % rep_morph_dir)
         print('Using unrepaired exemplar morph path: %s' % unrep_morph_dir)
 
-        create_mm_sqlite.create_mm_sqlite_circuitmvd3(
-            scores_db_path,
-            conf_dict.get('circuitmvd3_path') or conf_dict['recipe_path'],
-            morph_dir,
-            rep_morph_dir,
-            unrep_morph_dir,
-            emodel_etype_map,
-            final_dict,
-            emodel_dirs,
-            skip_repaired_exemplar=skip_repaired_exemplar)
+        if 'circuitmvd3_path' in conf_dict:
+            if 'recipe_path' in conf_dict:
+                raise ValueError('Impossible to specify both recipe_path '
+                                 'and circuitmvd3_path in config file')
+            circuitmvd3_path = conf_dict['circuitmvd3_path']
+
+            create_mm_sqlite.create_mm_sqlite_circuitmvd3(
+                scores_db_path,
+                circuitmvd3_path,
+                morph_dir,
+                rep_morph_dir,
+                unrep_morph_dir,
+                emodel_etype_map,
+                final_dict,
+                emodel_dirs,
+                skip_repaired_exemplar=skip_repaired_exemplar)
+        else:
+            recipe_filename = conf_dict['recipe_path']
+
+            # Create a sqlite3 db with all the combos
+            create_mm_sqlite.create_mm_sqlite(
+                scores_db_path,
+                recipe_filename,
+                morph_dir,
+                rep_morph_dir,
+                unrep_morph_dir,
+                emodel_etype_map,
+                final_dict,
+                emodel_dirs,
+                skip_repaired_exemplar=skip_repaired_exemplar)
 
     return final_dict, emodel_dirs
 

@@ -23,7 +23,6 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 """Some code based on BrainBuilder and morph repair code"""
 
 # pylint: disable=R0912
-import voxcell
 import pandas
 import re
 
@@ -142,11 +141,65 @@ def read_mtype_morph_map(neurondb_filename):
 def read_circuitmvd3(circuitmvd3_path):
     """Read data from circuit.mvd3"""
     print("Reading circuit.mvd3 at %s" % circuitmvd3_path)
+
+    # TODO use code below once voxcell is open source
+    """
+    import voxcell
+
     df = voxcell.CellCollection.load_mvd3(circuitmvd3_path).properties
     df['fullmtype'] = df.mtype.astype(str)
     df['morph_name'] = df.morphology.astype(str)
     df['etype'] = df.etype.astype(str)
     return df[['fullmtype', 'morph_name', 'etype', 'layer']]
+    """
+
+    import h5py
+
+    circuitmvd3_file = h5py.File(circuitmvd3_path, 'r')
+
+    cell_etype_ids = circuitmvd3_file['cells']['properties']['etype'][()]
+    cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'][()]
+    cell_morph_ids = \
+        circuitmvd3_file['cells']['properties']['morphology'][()]
+    cell_layer_ids = \
+        circuitmvd3_file['cells']['properties']['layer'][()]
+
+    # Layer number or stored without library in the h5
+    if 'layer' in circuitmvd3_file['library']:
+        layer_ids = circuitmvd3_file['library']['layer'][()]
+        cell_layers = [layer_ids[cell_layer_id]
+                       for cell_layer_id in cell_layer_ids]
+
+    else:
+        cell_layers = [
+            str(layer)
+            for layer in circuitmvd3_file['cells']['properties']['layer'][()]]
+
+    mtype_ids = circuitmvd3_file['library']['mtype'][()]
+    etype_ids = circuitmvd3_file['library']['etype'][()]
+    morph_ids = circuitmvd3_file['library']['morphology'][()]
+
+    cell_mtypes = [mtype_ids[cell_mtype_id]
+                   for cell_mtype_id in cell_mtype_ids]
+    cell_etypes = [etype_ids[cell_etype_id]
+                   for cell_etype_id in cell_etype_ids]
+    cell_morphs = [morph_ids[cell_morph_id]
+                   for cell_morph_id in cell_morph_ids]
+
+    # Write out in order layer, fullmtype, etype, morph
+
+    cells = zip(cell_layers, cell_mtypes, cell_etypes, cell_morphs)
+    return pandas.DataFrame(
+        cells, columns=['layer', 'fullmtype', 'etype', 'morph_name'])
+
+
+def fullmatch(regex, string):
+    """Make sure string matches regex fully"""
+
+    match = regex.match(string)
+
+    if match and match.span()[1] == len(string):
+        return match
 
 
 def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
@@ -183,9 +236,9 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
             emodel = etype_map['mm_recipe']
             for layer in etype_map['layer']:
                 for fullmtype in fullmtypes:
-                    if mtype_regex.match(fullmtype):
+                    if fullmatch(mtype_regex, fullmtype):
                         for etype in etypes:
-                            if etype_regex.match(etype):
+                            if fullmatch(etype_regex, etype):
                                 yield (emodel,
                                        str(layer),
                                        fullmtype,
