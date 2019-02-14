@@ -37,26 +37,28 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 def test_read_circuitmvd3():
     """bluepymm.prepare_combos.parse_files: test reading a circuit.mvd3"""
 
-    cmvd3_filename = os.path.join(
-        BASE_DIR,
-        'examples/cmvd3a/circuit.mvd3')
+    for cmvd3_fn in ['circuit_strlayers.mvd3', 'circuit_intlayers.mvd3']:
+        cmvd3_path = os.path.join(
+            BASE_DIR, 'examples/cmvd3a', cmvd3_fn)
 
-    cmvd3_content = parse_files.read_circuitmvd3(cmvd3_filename)
+        cmvd3_content = parse_files.read_circuitmvd3(cmvd3_path)
 
-    expected_layers = ['5', '2'] * 5
-    expected_mtypes = ['L5_TPC', 'L2_TPC'] * 5
-    expected_etypes = ['cADpyr'] * 10
-    expected_morphnames = []
+        expected_layers = ['5', '2'] * 5
+        expected_mtypes = ['L5_TPC', 'L2_TPC'] * 5
+        expected_etypes = ['cADpyr'] * 10
+        expected_morphnames = []
 
-    for index in range(1, 6):
-        expected_morphnames += ['M%d_C060114A5' %
-                                index, 'M%d_mtC191200B_idA' % index]
-    nt.assert_equal(list(cmvd3_content['layer'].values), expected_layers)
-    nt.assert_equal(list(cmvd3_content['fullmtype'].values), expected_mtypes)
-    nt.assert_equal(list(cmvd3_content['etype'].values), expected_etypes)
-    nt.assert_equal(
-        list(cmvd3_content['morph_name'].values),
-        expected_morphnames)
+        for index in range(1, 6):
+            expected_morphnames += ['M%d_C060114A5' %
+                                    index, 'M%d_mtC191200B_idA' % index]
+        nt.assert_equal(list(cmvd3_content['layer'].values), expected_layers)
+        nt.assert_equal(
+            list(cmvd3_content['fullmtype'].values),
+            expected_mtypes)
+        nt.assert_equal(list(cmvd3_content['etype'].values), expected_etypes)
+        nt.assert_equal(
+            list(cmvd3_content['morph_name'].values),
+            expected_morphnames)
 
 
 @attr('unit')
