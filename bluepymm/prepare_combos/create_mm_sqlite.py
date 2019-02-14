@@ -257,12 +257,10 @@ def create_mm_sqlite_circuitmvd3(
 
     print('Creating full table by merging subtables')
 
-    emodel_fullmtype_etype_map.layer = emodel_fullmtype_etype_map.layer.astype(int)
     # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
     full_map = morph_fullmtype_etype_map.merge(
         emodel_fullmtype_etype_map,
         on=['layer', 'etype', 'fullmtype'], how='left')
-
 
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
 

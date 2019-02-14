@@ -1,5 +1,6 @@
-from __future__ import print_function
 """Create sqlite database"""
+
+from __future__ import print_function
 
 """
 Copyright (c) 2018, EPFL/Blue Brain Project
