@@ -261,9 +261,6 @@ def create_mm_sqlite_circuitmvd3(
         emodel_fullmtype_etype_map,
         on=['layer', 'etype', 'fullmtype'], how='left')
 
-    print(morph_fullmtype_etype_map)
-    print(emodel_fullmtype_etype_map)
-
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
 
     if len(null_emodel_rows) > 0:
