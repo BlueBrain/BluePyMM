@@ -301,7 +301,8 @@ def create_mm_sqlite_circuitmvd3(
     # Prepend exemplar rows to full_map
     full_map = pandas.concat(
         [exemplar_rows, full_map],
-        ignore_index=True)
+        ignore_index=True,
+        sort=True)
 
     # Write full table to sqlite database
     with sqlite3.connect(output_filename) as conn:
