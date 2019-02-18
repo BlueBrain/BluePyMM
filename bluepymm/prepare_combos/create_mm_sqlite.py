@@ -258,9 +258,13 @@ def create_mm_sqlite_circuitmvd3(
     print('Creating full table by merging subtables')
 
     # Contains layer, fullmtype, etype, morph_name, e_model, morph_regex
-    full_map = morph_fullmtype_etype_map.merge(
-        emodel_fullmtype_etype_map,
-        on=['layer', 'etype', 'fullmtype'], how='left')
+    # full_map = morph_fullmtype_etype_map.merge(
+    #    emodel_fullmtype_etype_map,
+    #    on=['layer', 'etype', 'fullmtype'], how='left')
+
+    # In this branch of the code we're reading the e-model from the
+    # circuit.mvd3, so no merge is needed
+    full_map = morph_fullmtype_etype_map
 
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
 
@@ -272,9 +276,9 @@ def create_mm_sqlite_circuitmvd3(
 
     emodels = full_map['emodel'].unique().tolist()
 
-    print('Filtering out morp_names that dont match regex')
+    # print('Filtering out morp_names that dont match regex')
     # Contains layer, fullmtype, etype, morph_name, e_model
-    full_map = remove_morph_regex_failures(full_map)
+    # full_map = remove_morph_regex_failures(full_map)
     tools.check_no_null_nan_values(full_map, "the full map")
 
     print('Adding exemplar rows')

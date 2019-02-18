@@ -159,6 +159,7 @@ def read_circuitmvd3(circuitmvd3_path):
     circuitmvd3_file = h5py.File(circuitmvd3_path, 'r')
 
     cell_etype_ids = circuitmvd3_file['cells']['properties']['etype'][()]
+    cell_emodel_ids = circuitmvd3_file['cells']['properties']['emodel'][()]
     cell_mtype_ids = circuitmvd3_file['cells']['properties']['mtype'][()]
     cell_morph_ids = \
         circuitmvd3_file['cells']['properties']['morphology'][()]
@@ -178,20 +179,28 @@ def read_circuitmvd3(circuitmvd3_path):
 
     mtype_ids = circuitmvd3_file['library']['mtype'][()]
     etype_ids = circuitmvd3_file['library']['etype'][()]
+    emodel_ids = circuitmvd3_file['library']['emodel'][()]
     morph_ids = circuitmvd3_file['library']['morphology'][()]
 
     cell_mtypes = [mtype_ids[cell_mtype_id]
                    for cell_mtype_id in cell_mtype_ids]
     cell_etypes = [etype_ids[cell_etype_id]
                    for cell_etype_id in cell_etype_ids]
+    cell_emodels = [emodel_ids[cell_emodel_id]
+                    for cell_emodel_id in cell_emodel_ids]
     cell_morphs = [morph_ids[cell_morph_id]
                    for cell_morph_id in cell_morph_ids]
 
     # Write out in order layer, fullmtype, etype, morph
 
-    cells = zip(cell_layers, cell_mtypes, cell_etypes, cell_morphs)
+    cells = zip(
+        cell_layers,
+        cell_mtypes,
+        cell_etypes,
+        cell_morphs,
+        cell_emodels)
     return pandas.DataFrame(
-        cells, columns=['layer', 'fullmtype', 'etype', 'morph_name'])
+        cells, columns=['layer', 'fullmtype', 'etype', 'morph_name', 'emodel'])
 
 
 def fullmatch(regex, string):
