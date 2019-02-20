@@ -202,15 +202,24 @@ def run_emodel_morph(
                 extra_values['threshold_current'] = \
                     responses.get('bpo_threshold_current', None)
 
-            name = 'my_dump_{}_{}.json'.format(emodel, os.path.basename(morph_path))
-            path = os.path.join(emodel_dir, '..', '..', '..', 'output', 'traces')
+            '''
+            name = 'my_dump_{}_{}.json'.format(
+                emodel, os.path.basename(morph_path))
+            path = os.path.join(
+                emodel_dir,
+                '..',
+                '..',
+                '..',
+                'output',
+                'traces')
             try:
                 os.mkdir(path)
-            except:
+            except BaseException:
                 pass
 
             with open(os.path.join(path, name), 'w') as f:
                 json.dump(responses, f, cls=TimeVoltageResponseEncoder)
+            '''
 
         return scores, extra_values
     except Exception:
@@ -325,7 +334,6 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
     score_values = scores['scores'].apply(
         lambda json_str: pandas.Series
         (json.loads(json_str)) if json_str else pandas.Series())
-
 
     scores.to_csv('output/scores.csv')
     score_values.to_csv('output/score_values.csv')

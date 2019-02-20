@@ -238,7 +238,7 @@ def prepare_emodel_dir(input_args):
                 sh.tar('xf', tar_filename)
 
                 with tools.cd(emodel):
-                    print('Compiling mechanisms ...')
+                    print('Compiling mechanisms %s ...' % emodel)
                     sh.nrnivmodl('mechanisms')
 
                     create_and_write_hoc_file(

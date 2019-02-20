@@ -9,3 +9,4 @@
 /.tox
 /.coverage
 /cov_reports/
+.python-version

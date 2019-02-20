@@ -265,6 +265,7 @@ def create_mm_sqlite_circuitmvd3(
     # In this branch of the code we're reading the e-model from the
     # circuit.mvd3, so no merge is needed
     full_map = morph_fullmtype_etype_map
+    full_map['original_emodel'] = full_map['emodel']
 
     null_emodel_rows = full_map[pandas.isnull(full_map['emodel'])]
 
@@ -307,7 +308,7 @@ def create_mm_sqlite_circuitmvd3(
     full_map = pandas.concat(
         [exemplar_rows, full_map],
         ignore_index=True,
-        sort=True)
+        sort=False)
 
     # Write full table to sqlite database
     with sqlite3.connect(output_filename) as conn:
