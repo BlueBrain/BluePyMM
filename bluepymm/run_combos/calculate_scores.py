@@ -166,6 +166,16 @@ def run_emodel_morph(
                 responses = evaluator.run_protocols(
                     evaluator.fitness_protocols.values(),
                     emodel_params)
+
+                feature_values = {}
+                for objective in evaluator.fitness_calculator.objectives:
+                    for feature in objective.features:
+                        feature_values[feature.name] = {
+                                'value': feature.calculate_feature(responses),
+                                'exp_mean': feature.exp_mean,
+                                'exp_std': feature.exp_std
+                            }
+
                 scores = evaluator.fitness_calculator.calculate_scores(
                     responses)
 
@@ -202,10 +212,9 @@ def run_emodel_morph(
                 extra_values['threshold_current'] = \
                     responses.get('bpo_threshold_current', None)
 
-            '''
-            name = 'my_dump_{}_{}.json'.format(
+            traces_fn = 'traces_{}_{}.json'.format(
                 emodel, os.path.basename(morph_path))
-            path = os.path.join(
+            traces_path = os.path.join(
                 emodel_dir,
                 '..',
                 '..',
@@ -213,13 +222,38 @@ def run_emodel_morph(
                 'output',
                 'traces')
             try:
-                os.mkdir(path)
+                os.mkdir(traces_path)
             except BaseException:
                 pass
 
-            with open(os.path.join(path, name), 'w') as f:
-                json.dump(responses, f, cls=TimeVoltageResponseEncoder)
-            '''
+            traces_fn = os.path.join(traces_path, traces_fn)
+            json.dump(
+                responses,
+                open(traces_fn, 'w'),
+                indent=2,
+                sort_keys=True,
+                cls=TimeVoltageResponseEncoder)
+
+            features_fn = 'features_{}_{}.json'.format(
+                emodel, os.path.basename(morph_path))
+            features_path = os.path.join(
+                emodel_dir,
+                '..',
+                '..',
+                '..',
+                'output',
+                'features')
+            try:
+                os.mkdir(features_path)
+            except BaseException:
+                pass
+
+            features_fn = os.path.join(features_path, features_fn)
+            json.dump(
+                feature_values,
+                open(features_fn, 'w'),
+                indent=2,
+                sort_keys=True)
 
         return scores, extra_values
     except Exception:
