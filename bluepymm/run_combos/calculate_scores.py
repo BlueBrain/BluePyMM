@@ -70,7 +70,7 @@ def run_emodel_morph_isolated(input_args):
 
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
-            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
+            run_emodel_morph, (uid, emodel, emodel_dir, emodel_params, morph_path))
     except Exception:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
@@ -122,6 +122,7 @@ def read_apical_point(morph_dir, morph_name):
 
 
 def run_emodel_morph(
+        uid,
         emodel,
         emodel_dir,
         emodel_params,
@@ -212,8 +213,8 @@ def run_emodel_morph(
                 extra_values['threshold_current'] = \
                     responses.get('bpo_threshold_current', None)
 
-            traces_fn = 'traces_{}_{}.json'.format(
-                emodel, os.path.basename(morph_path))
+            traces_fn = 'traces_{}_{}_{}.json'.format(
+                uid, emodel, os.path.basename(morph_path))
             traces_path = os.path.join(
                 emodel_dir,
                 '..',
@@ -235,8 +236,8 @@ def run_emodel_morph(
                     sort_keys=True,
                     cls=TimeVoltageResponseEncoder)
 
-            features_fn = 'features_{}_{}.json'.format(
-                emodel, os.path.basename(morph_path))
+            features_fn = 'features_{}_{}_{}.json'.format(
+                uid, emodel, os.path.basename(morph_path))
             features_path = os.path.join(
                 emodel_dir,
                 '..',
