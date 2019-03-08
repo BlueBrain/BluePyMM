@@ -171,10 +171,10 @@ def run_emodel_morph(
                 for objective in evaluator.fitness_calculator.objectives:
                     for feature in objective.features:
                         feature_values[feature.name] = {
-                                'value': feature.calculate_feature(responses),
-                                'exp_mean': feature.exp_mean,
-                                'exp_std': feature.exp_std
-                            }
+                            'value': feature.calculate_feature(responses),
+                            'exp_mean': feature.exp_mean,
+                            'exp_std': feature.exp_std
+                        }
 
                 scores = evaluator.fitness_calculator.calculate_scores(
                     responses)
@@ -227,12 +227,13 @@ def run_emodel_morph(
                 pass
 
             traces_fn = os.path.join(traces_path, traces_fn)
-            json.dump(
-                responses,
-                open(traces_fn, 'w'),
-                indent=2,
-                sort_keys=True,
-                cls=TimeVoltageResponseEncoder)
+            with open(traces_fn, 'w') as traces_file:
+                json.dump(
+                    responses,
+                    traces_file,
+                    indent=2,
+                    sort_keys=True,
+                    cls=TimeVoltageResponseEncoder)
 
             features_fn = 'features_{}_{}.json'.format(
                 emodel, os.path.basename(morph_path))
@@ -249,11 +250,12 @@ def run_emodel_morph(
                 pass
 
             features_fn = os.path.join(features_path, features_fn)
-            json.dump(
-                feature_values,
-                open(features_fn, 'w'),
-                indent=2,
-                sort_keys=True)
+            with open(features_fn, 'w') as features_file:
+                json.dump(
+                    feature_values,
+                    features_file,
+                    indent=2,
+                    sort_keys=True)
 
         return scores, extra_values
     except Exception:
