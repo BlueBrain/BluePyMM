@@ -26,6 +26,7 @@ import json
 import os
 import sys
 import hashlib
+import multiprocessing.pool
 from string import digits
 
 
@@ -184,3 +185,31 @@ def get_neuron_compliant_template_name(name):
                                                 keep_length=40,
                                                 hash_length=9)
     return template_name
+
+
+class NestedPool(multiprocessing.pool.Pool):
+
+    """Class that represents a MultiProcessing nested pool"""
+
+    def Process(self, *args, **kwds):
+        process = super(NestedPool, self).Process(*args, **kwds)
+
+        class NoDaemonProcess(process.__class__):
+
+            """Class that represents a non-daemon process"""
+
+            # pylint: disable=R0201
+
+            @property
+            def daemon(self):
+                """Get daemon flag"""
+                return False
+
+            @daemon.setter
+            def daemon(self, value):
+                """Set daemon flag"""
+                pass
+
+        process.__class__ = NoDaemonProcess
+
+        return process
