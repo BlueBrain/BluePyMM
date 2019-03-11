@@ -26,8 +26,6 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 import sys
 import os
 import json
-import multiprocessing
-import multiprocessing.pool
 import ipyparallel
 import sqlite3
 import traceback
@@ -57,7 +55,7 @@ def run_emodel_morph_isolated(input_args):
     return_dict['uid'] = uid
     return_dict['exception'] = None
 
-    pool = NestedPool(1, maxtasksperchild=1)
+    pool = tools.NestedPool(1, maxtasksperchild=1)
 
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
@@ -73,28 +71,6 @@ def run_emodel_morph_isolated(input_args):
     del pool
 
     return return_dict
-
-
-class NoDaemonProcess(multiprocessing.Process):
-
-    """Class that represents a non-daemon process"""
-
-    # pylint: disable=R0201
-
-    def _get_daemon(self):
-        """Get daemon flag"""
-        return False
-
-    def _set_daemon(self, value):
-        """Set daemon flag"""
-        pass
-    daemon = property(_get_daemon, _set_daemon)
-
-
-class NestedPool(multiprocessing.pool.Pool):
-
-    """Class that represents a MultiProcessing nested pool"""
-    Process = NoDaemonProcess
 
 
 def read_apical_point(morph_dir, morph_name):
@@ -341,7 +317,7 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
                              arg_list, ordered=False)
     else:
         # use multiprocessing
-        pool = NestedPool()
+        pool = tools.NestedPool()
         results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
     # keep track of the number of received results
