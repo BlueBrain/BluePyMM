@@ -5,7 +5,7 @@ python:
 - '3.7'
 dist: xenial
 before_install:
-    - pip install tox --upgrade
+    - pip install tox==3.7
     - pip install codecov
 script: tox -e "$(echo py$TRAVIS_PYTHON_VERSION | tr -d .)-unit-functional"
 after_success:
