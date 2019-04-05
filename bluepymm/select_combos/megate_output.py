@@ -34,8 +34,13 @@ def _write_extneurondbdat(extneurondb, filename):
 
     # Select the correct columns
     column_order = ['morph_name', 'layer', 'fullmtype', 'etype', 'combo_name']
-    pure_extneuron_db = pure_extneuron_db[column_order]
-    pure_extneuron_db.to_csv(filename, sep=' ', index=False, header=False)
+    # pure_extneuron_db = pure_extneuron_db[column_order]
+    pure_extneuron_db.to_csv(
+        filename,
+        sep=' ',
+        columns=column_order,
+        index=False,
+        header=False)
 
 
 def save_megate_results(extneurondb, output_dir,
@@ -95,7 +100,19 @@ def save_megate_results(extneurondb, output_dir,
                 print("WARNING ! There are rows with None for "
                       "holding current: %s" % str(extneurondb[null_rows]))
 
-    extneurondb.to_csv(mecombo_emodel_path, sep='\t', index=False)
+    extneurondb.to_csv(
+        mecombo_emodel_path,
+        columns=[
+            'morph_name',
+            'layer',
+            'fullmtype',
+            'etype',
+            'emodel',
+            'combo_name',
+            'threshold_current',
+            'holding_current'],
+        sep='\t',
+        index=False)
     print(
         'Wrote mecombo_emodel tsv to {}'.format(
             os.path.abspath(mecombo_emodel_path)))
