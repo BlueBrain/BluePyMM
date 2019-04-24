@@ -52,3 +52,5 @@ docpdf:
 	 cd docs; $(MAKE) clean; $(MAKE) latexpdf
 docopen: doc
 	open docs/build/html/index.html
+toxbinlinks:
+	cd ${TOX_ENVBINDIR}; find $(TOX_NRNBINDIR) -type f -exec ln -sf \{\} . \;
