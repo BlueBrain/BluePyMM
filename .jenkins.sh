@@ -36,7 +36,4 @@ pip install tox --upgrade
 
 cd  ${WORKSPACE}/BluePyMM
 
-ls -al .tox
-ls -al .tox/py27/
-
 tox ${tox_args}
