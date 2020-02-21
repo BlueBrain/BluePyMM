@@ -304,7 +304,7 @@ def test_expand_scores_to_score_values_table():
     expected_df = pandas.DataFrame(data=json.loads(scores), index=[0])
     with sqlite3.connect(db_path) as conn:
         score_values = pandas.read_sql('SELECT * FROM score_values', conn)
-    pandas.util.testing.assert_frame_equal(score_values, expected_df)
+    pandas.testing.assert_frame_equal(score_values, expected_df)
 
 
 @attr('unit')

@@ -181,12 +181,12 @@ def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
 def _create_extneurondb_rows(selected_combinations):
     """Prepare rows for database based on selected combinations."""
     # 1. select relevant columns from db with successful combinations
-    emodel_ext_neurondb = selected_combinations.ix[:, ('morph_name',
-                                                       'layer',
-                                                       'fullmtype',
-                                                       'etype',
-                                                       'emodel',
-                                                       'extra_values')].copy()
+    emodel_ext_neurondb = selected_combinations.loc[:, ('morph_name',
+                                                        'layer',
+                                                        'fullmtype',
+                                                        'etype',
+                                                        'emodel',
+                                                        'extra_values')].copy()
 
     # 2. create additional columns: combo_name, threshold current, and
     #    holding current
