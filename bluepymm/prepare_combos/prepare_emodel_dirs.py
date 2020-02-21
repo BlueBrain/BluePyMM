@@ -239,7 +239,8 @@ def prepare_emodel_dir(input_args):
 
                 with tools.cd(emodel):
                     print('Compiling mechanisms ...')
-                    sh.nrnivmodl('mechanisms')
+                    if os.path.exists('mechanisms'):
+                        sh.nrnivmodl('mechanisms')
 
                     create_and_write_hoc_file(
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
