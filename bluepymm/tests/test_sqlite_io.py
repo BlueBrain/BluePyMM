@@ -64,8 +64,8 @@ def test_read_and_process_sqlite_score_tables():
     # verify output
     nt.assert_false('index' in ret_sc_vals.columns.values)
 
-    pandas.util.testing.assert_frame_equal(ret_scs, scores)
-    pandas.util.testing.assert_frame_equal(ret_sc_vals, score_values)
+    pandas.testing.assert_frame_equal(ret_scs, scores)
+    pandas.testing.assert_frame_equal(ret_sc_vals, score_values)
 
 
 @attr('unit')

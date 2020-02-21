@@ -174,9 +174,9 @@ def plot_morphs_per_mtype_for_emodel(emodel, fullmtypes, megate_scores):
     for mtype in fullmtypes.unique():
         megate_scores_mtype = megate_scores[fullmtypes == mtype]
         mtype_passed = megate_scores_mtype[megate_scores_mtype['Passed all']]
-        sums.ix[mtype, 'passed'] = len(mtype_passed)
-        sums.ix[mtype, 'failed'] = (len(megate_scores_mtype) -
-                                    sums.ix[mtype, 'passed'])
+        sums.loc[mtype, 'passed'] = len(mtype_passed)
+        sums.loc[mtype, 'failed'] = (len(megate_scores_mtype) -
+                                     sums.loc[mtype, 'passed'])
 
     return plot_stacked_bars(
         sums, '# morphologies', '',
@@ -223,9 +223,9 @@ def plot_emodels_per_morphology(data, final_db):
         nb_combos = len(non_exemplars_morph)
 
         label = create_morphology_label(non_exemplars_morph)
-        sums.ix[label, 'passed'] = nb_matches
-        sums.ix[label, 'error'] = nb_errors
-        sums.ix[label, 'failed'] = nb_combos - nb_matches - nb_errors
+        sums.loc[label, 'passed'] = nb_matches
+        sums.loc[label, 'error'] = nb_errors
+        sums.loc[label, 'failed'] = nb_combos - nb_matches - nb_errors
 
     return plot_stacked_bars(
         sums, '# tested e-models', 'Morphology name',
@@ -259,9 +259,9 @@ def plot_emodels_per_metype(data, final_db):
                 (non_exemplars['metype'] == metype) & (
                     non_exemplars['exception'].notnull())])
         nb_combos = len(non_exemplars[non_exemplars['metype'] == metype])
-        sums.ix[metype, 'passed'] = nb_matches
-        sums.ix[metype, 'error'] = nb_errors
-        sums.ix[metype, 'failed'] = nb_combos - nb_matches - nb_errors
+        sums.loc[metype, 'passed'] = nb_matches
+        sums.loc[metype, 'error'] = nb_errors
+        sums.loc[metype, 'failed'] = nb_combos - nb_matches - nb_errors
 
     # Remove helper column 'metype'
     del data['metype']

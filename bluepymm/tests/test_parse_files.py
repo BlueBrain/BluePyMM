@@ -145,7 +145,7 @@ def test_read_mm_recipe():
     expected_df = pandas.DataFrame(expected_records,
                                    columns=["layer", "fullmtype", "etype"])
     df = parse_files.read_mm_recipe(recipe_filename)
-    pandas.util.testing.assert_frame_equal(df, expected_df)
+    pandas.testing.assert_frame_equal(df, expected_df)
 
 
 @attr('unit')
@@ -192,7 +192,7 @@ def test_read_mtype_morph_map():
                                    columns=["morph_name", "fullmtype", "mtype",
                                             "submtype", "layer"])
     df = parse_files.read_mtype_morph_map(neurondb_filename)
-    pandas.util.testing.assert_frame_equal(df, expected_df)
+    pandas.testing.assert_frame_equal(df, expected_df)
 
 
 def _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,

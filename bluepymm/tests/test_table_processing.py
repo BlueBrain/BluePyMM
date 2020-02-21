@@ -187,12 +187,12 @@ def test_process_emodel():
     exp_mtypes = pandas.Series('mtype2', index=[1], name='fullmtype')
 
     # verify results
-    pandas.util.testing.assert_frame_equal(emodel_ext_neurondb, exp_db)
-    pandas.util.testing.assert_frame_equal(
+    pandas.testing.assert_frame_equal(emodel_ext_neurondb, exp_db)
+    pandas.testing.assert_frame_equal(
         emodel_megate_pass, exp_megate_scores)
-    pandas.util.testing.assert_frame_equal(
+    pandas.testing.assert_frame_equal(
         emodel_score_values, exp_score_values)
-    pandas.util.testing.assert_series_equal(mtypes, exp_mtypes)
+    pandas.testing.assert_series_equal(mtypes, exp_mtypes)
 
 
 @attr('unit')
@@ -355,7 +355,7 @@ def test_process_combo_name():
     expected_df = pandas.DataFrame(expected_names, columns=['combo_name'])
 
     table_processing.process_combo_name(data, log_filename)
-    pandas.util.testing.assert_frame_equal(data, expected_df)
+    pandas.testing.assert_frame_equal(data, expected_df)
     nt.assert_true(os.path.isfile(log_filename))
     # clear output
     if os.path.isfile(log_filename):

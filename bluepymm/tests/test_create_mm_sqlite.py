@@ -121,7 +121,7 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
     expected_ret.sort_index(axis=1, inplace=True)
     ret.sort_index(axis=1, inplace=True)
 
-    pandas.util.testing.assert_frame_equal(ret, expected_ret)
+    pandas.testing.assert_frame_equal(ret, expected_ret)
 
 
 @attr('unit')
@@ -136,7 +136,7 @@ def test_remove_morph_regex_failures():
     expected_ret = pandas.DataFrame([('morph1'),
                                      ('morph3'), ],
                                     columns=['morph_name'])
-    pandas.util.testing.assert_frame_equal(ret, expected_ret)
+    pandas.testing.assert_frame_equal(ret, expected_ret)
 
 
 @attr('unit')
