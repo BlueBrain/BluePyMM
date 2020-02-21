@@ -8,7 +8,7 @@ tox_args='--recreate -e py27-style-unit-functional'
 if [ "${os}" = "cscsviz" ]
 then
 	. /opt/rh/python27/enable
-elif [ "${os}" = "Ubuntu-16.04" ]
+elif [ "${os}" = "Ubuntu-18.04" ]
 then
 	tox_args="${tox_args}"
 fi
