@@ -338,8 +338,9 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
                'with exception' if exception else ''))
         sys.stdout.flush()
 
-    pool.terminate()
-    pool.join()
+    if not use_ipyp:
+        pool.terminate()
+        pool.join()
 
     print('Converting score json strings to scores values ...')
     expand_scores_to_score_values_table(scores_db_filename)
