@@ -49,7 +49,7 @@ def run_emodel_morph_isolated(input_args):
         Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
     """
 
-    uid, emodel, emodel_dir, emodel_params, morph_path = input_args
+    uid, emodel, emodel_dir, emodel_params, morph_path, apical_point = input_args
 
     return_dict = {}
     return_dict['uid'] = uid
@@ -59,7 +59,7 @@ def run_emodel_morph_isolated(input_args):
 
     try:
         return_dict['scores'], return_dict['extra_values'] = pool.apply(
-            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path))
+            run_emodel_morph, (emodel, emodel_dir, emodel_params, morph_path, apical_point))
     except Exception:
         return_dict['scores'] = None
         return_dict['extra_values'] = None
@@ -93,6 +93,7 @@ def run_emodel_morph(
         emodel_dir,
         emodel_params,
         morph_path,
+        apical_point_isec,
         extra_values_error=True):
     """Run e-model morphology combination.
 
@@ -101,6 +102,7 @@ def run_emodel_morph(
         emodel_dir: directory containing e-model files
         emodel_params: dict that maps e-model parameters to their values
         morph_path: path to morphology
+        apical_point_isec: integer value of the apical point isection
 
     Returns:
         tuple:
@@ -118,9 +120,6 @@ def run_emodel_morph(
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
             if hasattr(setup, 'multieval'):
-                apical_point_isec = read_apical_point(
-                    os.path.dirname(morph_path), os.path.splitext(
-                        os.path.basename(morph_path))[0])
 
                 prefix = 'mm'
 
@@ -196,6 +195,8 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
         scores_db.row_factory = sqlite3.Row
         scores_cursor = scores_db.execute('SELECT * FROM scores')
 
+        morph_dir = scores_cursor[0]['morph_dir'] #TODO: test this properly
+        apical_points_isec = json.load(open(os.path.join(morph_dir, "apical_points_isec.json"), "r"))
         for row in scores_cursor.fetchall():
             index = row['index']
             morph_name = row['morph_name']
@@ -203,6 +204,10 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
 
             if morph_ext is None:
                 morph_ext = '.asc'
+
+            apical_point_isec = None
+            if morph_name in apical_points_isec:
+                apical_point_isec = int(apical_points_isec[morph_name])
 
             morph_filename = morph_name + morph_ext
             morph_path = os.path.abspath(os.path.join(row['morph_dir'],
@@ -219,7 +224,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
-                        morph_path)
+                        morph_path, apical_point)
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))
