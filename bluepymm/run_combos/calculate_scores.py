@@ -44,6 +44,7 @@ def run_emodel_morph_isolated(input_args):
         - emodel_dir: directory containing e-model files
         - emodel_params: dict that maps e-model parameters to their values
         - morph_path: path to morphology
+        - apical_point_isec: integer value of the apical point isection
 
     Returns:
         Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
