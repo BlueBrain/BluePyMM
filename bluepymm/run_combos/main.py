@@ -39,9 +39,11 @@ def add_parser(action):
                         help='Use ipyparallel')
     parser.add_argument('--ipyp_profile',
                         help='Path to ipyparallel profile')
+    parser.add_argument('--timeout',
+                        help='Timeout for ipyparallel clients')
 
 
-def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None):
+def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None, timeout=10):
     """Run combos from conf dictionary"""
     output_dir = conf_dict['output_dir']
     final_dict = tools.load_json(
@@ -60,7 +62,8 @@ def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None):
         emodel_dirs,
         scores_db_path,
         use_ipyp=ipyp,
-        ipyp_profile=ipyp_profile)
+        ipyp_profile=ipyp_profile,
+        timeout=timeout)
 
 
 def run_combos(conf_filename, ipyp=None, ipyp_profile=None):
