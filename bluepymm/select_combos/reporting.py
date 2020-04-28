@@ -244,9 +244,14 @@ def plot_emodels_per_metype(data, final_db):
         error, and failed are colored blue, yellow and red, respectively.
     """
     # Add helper column 'metype'
-    def create_metype(x):
-        """Create me-type from m-type and e-type"""
-        return '%s_%s' % (x['etype'], x['fullmtype'])
+    sums = _create_pass_failed_metypes(data, final_db)
+    return plot_stacked_bars(
+        sums, '# tested (e-model, morphology) combinations', 'me-type',
+        'Number of tested (e-model, morphology) combinations per me-type',
+        [BLUE, YELLOW, RED], log=True, yticksize=3)
+
+
+def _create_pass_failed_metypes(data, final_db):
     data['metype'] = data.apply(create_metype, axis=1)
     final_db['metype'] = final_db.apply(create_metype, axis=1)
 
@@ -267,10 +272,7 @@ def plot_emodels_per_metype(data, final_db):
     del data['metype']
     del final_db['metype']
 
-    return plot_stacked_bars(
-        sums, '# tested (e-model, morphology) combinations', 'me-type',
-        'Number of tested (e-model, morphology) combinations per me-type',
-        [BLUE, YELLOW, RED], log=True, yticksize=3)
+    return sums
 
 
 def create_metype(x):
@@ -437,5 +439,7 @@ def create_final_db_and_write_report(pdf_filename,
             add_plot_to_report(pp, plot_emodels_per_morphology, scores,
                                ext_neurondb)
         add_plot_to_report(pp, plot_emodels_per_metype, scores, ext_neurondb)
+        sums = _create_pass_failed_metypes(scores, ext_neurondb)
+        sums.to_csv(os.path.join(extra_data_dir, 'all_pass_failed.csv'))
 
     return ext_neurondb
