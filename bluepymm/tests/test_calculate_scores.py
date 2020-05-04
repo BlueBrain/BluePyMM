@@ -36,6 +36,7 @@ from bluepymm import tools
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
+TEST_DIR_MULTIEVAL = os.path.join(BASE_DIR, 'examples/multieval1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/')
 
 
@@ -160,11 +161,12 @@ def test_create_arg_list():
     testsqlite_filename = os.path.join(TMP_DIR, 'test1.sqlite')
     index = 0
     morph_name = 'morph'
-    morph_dir = 'morph_dir'
+    morph_dir = os.path.join(TEST_DIR_MULTIEVAL, 'data/morphs')
     mtype = 'mtype'
     etype = 'etype'
     layer = 'layer'
     emodel = 'emodel'
+    emodel_dir = os.path.join(TEST_DIR_MULTIEVAL, 'data/emodels_dir/subdir/')
     row = {'index': index,
            'morph_name': morph_name,
            'morph_ext': None,
@@ -178,10 +180,10 @@ def test_create_arg_list():
     _write_test_scores_database(row, testsqlite_filename)
 
     # extra input parameters
-    emodel_dirs = {emodel: 'emodel_dirs'}
+    emodel_dirs = {emodel: emodel_dir}
     params = 'test'
     final_dict = {emodel: {'params': params}}
-
+    # from nose.tools import set_trace; set_trace()
     ret = run_combos.calculate_scores.create_arg_list(
         testsqlite_filename,
         emodel_dirs,
@@ -194,7 +196,7 @@ def test_create_arg_list():
                      os.path.abspath(emodel_dirs[emodel]),
                      params,
                      os.path.abspath(morph_path),
-                     None)]
+                     0)]
     nt.assert_list_equal(ret, expected_ret)
 
 
@@ -205,11 +207,12 @@ def test_create_arg_list_exception():
     testsqlite_filename = os.path.join(TMP_DIR, 'test2.sqlite')
     index = 0
     morph_name = 'morph'
-    morph_dir = 'morph_dir'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     mtype = 'mtype'
     etype = 'etype'
     layer = 'layer'
     emodel = None
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     row = {'index': index,
            'morph_name': morph_name,
            'morph_ext': None,
@@ -223,7 +226,7 @@ def test_create_arg_list_exception():
     _write_test_scores_database(row, testsqlite_filename)
 
     # extra input parameters
-    emodel_dirs = {emodel: 'emodel_dirs'}
+    emodel_dirs = {emodel: emodel_dir}
     params = 'test'
     final_dict = {emodel: {'params': params}}
 
@@ -336,7 +339,7 @@ def test_calculate_scores():
     # write database
     test_db_filename = os.path.join(TMP_DIR, 'test4.sqlite')
     morph_name = 'morph1'
-    morph_dir = './data/morphs'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     mtype = 'mtype1'
     etype = 'etype1'
     layer = 1
