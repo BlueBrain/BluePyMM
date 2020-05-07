@@ -132,16 +132,16 @@ def create(etype, altmorph=None):
         bounds=[.5, 2.])
 
     if altmorph:
-        morph = altmorph[0][1]
+        morph_path = altmorph[0][1]
     else:
         if etype == 'emodel1':
-            morph = ephys.morphologies.NrnFileMorphology(
-                '../morphologies/morph1.asc')
+            morph_path = '../morphologies/morph1.asc'
         elif etype == 'emodel2':
-            morph = ephys.morphologies.NrnFileMorphology(
-                '../morphologies/morph2.asc')
+            morph_path = '../morphologies/morph2.asc'
         else:
             raise Exception('Unknown emodel: %s' % etype)
+
+    morph = ephys.morphologies.NrnFileMorphology(morph_path)
 
     simple_cell = ephys.models.CellModel(
         name='simple_cell',
