@@ -36,7 +36,6 @@ from bluepymm import tools
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
-TEST_DIR_MULTIEVAL = os.path.join(BASE_DIR, 'examples/multieval1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/')
 
 
@@ -161,12 +160,12 @@ def test_create_arg_list():
     testsqlite_filename = os.path.join(TMP_DIR, 'test1.sqlite')
     index = 0
     morph_name = 'morph'
-    morph_dir = os.path.join(TEST_DIR_MULTIEVAL, 'data/morphs')
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     mtype = 'mtype'
     etype = 'etype'
     layer = 'layer'
     emodel = 'emodel'
-    emodel_dir = os.path.join(TEST_DIR_MULTIEVAL, 'data/emodels_dir/subdir/')
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     row = {'index': index,
            'morph_name': morph_name,
            'morph_ext': None,
