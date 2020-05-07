@@ -106,7 +106,7 @@ class MultiEvaluator(bpopt.evaluators.Evaluator):
 
 
 
-def create(etype):
+def create(etype, altmorph=None):
     """Setup"""
 
     soma_loc = ephys.locations.NrnSeclistCompLocation(
@@ -131,14 +131,17 @@ def create(etype):
         locations=[somatic_loc],
         bounds=[.5, 2.])
 
-    if etype == 'emodel1':
-        morph = ephys.morphologies.NrnFileMorphology(
-            '../morphologies/morph1.asc')
-    elif etype == 'emodel2':
-        morph = ephys.morphologies.NrnFileMorphology(
-            '../morphologies/morph2.asc')
+    if altmorph:
+        morph = altmorph[0][1]
     else:
-        raise Exception('Unknown emodel: %s' % etype)
+        if etype == 'emodel1':
+            morph = ephys.morphologies.NrnFileMorphology(
+                '../morphologies/morph1.asc')
+        elif etype == 'emodel2':
+            morph = ephys.morphologies.NrnFileMorphology(
+                '../morphologies/morph2.asc')
+        else:
+            raise Exception('Unknown emodel: %s' % etype)
 
     simple_cell = ephys.models.CellModel(
         name='simple_cell',
