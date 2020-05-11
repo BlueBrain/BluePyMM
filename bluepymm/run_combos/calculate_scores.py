@@ -320,7 +320,7 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
 
 
 def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
-                     use_ipyp=False, ipyp_profile=None):
+                     use_ipyp=False, ipyp_profile=None, timeout=10):
     """Calculate scores of e-model morphology combinations and update the
     database accordingly.
 
@@ -342,7 +342,7 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
 
     if use_ipyp:
         # use ipyparallel
-        client = ipyparallel.Client(profile=ipyp_profile)
+        client = ipyparallel.Client(profile=ipyp_profile, timeout=timeout)
         lview = client.load_balanced_view()
         results = lview.imap(run_emodel_morph_isolated,
                              arg_list, ordered=False)
