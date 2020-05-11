@@ -27,6 +27,7 @@ import pandas
 import sqlite3
 import json
 import subprocess
+import time
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
@@ -363,6 +364,9 @@ def test_calculate_scores():
 
         if use_ipyp:
             ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
+            # ensure that ipcluster has enough time to start
+            time.sleep(10)
+
         with tools.cd(TEST_DIR):
             run_combos.calculate_scores.calculate_scores(final_dict,
                                                          emodel_dirs,
