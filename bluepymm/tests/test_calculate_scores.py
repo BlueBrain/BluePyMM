@@ -26,6 +26,8 @@ import os
 import pandas
 import sqlite3
 import json
+import subprocess
+import time
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
@@ -357,28 +359,42 @@ def test_calculate_scores():
     emodel_dirs = {emodel: emodel_dir}
     final_dict_path = os.path.join(emodel_dir, 'final.json')
     final_dict = tools.load_json(final_dict_path)
-    with tools.cd(TEST_DIR):
-        run_combos.calculate_scores.calculate_scores(final_dict, emodel_dirs,
-                                                     test_db_filename)
 
-    # verify database
-    scores = {'Step1.SpikeCount': 20.0}
-    extra_values = {'holding_current': None, 'threshold_current': None}
-    expected_db_row = {'index': 0,
-                       'morph_name': morph_name,
-                       'morph_ext': None,
-                       'morph_dir': morph_dir,
-                       'mtype': mtype,
-                       'etype': etype,
-                       'layer': layer,
-                       'emodel': emodel,
-                       'original_emodel': emodel,
-                       'to_run': 0,
-                       'scores': json.dumps(scores),
-                       'extra_values': json.dumps(extra_values),
-                       'exception': exception}
-    with sqlite3.connect(test_db_filename) as scores_db:
-        scores_db.row_factory = _dict_factory
-        scores_cursor = scores_db.execute('SELECT * FROM scores')
-        db_row = scores_cursor.fetchall()[0]
-        nt.assert_dict_equal(db_row, expected_db_row)
+    for use_ipyp in [False, True]:
+
+        if use_ipyp:
+            ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
+            # ensure that ipcluster has enough time to start
+            time.sleep(10)
+
+        with tools.cd(TEST_DIR):
+            run_combos.calculate_scores.calculate_scores(final_dict,
+                                                         emodel_dirs,
+                                                         test_db_filename,
+                                                         use_ipyp=use_ipyp
+                                                         )
+
+        if use_ipyp:
+            ip_proc.terminate()
+
+        # verify database
+        scores = {'Step1.SpikeCount': 20.0}
+        extra_values = {'holding_current': None, 'threshold_current': None}
+        expected_db_row = {'index': 0,
+                           'morph_name': morph_name,
+                           'morph_ext': None,
+                           'morph_dir': morph_dir,
+                           'mtype': mtype,
+                           'etype': etype,
+                           'layer': layer,
+                           'emodel': emodel,
+                           'original_emodel': emodel,
+                           'to_run': 0,
+                           'scores': json.dumps(scores),
+                           'extra_values': json.dumps(extra_values),
+                           'exception': exception}
+        with sqlite3.connect(test_db_filename) as scores_db:
+            scores_db.row_factory = _dict_factory
+            scores_cursor = scores_db.execute('SELECT * FROM scores')
+            db_row = scores_cursor.fetchall()[0]
+            nt.assert_dict_equal(db_row, expected_db_row)
