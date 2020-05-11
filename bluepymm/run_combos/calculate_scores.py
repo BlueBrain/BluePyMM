@@ -45,6 +45,7 @@ def run_emodel_morph_isolated(input_args):
         - emodel_params: dict that maps e-model parameters to their values
         - morph_path: path to morphology
         - apical_point_isec: integer value of the apical point isection
+        - extra_values_error: boolean to raise an exception upon a missing key
 
     Returns:
         Dict with keys 'exception', 'extra_values', 'scores', 'uid'.
@@ -57,6 +58,7 @@ def run_emodel_morph_isolated(input_args):
         emodel_params,
         morph_path,
         apical_point_isec,
+        extra_values_error
     ) = input_args
 
     return_dict = {}
@@ -72,6 +74,7 @@ def run_emodel_morph_isolated(input_args):
                                emodel_params,
                                morph_path,
                                apical_point_isec,
+                               extra_values_error
                                ))
     except Exception:
         return_dict['scores'] = None
@@ -116,6 +119,7 @@ def run_emodel_morph(
         emodel_params: dict that maps e-model parameters to their values
         morph_path: path to morphology
         apical_point_isec: integer value of the apical point isection
+        extra_values_error: boolean to raise an exception upon a missing key
 
     Returns:
         tuple:
@@ -188,7 +192,8 @@ def run_emodel_morph(
             "".join(traceback.format_exception(*sys.exc_info())))
 
 
-def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
+def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
+                    extra_values_error=False):
     """Create list of argument tuples to be used as an input for
     run_emodel_morph.
 
@@ -197,6 +202,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
         emodel_dirs: a dict mapping e-models to the directories with e-model
             input files
         final_dict: a dict mapping e-models to dicts with e-model parameters
+        extra_values_error: boolean to raise an exception upon a missing key
 
     Raises:
         ValueError, if one of the database entries contains has value None for
@@ -244,7 +250,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict):
                 args = (index, emodel,
                         os.path.abspath(emodel_dirs[emodel]),
                         final_dict[original_emodel]['params'],
-                        morph_path, apical_point_isec)
+                        morph_path, apical_point_isec, extra_values_error)
                 arg_list.append(args)
 
     print('Found %d rows in score database to run' % len(arg_list))
