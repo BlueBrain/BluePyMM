@@ -56,7 +56,8 @@ def test_run_emodel_morph_isolated():
         emodel_dir,
         emodel_params,
         morph_path,
-        None)
+        None,
+        False)
     ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     expected_ret = {'exception': None,
@@ -73,7 +74,7 @@ def test_run_emodel_morph_isolated_exception():
     """
     # input parameters
     uid = 0
-    emodel = 'emodel_doesnt_exist'
+    emodel = 'Key mm.bpo_holding_current not found in responses'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_params = {'cm': 1.0}
     morph_name = 'morph1'
@@ -87,7 +88,8 @@ def test_run_emodel_morph_isolated_exception():
         emodel_dir,
         emodel_params,
         morph_path,
-        None)
+        None,
+        True)
     ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     # verify output: exception thrown because of non-existing e-model
@@ -117,7 +119,8 @@ def test_run_emodel_morph():
         emodel_dir,
         emodel_params,
         morph_path,
-        None)
+        None,
+        False)
 
     expected_scores = {'Step1.SpikeCount': 20.0}
     expected_extra_values = {'holding_current': None,
@@ -182,11 +185,13 @@ def test_create_arg_list():
     emodel_dirs = {emodel: emodel_dir}
     params = 'test'
     final_dict = {emodel: {'params': params}}
+    extra_values_error = False
     # from nose.tools import set_trace; set_trace()
     ret = run_combos.calculate_scores.create_arg_list(
         testsqlite_filename,
         emodel_dirs,
-        final_dict)
+        final_dict,
+        extra_values_error)
 
     # verify output
     morph_path = os.path.join(morph_dir, '{}.asc'.format(morph_name))
@@ -195,7 +200,7 @@ def test_create_arg_list():
                      os.path.abspath(emodel_dirs[emodel]),
                      params,
                      os.path.abspath(morph_path),
-                     0)]
+                     0, extra_values_error)]
     nt.assert_list_equal(ret, expected_ret)
 
 
