@@ -10,3 +10,4 @@
 /.coverage
 /cov_reports/
 .python-version
+.vscode

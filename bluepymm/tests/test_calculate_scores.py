@@ -57,7 +57,9 @@ def test_run_emodel_morph_isolated():
         emodel,
         emodel_dir,
         emodel_params,
-        morph_path)
+        morph_path,
+        None,
+        False)
     ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     expected_ret = {'exception': None,
@@ -74,7 +76,7 @@ def test_run_emodel_morph_isolated_exception():
     """
     # input parameters
     uid = 0
-    emodel = 'emodel_doesnt_exist'
+    emodel = 'Key mm.bpo_holding_current not found in responses'
     emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     emodel_params = {'cm': 1.0}
     morph_name = 'morph1'
@@ -87,7 +89,9 @@ def test_run_emodel_morph_isolated_exception():
         emodel,
         emodel_dir,
         emodel_params,
-        morph_path)
+        morph_path,
+        None,
+        True)
     ret = run_combos.calculate_scores.run_emodel_morph_isolated(input_args)
 
     # verify output: exception thrown because of non-existing e-model
@@ -116,7 +120,9 @@ def test_run_emodel_morph():
         emodel,
         emodel_dir,
         emodel_params,
-        morph_path)
+        morph_path,
+        None,
+        False)
 
     expected_scores = {'Step1.SpikeCount': 20.0}
     expected_extra_values = {'holding_current': None,
@@ -159,11 +165,12 @@ def test_create_arg_list():
     testsqlite_filename = os.path.join(TMP_DIR, 'test1.sqlite')
     index = 0
     morph_name = 'morph'
-    morph_dir = 'morph_dir'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     mtype = 'mtype'
     etype = 'etype'
     layer = 'layer'
     emodel = 'emodel'
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     row = {'index': index,
            'morph_name': morph_name,
            'morph_ext': None,
@@ -177,14 +184,16 @@ def test_create_arg_list():
     _write_test_scores_database(row, testsqlite_filename)
 
     # extra input parameters
-    emodel_dirs = {emodel: 'emodel_dirs'}
+    emodel_dirs = {emodel: emodel_dir}
     params = 'test'
     final_dict = {emodel: {'params': params}}
-
+    extra_values_error = False
+    # from nose.tools import set_trace; set_trace()
     ret = run_combos.calculate_scores.create_arg_list(
         testsqlite_filename,
         emodel_dirs,
-        final_dict)
+        final_dict,
+        extra_values_error)
 
     # verify output
     morph_path = os.path.join(morph_dir, '{}.asc'.format(morph_name))
@@ -192,7 +201,8 @@ def test_create_arg_list():
                      emodel,
                      os.path.abspath(emodel_dirs[emodel]),
                      params,
-                     os.path.abspath(morph_path))]
+                     os.path.abspath(morph_path),
+                     0, extra_values_error)]
     nt.assert_list_equal(ret, expected_ret)
 
 
@@ -203,11 +213,12 @@ def test_create_arg_list_exception():
     testsqlite_filename = os.path.join(TMP_DIR, 'test2.sqlite')
     index = 0
     morph_name = 'morph'
-    morph_dir = 'morph_dir'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     mtype = 'mtype'
     etype = 'etype'
     layer = 'layer'
     emodel = None
+    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/')
     row = {'index': index,
            'morph_name': morph_name,
            'morph_ext': None,
@@ -221,7 +232,7 @@ def test_create_arg_list_exception():
     _write_test_scores_database(row, testsqlite_filename)
 
     # extra input parameters
-    emodel_dirs = {emodel: 'emodel_dirs'}
+    emodel_dirs = {emodel: emodel_dir}
     params = 'test'
     final_dict = {emodel: {'params': params}}
 
@@ -334,7 +345,7 @@ def test_calculate_scores():
     # write database
     test_db_filename = os.path.join(TMP_DIR, 'test4.sqlite')
     morph_name = 'morph1'
-    morph_dir = './data/morphs'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     mtype = 'mtype1'
     etype = 'etype1'
     layer = 1
