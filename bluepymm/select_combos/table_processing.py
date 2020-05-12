@@ -288,6 +288,9 @@ def process_emodels(emodels,
         print('Received processed info from e-model %s' % emodel)
         emodel_infos[emodel] = emodel_info
 
+    pool.terminate()
+    pool.join()
+
     return emodel_infos
 
 
