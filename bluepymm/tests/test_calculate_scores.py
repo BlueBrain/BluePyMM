@@ -442,3 +442,16 @@ def test_calculate_scores():
             scores_cursor = scores_db.execute('SELECT * FROM scores')
             db_row = scores_cursor.fetchall()[0]
             nt.assert_dict_equal(db_row, expected_db_row)
+
+
+@attr('unit')
+def test_read_apical_point():
+    """run_combos.calculate_scores: test read_apical_point"""
+
+    morph_name = 'morph'
+    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
+
+    apical_point_isec = run_combos.calculate_scores.read_apical_point(
+        morph_dir, morph_name)
+
+    nt.assert_equal(apical_point_isec, 0)
