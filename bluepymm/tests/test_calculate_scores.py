@@ -28,7 +28,6 @@ import sqlite3
 import json
 import subprocess
 import time
-import sys
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
@@ -130,38 +129,6 @@ def test_run_emodel_morph():
                              'threshold_current': None}
     nt.assert_dict_equal(ret[0], expected_scores)
     nt.assert_dict_equal(ret[1], expected_extra_values)
-
-
-@attr('unit')
-def test_run_emodel_morph_single():
-    """run_combos.calculate_scores: test run_emodel_morph without multieval."""
-
-    # to prevent the fast-path in tools:load_module
-    del sys.modules["setup"]
-
-    emodel = 'emodel1'
-    emodel_dir = os.path.join(TEST_DIR, 'data/emodels_dir/subdir/single-eval')
-    emodel_params = {'cm': 1.0}
-
-    morph_name = 'morph1'
-    morph_dir = os.path.join(TEST_DIR, 'data/morphs')
-    morph_path = os.path.join(morph_dir, '%s.asc' % morph_name)
-
-    ret = run_combos.calculate_scores.run_emodel_morph(
-        emodel,
-        emodel_dir,
-        emodel_params,
-        morph_path,
-        None,
-        False)
-
-    expected_scores = {'Step1.SpikeCount': 20.0}
-    expected_extra_values = {'holding_current': None,
-                             'threshold_current': None}
-    nt.assert_dict_equal(ret[0], expected_scores)
-    nt.assert_dict_equal(ret[1], expected_extra_values)
-
-    del sys.modules["setup"]
 
 
 @attr('unit')
