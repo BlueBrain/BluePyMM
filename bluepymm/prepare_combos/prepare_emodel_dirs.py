@@ -246,6 +246,8 @@ def prepare_emodel_dir(input_args):
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
                         'cell_template_neurodamus.jinja2')
 
+                os.remove(tar_filename)
+
     except Exception:
         raise Exception(''.join(traceback.format_exception(*sys.exc_info())))
 
