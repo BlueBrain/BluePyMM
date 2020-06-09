@@ -27,7 +27,6 @@ import os
 
 import pandas
 import numpy
-from tqdm import tqdm
 import seaborn
 
 import matplotlib
@@ -505,7 +504,8 @@ def compare_scores(
     emodel_infos_1 = _get_emodel_infos(conf_dict_path_1)
     emodel_infos_2 = _get_emodel_infos(conf_dict_path_2)
     with PdfPages(pdf_filename) as pdf:
-        for emodel, emodel_info_1 in tqdm(emodel_infos_1.items()):
+        for emodel, emodel_info_1 in emodel_infos_1.items():
+            print("Plotting emodel: ", emodel)
 
             emodel_info_1[2].to_csv("bio.csv", index=False)
             emodel_infos_2[emodel][2].to_csv("synth.csv", index=False)
