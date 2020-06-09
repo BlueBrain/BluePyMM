@@ -27,7 +27,6 @@ import os
 
 import pandas
 import numpy
-import seaborn
 
 import matplotlib
 matplotlib.use('Agg')
@@ -501,6 +500,8 @@ def compare_scores(
         clip (float): clip value for scores
         n_samples (int): number of samples to use for each emodel
     """
+    import seaborn
+
     emodel_infos_1 = _get_emodel_infos(conf_dict_path_1)
     emodel_infos_2 = _get_emodel_infos(conf_dict_path_2)
     with PdfPages(pdf_filename) as pdf:
