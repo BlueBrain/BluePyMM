@@ -27,6 +27,8 @@ import os
 
 import pandas
 import numpy
+from tqdm import tqdm
+import seaborn
 
 import matplotlib
 matplotlib.use('Agg')
@@ -34,8 +36,10 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
-from . import table_processing
 from bluepymm import tools
+
+from . import table_processing, sqlite_io
+from . import process_megate_config as proc_config
 
 
 BLUE = 'C1'
@@ -443,3 +447,111 @@ def create_final_db_and_write_report(pdf_filename,
         sums.to_csv(os.path.join(extra_data_dir, 'all_pass_failed.csv'))
 
     return ext_neurondb
+
+
+def _get_emodel_infos(conf_dict_path):
+    """Return information from each emodel of a run
+
+    Args:
+        conf_dict_path (str): path to select.json for the run
+
+    Returns:
+        tuple with structure from table_processing.process_emodels
+    """
+    conf_dict = tools.load_json(conf_dict_path)
+
+    scores, score_values = sqlite_io.read_and_process_sqlite_score_tables(
+        conf_dict["scores_db"]
+    )
+
+    emodels = sorted(scores[scores.is_original == 0].emodel.unique())
+    to_skip_patterns, to_skip_features = proc_config.read_to_skip_features(
+        conf_dict
+    )
+    megate_patterns, megate_thresholds = proc_config.read_megate_thresholds(
+        conf_dict
+    )
+
+    return table_processing.process_emodels(
+        emodels,
+        scores,
+        score_values,
+        to_skip_patterns,
+        megate_patterns,
+        conf_dict.get("skip_repaired_exemplar", False),
+        conf_dict.get("check_opt_scores", True),
+        conf_dict.get("select_perc_best", None),
+    )
+
+
+def compare_scores(
+    conf_dict_path_1,
+    conf_dict_path_2,
+    pdf_filename="compare.pdf",
+    hue_name="bio",
+    clip=20,
+    n_samples=1000,
+):
+    """Create comparison plots between scores of two MM runs.
+
+    Args:
+        conf_dict_path_1 (str): path to select.json for first run
+        conf_dict_path_2 (str): path to select.json for second run
+        pdf_filename (str): name of pdf file for plotting
+        hue_name (str): string to use to separate both runs
+        clip (float): clip value for scores
+        n_samples (int): number of samples to use for each emodel
+    """
+    emodel_infos_1 = _get_emodel_infos(conf_dict_path_1)
+    emodel_infos_2 = _get_emodel_infos(conf_dict_path_2)
+    with PdfPages(pdf_filename) as pdf:
+        for emodel, emodel_info_1 in tqdm(emodel_infos_1.items()):
+
+            emodel_info_1[2].to_csv("bio.csv", index=False)
+            emodel_infos_2[emodel][2].to_csv("synth.csv", index=False)
+
+            df_1 = (
+                emodel_info_1[2]
+                .sample(n=min(n_samples, len(emodel_info_1[2].index)),
+                        random_state=1)
+                .clip(0, clip)
+                .melt(var_name="features", value_name="scores")
+                .copy()
+            )
+            df_1[hue_name] = True
+
+            df_2 = (
+                emodel_infos_2[emodel][2]
+                .sample(
+                    n=min(n_samples, len(emodel_infos_2[emodel][2].index)),
+                    random_state=1,
+                )
+                .clip(0, clip)
+                .melt(var_name="features", value_name="scores")
+                .copy()
+            )
+            df_2[hue_name] = False
+
+            df = df_1.append(df_2)
+
+            plt.figure(figsize=FIGSIZE)
+            ax = plt.gca()
+
+            seaborn.violinplot(
+                y="features",
+                x="scores",
+                data=df,
+                ax=ax,
+                orient="h",
+                split=True,
+                hue=hue_name,
+                linewidth=0.1,
+                inner=None,
+                bw=0.05,
+                cut=0,
+                width=1,
+            )
+
+            plt.suptitle("emodel: " + emodel)
+            pdf.savefig(bbox_inches='tight')
+            plt.close()
