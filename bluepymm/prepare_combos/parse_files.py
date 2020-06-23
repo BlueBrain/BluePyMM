@@ -123,7 +123,8 @@ def read_mm_recipe_yaml(recipe_filename):
     with open(recipe_filename, 'r') as f:
         recipe = yaml.safe_load(f)
 
-    assert recipe['version'] in ('v2.0',)
+    if recipe['version'] not in ('v2.0',):
+        raise Exception('Only v2.0 of recipe yaml files are supported')
 
     mecombos = pandas.DataFrame(columns=["layer", "fullmtype", "etype"])
     for region in recipe['neurons']:
