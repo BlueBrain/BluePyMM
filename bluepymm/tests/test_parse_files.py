@@ -158,14 +158,15 @@ def test_read_mm_recipe_yaml():
     recipe_filename = os.path.join(
         BASE_DIR,
         'examples/simple1/data/simple1_recipe.yaml')
-    expected_records = [("1", "mtype1", "etype1"),
-                        ("1", "mtype1", "etype2"),
-                        ("1", "mtype2", "etype1"),
-                        ("2", "mtype1", "etype2"), ]
+    expected_records = [(1, "mtype1", "etype1"),
+                        (1, "mtype1", "etype2"),
+                        (1, "mtype2", "etype1"),
+                        (2, "mtype1", "etype2"), ]
     expected_df = pandas.DataFrame(expected_records,
-                                   columns=["layer", "fullmtype", "etype"])
+                                   columns=["layer", "fullmtype", "etype"],
+                                   )
     df = parse_files.read_mm_recipe(recipe_filename)
-    pandas.testing.assert_frame_equal(df, expected_df)
+    pandas.testing.assert_frame_equal(df, expected_df, check_dtype=False)
 
 
 @attr('unit')
