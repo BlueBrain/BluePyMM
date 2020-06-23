@@ -102,9 +102,10 @@ def read_mm_recipe(recipe_filename):
 
     if Path(recipe_filename).suffix == '.xml':
         return read_mm_recipe_xml(recipe_filename)
-    if Path(recipe_filename).suffix == '.yaml':
+    elif Path(recipe_filename).suffix == '.yaml':
         return read_mm_recipe_yaml(recipe_filename)
-    raise Exception('Please provide an .xml or .yaml as recipe file')
+    else:
+        raise Exception('Please provide an .xml or .yaml as recipe file')
 
 
 def read_mm_recipe_yaml(recipe_filename):
@@ -129,8 +130,8 @@ def read_mm_recipe_yaml(recipe_filename):
         for etype in region['traits']['etype'].keys():
             n_combos = len(mecombos)
             mecombos.loc[n_combos, 'layer'] = region['traits']['layer']
-            mecombos.loc[n_combos - 1, 'fullmtype'] = region['traits']['mtype']
-            mecombos.loc[n_combos - 1, 'etype'] = etype
+            mecombos.loc[n_combos, 'fullmtype'] = region['traits']['mtype']
+            mecombos.loc[n_combos, 'etype'] = etype
     return mecombos
 
 
