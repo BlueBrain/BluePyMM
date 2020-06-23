@@ -27,6 +27,7 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 
 import pandas
 import re
+import os
 
 import lxml
 import lxml.etree
@@ -98,11 +99,9 @@ def read_mm_recipe(recipe_filename):
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
-    from pathlib import Path
-
-    if Path(recipe_filename).suffix == '.xml':
+    if os.path.splitext(recipe_filename)[1] == '.xml':
         return read_mm_recipe_xml(recipe_filename)
-    elif Path(recipe_filename).suffix == '.yaml':
+    elif os.path.splitext(recipe_filename)[1] == '.yaml':
         return read_mm_recipe_yaml(recipe_filename)
     else:
         raise Exception('Please provide an .xml or .yaml as recipe file')
