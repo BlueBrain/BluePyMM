@@ -1,26 +1,15 @@
-Recipe:
-  NeuronTypes:
-    Layer:
-      - StructuralType:
-          - ElectroType:
-              - _id: etype1
-                _percentage: '33.33'
-              - _id: etype2
-                _percentage: '66.67'
-            _id: mtype1
-            _percentage: '17.7304964539'
-          - ElectroType:
-              _id: etype1
-              _percentage: '10.00'
-            _id: mtype2
-            _percentage: '20.5673758865'
-        _id: '1'
-        _percentage: '1.037315'
-      - StructuralType:
-          ElectroType:
-            _id: etype2
-            _percentage: '100'
-          _id: mtype1
-          _percentage: '67.7948717949'
-        _id: '2'
-        _percentage: '10.832282'
+neurons:
+  - traits:
+      etype: {etype1: 33.33, etype2: 66.67}
+      layer: 1
+      mtype: mtype1
+  - traits:
+      etype: {etype1: 10.00}
+      layer: 1
+      mtype: mtype2
+  - traits:
+      etype: {etype2: 100}
+      layer: 2
+      mtype: mtype1
+ version: v2.0
+
