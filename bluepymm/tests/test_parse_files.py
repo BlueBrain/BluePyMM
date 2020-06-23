@@ -153,6 +153,8 @@ def test_read_mm_recipe_yaml():
     """bluepymm.prepare_combos.parse_files: test read_mm_recipe with a yaml
     recipe from test example "simple1".
     """
+
+    import yaml
     recipe_filename = os.path.join(
         BASE_DIR,
         'examples/simple1/data/simple1_recipe.yaml')
