@@ -11,5 +11,5 @@ neurons:
       etype: {etype2: 100}
       layer: 2
       mtype: mtype1
- version: v2.0
+version: v2.0
 
