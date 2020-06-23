@@ -131,9 +131,9 @@ def test_read_recipe_records():
 
 
 @attr('unit')
-def test_read_mm_recipe():
-    """bluepymm.prepare_combos.parse_files: test read_mm_recipe with recipe
-    from test example "simple1".
+def test_read_mm_recipe_xml():
+    """bluepymm.prepare_combos.parse_files: test read_mm_recipe with an xml
+    recipe from test example "simple1".
     """
     recipe_filename = os.path.join(
         BASE_DIR,
