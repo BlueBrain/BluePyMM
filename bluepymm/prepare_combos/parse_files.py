@@ -27,6 +27,7 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 
 import pandas
 import re
+import os
 
 import lxml
 import lxml.etree
@@ -89,6 +90,52 @@ def read_recipe_records(recipe_tree):
 
 
 def read_mm_recipe(recipe_filename):
+    """Read a BBP builder recipe and return a pandas.DataFrame with all
+    possible (layer, m-type, e-type)-combinations.
+
+    Args:
+        recipe_filename(str): filename of recipe (XML/YAML)
+
+    Returns:
+        A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
+    """
+    if os.path.splitext(recipe_filename)[1] == '.xml':
+        return read_mm_recipe_xml(recipe_filename)
+    elif os.path.splitext(recipe_filename)[1] == '.yaml':
+        return read_mm_recipe_yaml(recipe_filename)
+    else:
+        raise Exception('Please provide an .xml or .yaml as recipe file')
+
+
+def read_mm_recipe_yaml(recipe_filename):
+    """Read a BBP builder recipe and return a pandas.DataFrame with all
+    possible (layer, m-type, e-type)-combinations.
+
+    Args:
+        recipe_filename(str): filename of recipe (YAML)
+
+    Returns:
+        A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
+    """
+    import yaml
+
+    with open(recipe_filename, 'r') as f:
+        recipe = yaml.safe_load(f)
+
+    if recipe['version'] not in ('v2.0',):
+        raise Exception('Only v2.0 of recipe yaml files are supported')
+
+    mecombos = pandas.DataFrame(columns=["layer", "fullmtype", "etype"])
+    for region in recipe['neurons']:
+        for etype in region['traits']['etype'].keys():
+            n_combos = len(mecombos)
+            mecombos.loc[n_combos, 'layer'] = region['traits']['layer']
+            mecombos.loc[n_combos, 'fullmtype'] = region['traits']['mtype']
+            mecombos.loc[n_combos, 'etype'] = etype
+    return mecombos
+
+
+def read_mm_recipe_xml(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
 
