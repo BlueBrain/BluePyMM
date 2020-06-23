@@ -93,6 +93,52 @@ def read_mm_recipe(recipe_filename):
     possible (layer, m-type, e-type)-combinations.
 
     Args:
+        recipe_filename(str): filename of recipe (XML/YAML)
+
+    Returns:
+        A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
+    """
+    from pathlib import Path
+
+    if Path(recipe_filename).suffix == '.xml':
+        return read_mm_recipe_xml(recipe_filename)
+    if Path(recipe_filename).suffix == '.yaml':
+        return read_mm_recipe_yaml(recipe_filename)
+    raise Exception('Please provide an .xml or .yaml as recipe file')
+
+
+def read_mm_recipe_yaml(recipe_filename):
+    """Read a BBP builder recipe and return a pandas.DataFrame with all
+    possible (layer, m-type, e-type)-combinations.
+
+    Args:
+        recipe_filename(str): filename of recipe (YAML)
+
+    Returns:
+        A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
+    """
+    import yaml
+
+    with open(recipe_filename, 'r') as f:
+        recipe = yaml.safe_load(f)
+
+    assert recipe['version'] in ('v2.0',)
+
+    mecombos = pandas.DataFrame(columns=["layer", "fullmtype", "etype"])
+    for region in recipe['neurons']:
+        for etype in region['traits']['etype'].keys():
+            n_combos = len(mecombos)
+            mecombos.loc[n_combos, 'layer'] = region['traits']['layer']
+            mecombos.loc[n_combos - 1, 'fullmtype'] = region['traits']['mtype']
+            mecombos.loc[n_combos - 1, 'etype'] = etype
+    return mecombos
+
+
+def read_mm_recipe_xml(recipe_filename):
+    """Read a BBP builder recipe and return a pandas.DataFrame with all
+    possible (layer, m-type, e-type)-combinations.
+
+    Args:
         recipe_filename(str): filename of recipe (XML)
 
     Returns:
