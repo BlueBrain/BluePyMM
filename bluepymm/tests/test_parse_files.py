@@ -131,9 +131,9 @@ def test_read_recipe_records():
 
 
 @attr('unit')
-def test_read_mm_recipe():
-    """bluepymm.prepare_combos.parse_files: test read_mm_recipe with recipe
-    from test example "simple1".
+def test_read_mm_recipe_xml():
+    """bluepymm.prepare_combos.parse_files: test read_mm_recipe with an xml
+    recipe from test example "simple1".
     """
     recipe_filename = os.path.join(
         BASE_DIR,
@@ -146,6 +146,33 @@ def test_read_mm_recipe():
                                    columns=["layer", "fullmtype", "etype"])
     df = parse_files.read_mm_recipe(recipe_filename)
     pandas.testing.assert_frame_equal(df, expected_df)
+
+
+@attr('unit')
+def test_read_mm_recipe_yaml():
+    """bluepymm.prepare_combos.parse_files: test read_mm_recipe with a yaml
+    recipe from test example "simple1".
+    """
+
+    import yaml
+    recipe_filename = os.path.join(
+        BASE_DIR,
+        'examples/simple1/data/simple1_recipe.yaml')
+    expected_records = [(1, "mtype1", "etype1"),
+                        (1, "mtype1", "etype2"),
+                        (1, "mtype2", "etype1"),
+                        (2, "mtype1", "etype2"), ]
+    expected_df = pandas.DataFrame(expected_records,
+                                   columns=["layer", "fullmtype", "etype"],
+                                   )
+    expected_df = expected_df.sort_values(by=['etype', 'fullmtype', 'layer'])
+    expected_df = expected_df.reset_index(drop=True)
+
+    df = parse_files.read_mm_recipe(recipe_filename)
+    df = df.sort_values(by=['etype', 'fullmtype', 'layer'])
+    df = df.reset_index(drop=True)
+
+    pandas.testing.assert_frame_equal(df, expected_df, check_dtype=False)
 
 
 @attr('unit')

@@ -1,0 +1,15 @@
+neurons:
+  - traits:
+      etype: {etype1: 33.33, etype2: 66.67}
+      layer: 1
+      mtype: mtype1
+  - traits:
+      etype: {etype1: 10.00}
+      layer: 1
+      mtype: mtype2
+  - traits:
+      etype: {etype2: 100}
+      layer: 2
+      mtype: mtype1
+version: v2.0
+
