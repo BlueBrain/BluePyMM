@@ -165,7 +165,13 @@ def test_read_mm_recipe_yaml():
     expected_df = pandas.DataFrame(expected_records,
                                    columns=["layer", "fullmtype", "etype"],
                                    )
+    expected_df = expected_df.sort_values(by=['etype', 'fullmtype', 'layer'])
+    expected_df = expected_df.reset_index(drop=True)
+
     df = parse_files.read_mm_recipe(recipe_filename)
+    df = df.sort_values(by=['etype', 'fullmtype', 'layer'])
+    df = df.reset_index(drop=True)
+
     pandas.testing.assert_frame_equal(df, expected_df, check_dtype=False)
 
 
