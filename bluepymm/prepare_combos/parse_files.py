@@ -129,9 +129,9 @@ def read_mm_recipe_yaml(recipe_filename):
     for region in recipe['neurons']:
         for etype in region['traits']['etype'].keys():
             n_combos = len(mecombos)
-            mecombos.loc[n_combos, 'layer'] = region['traits']['layer']
-            mecombos.loc[n_combos, 'fullmtype'] = region['traits']['mtype']
-            mecombos.loc[n_combos, 'etype'] = etype
+            mecombos.loc[n_combos, 'layer'] = str(region['traits']['layer'])
+            mecombos.loc[n_combos, 'fullmtype'] = str(region['traits']['mtype'])
+            mecombos.loc[n_combos, 'etype'] = str(etype)
     return mecombos
 
 

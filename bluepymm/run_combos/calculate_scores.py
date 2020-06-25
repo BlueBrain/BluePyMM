@@ -139,7 +139,6 @@ def run_emodel_morph(
             if hasattr(setup, 'multieval'):
 
                 prefix = 'mm'
-
                 altmorph = [[prefix, morph_path, apical_point_isec]]
                 evaluator = setup.evaluator.create(etype='%s' % emodel,
                                                    altmorph=altmorph)
@@ -218,9 +217,13 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
         apical_points_isec = {}
         setup = tools.load_module('setup', emodel_dirs[one_row['emodel']])
         if hasattr(setup, 'multieval'):
-            apical_points_isec = tools.load_json(
-                os.path.join(one_row['morph_dir'], "apical_points_isec.json")
-            )
+            try:
+                apical_points_isec = tools.load_json(
+                    os.path.join(one_row['morph_dir'], "apical_points_isec.json")
+                )
+            except IOError:
+                apical_points_isec = {}
+                print('Warning: no apical_points_isec.json found!')
 
         scores_cursor = scores_db.execute('SELECT * FROM scores')
         for row in scores_cursor.fetchall():
