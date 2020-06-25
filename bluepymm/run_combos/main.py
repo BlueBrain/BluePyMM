@@ -57,7 +57,7 @@ def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None, timeout=10):
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
     if 'use_apical_points' in conf_dict:
-        use_apical_points = conf_dict['use_apical_points'] 
+        use_apical_points = conf_dict['use_apical_points']
     else:
         use_apical_points = True
 
