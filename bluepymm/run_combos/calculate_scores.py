@@ -217,14 +217,10 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
 
         apical_points_isec = {}
         setup = tools.load_module('setup', emodel_dirs[one_row['emodel']])
-        if hasattr(setup, 'multieval'):
-            if use_apical_points:
-                apical_points_isec = tools.load_json(
-                    os.path.join(one_row['morph_dir'],
-                                 "apical_points_isec.json")
-                )
-            else:
-                apical_points_isec = {}
+        if hasattr(setup, 'multieval') and use_apical_points:
+            apical_points_isec = tools.load_json(
+                os.path.join(one_row['morph_dir'], "apical_points_isec.json")
+            )
 
         scores_cursor = scores_db.execute('SELECT * FROM scores')
         for row in scores_cursor.fetchall():
