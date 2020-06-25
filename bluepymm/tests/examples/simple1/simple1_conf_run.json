@@ -1,5 +1,6 @@
 {
     "version": "1.0",
     "scores_db": "./output/scores.sqlite",
-    "output_dir": "./output/"
+    "output_dir": "./output/",
+    "use_apical_points": false
 }
