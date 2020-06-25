@@ -192,7 +192,7 @@ def run_emodel_morph(
 
 
 def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
-                    extra_values_error=False):
+                    extra_values_error=False, use_apical_points=True):
     """Create list of argument tuples to be used as an input for
     run_emodel_morph.
 
@@ -202,6 +202,7 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
             input files
         final_dict: a dict mapping e-models to dicts with e-model parameters
         extra_values_error: boolean to raise an exception upon a missing key
+        use_apical_points: boolean to use apical points or not
 
     Raises:
         ValueError, if one of the database entries contains has value None for
@@ -217,13 +218,13 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
         apical_points_isec = {}
         setup = tools.load_module('setup', emodel_dirs[one_row['emodel']])
         if hasattr(setup, 'multieval'):
-            try:
+            if use_apical_points:
                 apical_points_isec = tools.load_json(
-                    os.path.join(one_row['morph_dir'], "apical_points_isec.json")
+                    os.path.join(one_row['morph_dir'],
+                                 "apical_points_isec.json")
                 )
-            except IOError:
+            else:
                 apical_points_isec = {}
-                print('Warning: no apical_points_isec.json found!')
 
         scores_cursor = scores_db.execute('SELECT * FROM scores')
         for row in scores_cursor.fetchall():
@@ -323,7 +324,8 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
 
 
 def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
-                     use_ipyp=False, ipyp_profile=None, timeout=10):
+                     use_ipyp=False, ipyp_profile=None, timeout=10,
+                     use_apical_points=True):
     """Calculate scores of e-model morphology combinations and update the
     database accordingly.
 
@@ -336,10 +338,14 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         use_ipyp: bool indicating whether ipyparallel is used. Default is
             False.
         ipyp_profile: path to ipyparallel profile. Default is None.
+        use_apical_points: boolean to use apical points or not
     """
 
     print('Creating argument list for parallelisation')
-    arg_list = create_arg_list(scores_db_filename, emodel_dirs, final_dict)
+    arg_list = create_arg_list(scores_db_filename,
+                               emodel_dirs,
+                               final_dict,
+                               use_apical_points)
 
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))
 

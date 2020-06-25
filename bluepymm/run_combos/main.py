@@ -63,7 +63,9 @@ def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None, timeout=10):
         scores_db_path,
         use_ipyp=ipyp,
         ipyp_profile=ipyp_profile,
-        timeout=timeout)
+        timeout=timeout,
+        use_apical_points=(conf_dict['use_apical_points']
+                           if 'use_apical_points' in conf_dict else True))
 
 
 def run_combos(conf_filename, ipyp=None, ipyp_profile=None):
