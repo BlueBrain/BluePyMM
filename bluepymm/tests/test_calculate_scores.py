@@ -379,12 +379,13 @@ def test_calculate_scores():
             time.sleep(10)
 
         with tools.cd(TEST_DIR):
-            run_combos.calculate_scores.calculate_scores(final_dict,
-                                                         emodel_dirs,
-                                                         test_db_filename,
-                                                         use_ipyp=use_ipyp,
-                                                         use_apical_points=False
-                                                         )
+            run_combos.calculate_scores.calculate_scores(
+                final_dict,
+                emodel_dirs,
+                test_db_filename,
+                use_ipyp=use_ipyp,
+                use_apical_points=False
+            )
 
         if use_ipyp:
             ip_proc.terminate()
