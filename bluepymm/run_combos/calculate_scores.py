@@ -341,7 +341,7 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
     arg_list = create_arg_list(scores_db_filename,
                                emodel_dirs,
                                final_dict,
-                               use_apical_points)
+                               use_apical_points=use_apical_points)
 
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))
 
