@@ -27,7 +27,7 @@ setuptools.setup(
     name="bluepymm",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    install_requires=['sh', 'bluepyopt', 'matplotlib', 'pandas', 'numpy',
+    install_requires=['sh', 'bluepyopt', 'matplotlib', 'pandas', 'numpy', 'NEURON',
                       'ipyparallel', 'lxml', 'h5py', 'pyyaml'],
     packages=setuptools.find_packages(exclude=('notebook',)),
     author="BlueBrain Project, EPFL",

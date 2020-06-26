@@ -54,3 +54,8 @@ def test_run_combos():
 
         # verify output
         _verify_run_combos_output(config['scores_db'])
+
+        # with use_apical_points
+        config['use_apical_points'] = False
+        run_combos.main.run_combos_from_conf(config)
+        _verify_run_combos_output(config['scores_db'])
