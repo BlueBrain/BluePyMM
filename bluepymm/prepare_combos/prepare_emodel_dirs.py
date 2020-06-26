@@ -305,5 +305,4 @@ def prepare_emodel_dirs(
     for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list, chunksize=1):
         for emodel, emodel_dir in emodel_dir_dict.items():
             emodel_dirs[emodel] = emodel_dir
-
     return emodel_dirs

@@ -56,6 +56,11 @@ def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None, timeout=10):
             'emodel_dirs.json'))
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
+    if 'use_apical_points' in conf_dict:
+        use_apical_points = conf_dict['use_apical_points']
+    else:
+        use_apical_points = True
+
     print('Calculating scores')
     calculate_scores.calculate_scores(
         final_dict,
@@ -63,7 +68,8 @@ def run_combos_from_conf(conf_dict, ipyp=None, ipyp_profile=None, timeout=10):
         scores_db_path,
         use_ipyp=ipyp,
         ipyp_profile=ipyp_profile,
-        timeout=timeout)
+        timeout=timeout,
+        use_apical_points=use_apical_points)
 
 
 def run_combos(conf_filename, ipyp=None, ipyp_profile=None):

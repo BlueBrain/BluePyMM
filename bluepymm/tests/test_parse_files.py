@@ -158,10 +158,10 @@ def test_read_mm_recipe_yaml():
     recipe_filename = os.path.join(
         BASE_DIR,
         'examples/simple1/data/simple1_recipe.yaml')
-    expected_records = [(1, "mtype1", "etype1"),
-                        (1, "mtype1", "etype2"),
-                        (1, "mtype2", "etype1"),
-                        (2, "mtype1", "etype2"), ]
+    expected_records = [("1", "mtype1", "etype1"),
+                        ("1", "mtype1", "etype2"),
+                        ("1", "mtype2", "etype1"),
+                        ("2", "mtype1", "etype2"), ]
     expected_df = pandas.DataFrame(expected_records,
                                    columns=["layer", "fullmtype", "etype"],
                                    )
