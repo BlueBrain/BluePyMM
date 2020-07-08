@@ -383,7 +383,8 @@ def test_calculate_scores():
                 final_dict,
                 emodel_dirs,
                 test_db_filename,
-                use_ipyp=use_ipyp
+                use_ipyp=use_ipyp,
+                n_processes=1
             )
 
         if use_ipyp:
