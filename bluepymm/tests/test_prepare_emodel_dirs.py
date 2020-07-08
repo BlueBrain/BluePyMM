@@ -300,7 +300,7 @@ def test_prepare_emodel_dirs():
     with tools.cd(TEST_DATA_DIR):
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
-            emodels_hoc_dir, emodels_in_repo, continu)
+            emodels_hoc_dir, emodels_in_repo, continu, n_processes=1)
 
     # verify output
     expected_ret = {emodel: os.path.join(
