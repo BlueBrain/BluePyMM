@@ -97,7 +97,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path, n_processes):
     return final_dict, emodel_dirs
 
 
-def prepare_combos(conf_filename, continu, n_processes):
+def prepare_combos(conf_filename, continu, n_processes=None):
     """Prepare combos"""
 
     print('Reading configuration at %s' % conf_filename)
