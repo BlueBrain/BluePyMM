@@ -51,7 +51,8 @@ def run(arg_list):
 
     if args.action == "prepare":
         prepare_combos.prepare_combos(conf_filename=args.conf_filename,
-                                      continu=args.continu)
+                                      continu=args.continu,
+                                      n_processes=args.n_processes)
     elif args.action == "run":
         run_combos.run_combos(conf_filename=args.conf_filename,
                               ipyp=args.ipyp,

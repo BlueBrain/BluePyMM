@@ -261,7 +261,9 @@ def prepare_emodel_dirs(
         opt_dir,
         emodels_hoc_dir,
         emodels_in_repo,
-        continu=False):
+        continu=False,
+        n_processes=None
+        ):
     """Prepare the directories for the emodels.
 
     Args:
@@ -298,9 +300,9 @@ def prepare_emodel_dirs(
              emodels_hoc_dir,
              emodels_in_repo,
              continu))
-
     print('Parallelising preparation of e-model directories')
-    pool = multiprocessing.Pool(maxtasksperchild=1)
+    pool = multiprocessing.Pool(processes=n_processes,
+                                maxtasksperchild=1)
     emodel_dirs = {}
     for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list, chunksize=1):
         for emodel, emodel_dir in emodel_dir_dict.items():
