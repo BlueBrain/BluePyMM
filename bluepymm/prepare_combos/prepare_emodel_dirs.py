@@ -255,15 +255,15 @@ def prepare_emodel_dir(input_args):
 
 
 def prepare_emodel_dirs(
-        final_dict,
-        emodel_etype_map,
-        emodels_dir,
-        opt_dir,
-        emodels_hoc_dir,
-        emodels_in_repo,
-        continu=False,
-        n_processes=None
-        ):
+    final_dict,
+    emodel_etype_map,
+    emodels_dir,
+    opt_dir,
+    emodels_hoc_dir,
+    emodels_in_repo,
+    continu=False,
+    n_processes=None,
+):
     """Prepare the directories for the emodels.
 
     Args:
