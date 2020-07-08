@@ -321,7 +321,7 @@ def expand_scores_to_score_values_table(scores_sqlite_filename):
 
 def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
                      use_ipyp=False, ipyp_profile=None, timeout=10,
-                     use_apical_points=True):
+                     use_apical_points=True, n_processes=None):
     """Calculate scores of e-model morphology combinations and update the
     database accordingly.
 
@@ -335,6 +335,8 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
             False.
         ipyp_profile: path to ipyparallel profile. Default is None.
         use_apical_points: boolean to use apical points or not
+        n_processes: the integer number of processes. If `None`,
+        all processes are going to be used.
     """
 
     print('Creating argument list for parallelisation')
@@ -344,16 +346,15 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
                                use_apical_points=use_apical_points)
 
     print('Parallelising score evaluation of %d me-combos' % len(arg_list))
-
     if use_ipyp:
         # use ipyparallel
         client = ipyparallel.Client(profile=ipyp_profile, timeout=timeout)
-        lview = client.load_balanced_view()
+        lview = client.load_balanced_view(targets=n_processes)
         results = lview.imap(run_emodel_morph_isolated,
                              arg_list, ordered=False)
     else:
         # use multiprocessing
-        pool = tools.NestedPool()
+        pool = tools.NestedPool(processes=n_processes)
         results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
     # keep track of the number of received results
