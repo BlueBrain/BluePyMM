@@ -51,13 +51,16 @@ def run(arg_list):
 
     if args.action == "prepare":
         prepare_combos.prepare_combos(conf_filename=args.conf_filename,
-                                      continu=args.continu)
+                                      continu=args.continu,
+                                      n_processes=args.n_processes)
     elif args.action == "run":
         run_combos.run_combos(conf_filename=args.conf_filename,
                               ipyp=args.ipyp,
-                              ipyp_profile=args.ipyp_profile)
+                              ipyp_profile=args.ipyp_profile,
+                              n_processes=args.n_processes)
     elif args.action == "select":
-        select_combos.select_combos(conf_filename=args.conf_filename)
+        select_combos.select_combos(conf_filename=args.conf_filename,
+                                    n_processes=args.n_processes)
     elif args.action == "validate":
         validate_output.validate_output(conf_filename=args.conf_filename)
 

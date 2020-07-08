@@ -29,7 +29,7 @@ from . import prepare_emodel_dirs as prepare_dirs
 from . import create_mm_sqlite
 
 
-def prepare_emodels(conf_dict, continu, scores_db_path):
+def prepare_emodels(conf_dict, continu, scores_db_path, n_processes):
     """Prepare emodels"""
 
     tmp_dir = conf_dict['tmp_dir']
@@ -52,7 +52,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
     # Clone the emodels repo and prepare the dirs for all the emodels
     emodel_dirs = prepare_dirs.prepare_emodel_dirs(
         final_dict, emodel_etype_map, emodels_dir, opt_dir, emodels_hoc_dir,
-        emodels_in_repo, continu=continu)
+        emodels_in_repo, continu=continu, n_processes=n_processes)
 
     if not continu:
         print('Creating sqlite db at %s' % scores_db_path)
@@ -97,7 +97,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path):
     return final_dict, emodel_dirs
 
 
-def prepare_combos(conf_filename, continu):
+def prepare_combos(conf_filename, continu, n_processes=None):
     """Prepare combos"""
 
     print('Reading configuration at %s' % conf_filename)
@@ -105,7 +105,7 @@ def prepare_combos(conf_filename, continu):
     scores_db_path = os.path.abspath(conf_dict['scores_db'])
 
     final_dict, emodel_dirs = prepare_emodels(
-        conf_dict, continu, scores_db_path)
+        conf_dict, continu, scores_db_path, n_processes)
 
     # Save output
     # TODO: gather all output business here?
@@ -124,3 +124,5 @@ def add_parser(action):
     parser.add_argument('conf_filename')
     parser.add_argument('--continu', action='store_true',
                         help='continue from previous run')
+    parser.add_argument('--n_processes', help='number of processes',
+                        type=int)

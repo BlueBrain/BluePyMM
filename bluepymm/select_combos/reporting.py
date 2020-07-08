@@ -330,7 +330,8 @@ def create_final_db_and_write_report(pdf_filename,
                                      score_values,
                                      enable_plot_emodels_per_morphology,
                                      output_dir,
-                                     select_perc_best):
+                                     select_perc_best,
+                                     n_processes=None):
     """Create the final output files and report"""
     ext_neurondb = pandas.DataFrame()
 
@@ -362,7 +363,9 @@ def create_final_db_and_write_report(pdf_filename,
                                                         megate_patterns,
                                                         skip_repaired_exemplar,
                                                         check_opt_scores,
-                                                        select_perc_best)
+                                                        select_perc_best,
+                                                        n_processes=n_processes
+                                                        )
 
         print("All emodels processed, generating output files")
 

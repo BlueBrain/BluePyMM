@@ -64,14 +64,14 @@ def _config_select_combos(config_template_path, tmp_dir):
 
 
 def _test_select_combos(test_data_dir, tmp_dir, config_template_path,
-                        benchmark_dir):
+                        benchmark_dir, n_processes=None):
     """Helper function to perform functional test of select_combos"""
     with tools.cd(test_data_dir):
         # prepare input data
         config = _config_select_combos(config_template_path, tmp_dir)
 
         # run combination selection
-        select_combos.main.select_combos_from_conf(config)
+        select_combos.main.select_combos_from_conf(config, n_processes)
 
         # verify output
         _verify_output(benchmark_dir, config['output_dir'])
@@ -84,7 +84,7 @@ def test_select_combos():
     tmp_dir = os.path.join(TMP_DIR, 'test_select_combos')
 
     _test_select_combos(TEST_DATA_DIR, tmp_dir, config_template_path,
-                        benchmark_dir)
+                        benchmark_dir, n_processes=1)
 
 
 def test_select_combos_2():

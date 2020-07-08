@@ -31,20 +31,21 @@ from . import sqlite_io, reporting, megate_output
 from . import process_megate_config as proc_config
 
 
-def select_combos(conf_filename):
+def select_combos(conf_filename, n_processes):
     """Parse conf file and run select combos"""
     # Parse configuration file
     conf_dict = tools.load_json(conf_filename)
 
-    select_combos_from_conf(conf_dict)
+    select_combos_from_conf(conf_dict, n_processes)
 
 
-def select_combos_from_conf(conf_dict):
+def select_combos_from_conf(conf_dict, n_processes=None):
     """Compare scores of me-combinations to thresholds, select successful
     combinations, and write results out to file.
 
     Args:
         conf_filename: filename of configuration (.json file)
+        n_processes: integer number of processes, `None` will use all of them
     """
     scores_db_filename = conf_dict['scores_db']
     pdf_filename = conf_dict['pdf_filename']
@@ -85,7 +86,8 @@ def select_combos_from_conf(conf_dict):
             scores, score_values,
             conf_dict.get('plot_emodels_per_morphology', False),
             output_dir,
-            select_perc_best)
+            select_perc_best,
+            n_processes=n_processes)
     print('Wrote pdf to %s' % os.path.abspath(pdf_filename))
 
     # write output files
@@ -112,3 +114,5 @@ def add_parser(action):
     parser = action.add_parser('select',
                                help='Select feasible me-combinations')
     parser.add_argument('conf_filename')
+    parser.add_argument('--n_processes', help='number of processes',
+                        type=int)
