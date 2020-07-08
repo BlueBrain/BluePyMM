@@ -280,6 +280,8 @@ def prepare_emodel_dirs(
             into separate subdirectories.
         continu: True if this BluePyMM run builds on a previous run, False
             otherwise. Default is False.
+        n_processes: the integer number of processes. If `None`,
+        all processes are going to be used.
 
     Return:
         A dict mapping e-models to prepared e-model directories.
