@@ -82,4 +82,5 @@ def run_combos(conf_filename, ipyp=None, ipyp_profile=None, n_processes=None):
     print('Reading configuration at %s' % conf_filename)
     conf_dict = tools.load_json(conf_filename)
 
-    run_combos_from_conf(conf_dict, ipyp, ipyp_profile, n_processes)
+    run_combos_from_conf(conf_dict, ipyp, ipyp_profile,
+                         n_processes=n_processes)
