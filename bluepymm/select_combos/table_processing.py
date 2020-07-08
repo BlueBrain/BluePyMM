@@ -269,7 +269,8 @@ def process_emodels(emodels,
                     megate_patterns,
                     skip_repaired_exemplar,
                     enable_check_opt_scores,
-                    select_perc_best):
+                    select_perc_best,
+                    n_processes=None):
 
     arg_list = [(emodel,
                  scores,
@@ -281,7 +282,7 @@ def process_emodels(emodels,
                  select_perc_best) for emodel in emodels]
 
     print('Parallelising selection processing of e-models')
-    pool = multiprocessing.Pool(maxtasksperchild=1)
+    pool = multiprocessing.Pool(maxtasksperchild=1, processes=n_processes)
     emodel_infos = {}
     for emodel, emodel_info in pool.imap(process_emodel, arg_list,
                                          chunksize=1):

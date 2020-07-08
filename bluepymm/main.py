@@ -59,7 +59,8 @@ def run(arg_list):
                               ipyp_profile=args.ipyp_profile,
                               n_processes=args.n_processes)
     elif args.action == "select":
-        select_combos.select_combos(conf_filename=args.conf_filename)
+        select_combos.select_combos(conf_filename=args.conf_filename,
+                                    n_processes=args.n_processes)
     elif args.action == "validate":
         validate_output.validate_output(conf_filename=args.conf_filename)
 
