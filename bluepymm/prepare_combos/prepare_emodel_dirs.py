@@ -302,11 +302,24 @@ def prepare_emodel_dirs(
              emodels_hoc_dir,
              emodels_in_repo,
              continu))
-    print('Parallelising preparation of e-model directories')
-    pool = multiprocessing.Pool(processes=n_processes,
-                                maxtasksperchild=1)
+
     emodel_dirs = {}
-    for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list, chunksize=1):
+    emodel_dir_dicts = []
+
+    if n_processes == 1:
+        for arg in arg_list:
+            emodel_dir_dict = prepare_emodel_dir(arg)
+            emodel_dir_dicts.append(emodel_dir_dict)
+    else:
+        print('Parallelising preparation of e-model directories')
+        pool = multiprocessing.Pool(processes=n_processes,
+                                    maxtasksperchild=1)
+        for emodel_dir_dict in pool.map(prepare_emodel_dir, arg_list,
+                                        chunksize=1):
+            emodel_dir_dicts.append(emodel_dir_dict)
+
+    for emodel_dir_dict in emodel_dir_dicts:
         for emodel, emodel_dir in emodel_dir_dict.items():
             emodel_dirs[emodel] = emodel_dir
+
     return emodel_dirs
