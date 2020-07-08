@@ -257,9 +257,10 @@ def test_prepare_emodel_dir():
 
 
 @attr('unit')
-def test_prepare_emodel_dirs():
-    """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dirs
-    based on test example 'simple1'.
+def test_prepare_emodel_dirs_single_process():
+    """prepare_combos.prepare_emodel_dirs_single_process:
+    test prepare_emodel_dirs based on test example 'simple1
+    using a single process'.
     """
     # create test directory, where output of this test will be created
     test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dirs')
@@ -301,6 +302,61 @@ def test_prepare_emodel_dirs():
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
             emodels_hoc_dir, emodels_in_repo, continu, n_processes=1)
+
+    # verify output
+    expected_ret = {emodel: os.path.join(
+        emodels_dir, emodel) for emodel in final_dict}
+    nt.assert_dict_equal(ret, expected_ret)
+    nt.assert_true(os.path.isdir(emodels_dir))
+    nt.assert_true(os.path.isdir(emodels_hoc_dir))
+
+
+@attr('unit')
+def test_prepare_emodel_dirs_multi_process():
+    """prepare_combos.prepare_emodel_dirs_multi_process:
+    test prepare_emodel_dirs based on test example 'simple1'
+    using multiprocessing.
+    """
+    # create test directory, where output of this test will be created
+    test_dir = os.path.join(TMP_DIR, 'test_prepare_emodel_dirs')
+    tools.makedirs(test_dir)
+
+    # input parameters
+    final_dict = {'emodel1': {'main_path': '.',
+                              'seed': 2,
+                              'rank': 0,
+                              'notes': '',
+                              'branch': 'emodel1',
+                              'params': {'cm': 1.0},
+                              'fitness': {'Step1.SpikeCount': 20.0},
+                              'score': 104.72906197480131,
+                              'morph_path': 'morphologies/morph1.asc'},
+                  'emodel2': {'main_path': '.',
+                              'seed': 2,
+                              'rank': 0,
+                              'notes': '',
+                              'branch': 'emodel2',
+                              'params': {'cm': 0.5},
+                              'fitness': {'Step1.SpikeCount': 20.0},
+                              'score': 104.72906197480131,
+                              'morph_path': 'morphologies/morph2.asc'}}
+    emodel_etype_map = {'emodel1': {'mm_recipe': 'emodel1',
+                                    'etype': 'etype1',
+                                    'layer': ['1', 'str1']},
+                        'emodel2': {'mm_recipe': 'emodel2',
+                                    'etype': 'etype2',
+                                    'layer': ['1', '2']}}
+    emodels_dir = os.path.join(test_dir, 'tmp/emodels/')
+    opt_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
+    emodels_hoc_dir = os.path.join(test_dir, './output/emodels_hoc/')
+    emodels_in_repo = False
+    continu = False
+
+    # run function
+    with tools.cd(TEST_DATA_DIR):
+        ret = prepare_emodel_dirs.prepare_emodel_dirs(
+            final_dict, emodel_etype_map, emodels_dir, opt_dir,
+            emodels_hoc_dir, emodels_in_repo, continu, n_processes=None)
 
     # verify output
     expected_ret = {emodel: os.path.join(
