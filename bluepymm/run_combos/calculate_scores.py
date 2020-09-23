@@ -133,6 +133,11 @@ def run_emodel_morph(
               (emodel, morph_path, emodel_dir))
 
         setup = tools.load_module('setup', emodel_dir)
+        if not hasattr(setup, 'evaluator'):
+            # for python3, to be able to import the module
+            from importlib import __import__
+            __import__("setup")
+            __import__("setup.evaluator")
 
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
