@@ -146,6 +146,12 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
     """
     setup = tools.load_module('setup', emodel_dir)
 
+    if not hasattr(setup, 'evaluator'):
+        # for python3, to be able to import the module
+        from importlib import __import__
+        __import__("setup")
+        __import__("setup.evaluator")
+
     with open(os.devnull, 'w') as devnull:
         old_stdout = sys.stdout
         try:
