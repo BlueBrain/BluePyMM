@@ -112,8 +112,6 @@ def create_exemplar_rows(
                 this_unrep_morph_dir = unrep_morph_dir
             morph_path = os.path.join(this_unrep_morph_dir, morph_filename)
 
-            check_morphology_existence(
-                morph_filename, 'unrepaired', morph_path)
 
             if skip_repaired_exemplar:
                 fullmtype = None
@@ -123,6 +121,8 @@ def create_exemplar_rows(
                 combos = [(emodel, False, False),
                           (original_emodel, True, False)]
             else:
+                check_morphology_existence(
+                    morph_filename, 'unrepaired', morph_path)
                 morph_info_list = rep_fullmtype_morph_map[
                     rep_fullmtype_morph_map['morph_name'] == morph_name].values
                 if len(morph_info_list) == 0:
@@ -362,6 +362,8 @@ def create_mm_sqlite(
     print('Merging recipe and neuronDB tables')
     morph_fullmtype_etype_map = fullmtype_morph_map.merge(
         fullmtype_etype_map, on=['fullmtype', 'layer'], how='left')
+
+    morph_fullmtype_etype_map = morph_fullmtype_etype_map.dropna()
     tools.check_no_null_nan_values(morph_fullmtype_etype_map,
                                    "morph_fullmtype_etype_map")
 
