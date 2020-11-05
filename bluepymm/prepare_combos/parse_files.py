@@ -32,6 +32,8 @@ import os
 import lxml
 import lxml.etree
 
+from bluepymm import tools
+
 
 def _parse_xml_tree(filename):
     """Read xml tree from file.
@@ -224,6 +226,11 @@ def read_circuitmvd3(circuitmvd3_path):
                    for cell_etype_id in cell_etype_ids]
     cell_morphs = [morph_ids[cell_morph_id]
                    for cell_morph_id in cell_morph_ids]
+
+    cell_layers = [tools.decode_bstring(layer) for layer in cell_layers]
+    cell_mtypes = [tools.decode_bstring(mtype) for mtype in cell_mtypes]
+    cell_etypes = [tools.decode_bstring(etype) for etype in cell_etypes]
+    cell_morphs = [tools.decode_bstring(morph) for morph in cell_morphs]
 
     # Write out in order layer, fullmtype, etype, morph
 

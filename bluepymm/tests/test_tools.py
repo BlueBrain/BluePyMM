@@ -179,3 +179,14 @@ def test_get_neuron_compliant_template_name():
     nt.assert_false(tools.check_compliance_with_neuron(name))
     ret = tools.get_neuron_compliant_template_name(name)
     nt.assert_true(tools.check_compliance_with_neuron(ret))
+
+
+@attr('unit')
+def test_decode_bstring():
+    """bluepymm.tools test the bstring decoding function."""
+    bstr_obj = b"this is a byte string"
+    decoded_bstr = "this is a byte string"
+    nt.assert_equal(tools.decode_bstring(bstr_obj), decoded_bstr)
+
+    str_obj = "this is a string"
+    nt.assert_equal(tools.decode_bstring(str_obj), str_obj)
