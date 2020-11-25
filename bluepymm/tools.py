@@ -167,6 +167,23 @@ def shorten_and_hash_string(label, keep_length=40, hash_length=9):
     return '{}_{}'.format(label[0:keep_length], hash_string[0:hash_length])
 
 
+def decode_bstring(bstr_obj):
+    """Decodes and returns the str object from bytes.
+
+    Args:
+        bstr_obj: the bytes string object
+    Returns:
+        string object if conversion is successful, input object otherwise.
+    """
+
+    try:
+        decode_bstring = bstr_obj.decode()
+    except (UnicodeDecodeError, AttributeError):
+        print("Warning: decoding of bstring failed, returning the input.")
+        return bstr_obj
+    return decode_bstring
+
+
 def get_neuron_compliant_template_name(name):
     """Get template name that is compliant with NEURON based on given name.
 
