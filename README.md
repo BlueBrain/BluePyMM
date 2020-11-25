@@ -1,6 +1,6 @@
 <img src="docs/source/logo/BluePyMMBanner.png"/>
 
-[![Build Status](https://travis-ci.org/BlueBrain/BluePyMM.svg?branch=master)](https://travis-ci.org/BlueBrain/BluePyMM)
+[![Build Status](https://travis-ci.com/BlueBrain/BluePyMM.svg?branch=master)](https://travis-ci.com/BlueBrain/BluePyMM)
 [![codecov](https://codecov.io/gh/BlueBrain/BluePyMM/branch/master/graph/badge.svg?token=G2d5ZWJbyY)](https://codecov.io/gh/BlueBrain/BluePyMM)
 [![Documentation Status](https://readthedocs.org/projects/bluepymm/badge/?version=latest)](http://bluepymm.readthedocs.io/en/latest/?badge=latest)
 
