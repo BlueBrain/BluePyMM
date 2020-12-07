@@ -389,7 +389,8 @@ def test_calculate_scores():
 
         if use_ipyp:
             ip_proc.terminate()
-            subprocess.run(["ipcluster", "stop"], check=True)
+            subprocess.Popen(["ipcluster", "stop"])
+            time.sleep(10)
 
         # verify database
         scores = {'Step1.SpikeCount': 20.0}
