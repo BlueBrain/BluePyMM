@@ -25,12 +25,14 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 import os
 import pandas
 import sqlite3
+import ipyparallel as ipp
 import json
 import subprocess
 import time
 
 from nose.plugins.attrib import attr
 import nose.tools as nt
+from nose.tools import with_setup
 
 import bluepymm.run_combos as run_combos
 from bluepymm import tools
@@ -39,6 +41,19 @@ from bluepymm import tools
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/')
+
+
+def setup_ipcluster():
+    """Starts the ipcluster engine."""
+    ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
+    # ensure that ipcluster has enough time to start
+    time.sleep(10)
+
+
+def teardown_ipcluster():
+    """Terminates the ipcluster."""
+    c = ipp.Client()
+    c.shutdown(hub=True)
 
 
 @attr('unit')
@@ -340,6 +355,7 @@ def test_expand_scores_to_score_values_table_error():
 
 
 @attr('unit')
+@with_setup(setup_ipcluster, teardown_ipcluster)
 def test_calculate_scores():
     """run_combos.calculate_scores: test calculate_scores"""
     # write database
@@ -372,12 +388,6 @@ def test_calculate_scores():
     final_dict = tools.load_json(final_dict_path)
 
     for use_ipyp in [False, True]:
-
-        if use_ipyp:
-            ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
-            # ensure that ipcluster has enough time to start
-            time.sleep(10)
-
         with tools.cd(TEST_DIR):
             run_combos.calculate_scores.calculate_scores(
                 final_dict,
@@ -386,10 +396,6 @@ def test_calculate_scores():
                 use_ipyp=use_ipyp,
                 n_processes=1
             )
-
-        if use_ipyp:
-            ip_proc.terminate()
-            subprocess.Popen(["ipcluster", "stop"])
 
         # verify database
         scores = {'Step1.SpikeCount': 20.0}
