@@ -11,6 +11,10 @@ then
 elif [ "${os}" = "Ubuntu-18.04" ]
 then
 	tox_args="${tox_args}"
+elif [ "${os}" = "bb5" ]
+then
+	. /opt/rh/rh-python36/enable
+	tox_args="${tox_args}"
 fi
 
 which python
