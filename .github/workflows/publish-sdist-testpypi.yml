@@ -1,0 +1,26 @@
+name: Publish sdist tarball to TestPyPi
+
+on:
+  push:
+
+
+jobs:
+  build-n-publish:
+    name: Build and publish on TestPyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - name: Build a source tarball
+        run:
+            python setup.py sdist
+
+      - name: Publish package to TestPyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_PASSWORD }}
+          repository_url: https://test.pypi.org/legacy/
