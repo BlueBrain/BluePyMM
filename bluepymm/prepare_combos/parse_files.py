@@ -4,18 +4,14 @@ from __future__ import print_function
 
 """
 Copyright (c) 2018, EPFL/Blue Brain Project
-
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
-
  This library is free software; you can redistribute it and/or modify it under
  the terms of the GNU Lesser General Public License version 3.0 as published
  by the Free Software Foundation.
-
  This library is distributed in the hope that it will be useful, but WITHOUT
  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
  details.
-
  You should have received a copy of the GNU Lesser General Public License
  along with this library; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -37,10 +33,8 @@ from bluepymm import tools
 
 def _parse_xml_tree(filename):
     """Read xml tree from file.
-
     Args:
         filename(str): filename of recipe (XML)
-
     Returns:
         xml.etree.ElementTree
     """
@@ -51,14 +45,11 @@ def _parse_xml_tree(filename):
 def verify_no_zero_percentage(tree_element_list):
     """Verify that none of the elements of a given list have a zero value for
     the field 'percentage'.
-
     Args:
         tree_element_list(list of xml.etree.ElementTree): list of tree elements
             with 'percentage' field
-
     Returns:
         True if no percentage of zero is found.
-
     Raises:
         ValueError: if a percentage of zero is found.
     """
@@ -72,18 +63,16 @@ def verify_no_zero_percentage(tree_element_list):
 
 def read_recipe_records(recipe_tree):
     """Parse recipe tree and yield (layer, m-type, e-type)-tuples.
-
     Args:
         recipe_tree: xml.etree.ElementTree.ElementTree or
                      xml.etree.ElementTree.Element
-
     Yields:
         (layer, m-type, e-type)-tuples
     """
-    for layer in recipe_tree.findall('NeuronTypes')[0].getchildren():
-        for mtype in layer.getchildren():
+    for layer in list(recipe_tree.findall('NeuronTypes')[0]):
+        for mtype in list(layer):
             if mtype.tag == "StructuralType":
-                for etype in mtype.getchildren():
+                for etype in list(mtype):
                     if etype.tag == "ElectroType":
                         verify_no_zero_percentage([layer, mtype, etype])
                         yield (layer.attrib['id'],
@@ -94,10 +83,8 @@ def read_recipe_records(recipe_tree):
 def read_mm_recipe(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
-
     Args:
         recipe_filename(str): filename of recipe (XML/YAML)
-
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
@@ -112,10 +99,8 @@ def read_mm_recipe(recipe_filename):
 def read_mm_recipe_yaml(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
-
     Args:
         recipe_filename(str): filename of recipe (YAML)
-
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
@@ -140,10 +125,8 @@ def read_mm_recipe_yaml(recipe_filename):
 def read_mm_recipe_xml(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
-
     Args:
         recipe_filename(str): filename of recipe (XML)
-
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
@@ -155,11 +138,9 @@ def read_mm_recipe_xml(recipe_filename):
 def read_morph_records(morph_tree):
     """Parse morphology tree and yield (name, fullmtype, mtype, msubtype,
     layer)-tuples.
-
     Args:
         morph_tree: xml.etree.ElementTree.ElementTree or
                     xml.etree.ElementTree.Element
-
     Yields:
         (name, fullmtype, mtype, msubtype, layer)-tuples
     """
@@ -175,10 +156,8 @@ def read_morph_records(morph_tree):
 def read_mtype_morph_map(neurondb_filename):
     """Read morphology database and return a pandas.DataFrame with all
     morphology records.
-
     Args:
         neurondb_filename(str): filename of morphology database (XML)
-
     Returns:
         A pandas.DataFrame with field "morph_name", "fullmtype", "mtype",
         "submtype", "layer".
@@ -253,7 +232,6 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
     or "morph_name" in the e-model e-type map, the regular expression ".*" is
     assumed.
-
     Args:
         emodel_etype_map: A dict mapping e-models to a dict with keys
             "mm_recipe" and "layer". Optional additional keys are "etype",
@@ -261,7 +239,6 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
             In absence of these keys, the regular expression ".*" is assumed.
         fullmtypes: A set of unique full m-types
         etypes: A set of unique e-types
-
     Returns:
         A pandas.DataFrame with fields 'emodel', 'layer', 'fullmtype', 'etype',
         'morph_regex', and 'original_emodel'. Each row corresponds to a unique
