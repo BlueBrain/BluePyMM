@@ -322,8 +322,7 @@ def process_emodel(args):
         - mtypes: pandas.DataFrame with tested m-types
 
         None:
-        - if boolean skip_repaired_exemplar is set to False, and no repaired
-          exemplars are available,
+        - if boolean skip_repaired_exemplar is set to False, and no repaired exemplars are available
         - if the e-model was not run on any released morphology
 
     Raises:

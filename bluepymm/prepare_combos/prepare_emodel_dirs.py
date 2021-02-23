@@ -193,13 +193,10 @@ def prepare_emodel_dir(input_args):
             - emodel_dict: dict with all e-model parameters
             - emodels_dir: directory with all e-models
             - opt_dir: directory with all opt e-models (TODO: clarify)
-            - hoc_dir: absolute path to the directory to which the .hoc files
-                will be written out
-            - emodels_in_repo: True if the input e-models are organized in
-                separate branches of a git repository, false if the e-models
-                are organized into separate subdirectories.
-            - continu: True if this BluePyMM run builds on a previous run,
-                False otherwise
+            - hoc_dir: absolute path to the directory to which the .hoc files will be written out
+            - emodels_in_repo: True if the input e-models are organized in separate branches of 
+            a git repository, false if the e-models are organized into separate subdirectories.
+            - continu: True if this BluePyMM run builds on a previous run, False otherwise
 
     Returns:
         A dict mapping the e-model and the original e-model to the e-model dir

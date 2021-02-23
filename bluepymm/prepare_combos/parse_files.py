@@ -45,11 +45,14 @@ def _parse_xml_tree(filename):
 def verify_no_zero_percentage(tree_element_list):
     """Verify that none of the elements of a given list have a zero value for
     the field 'percentage'.
+
     Args:
         tree_element_list(list of xml.etree.ElementTree): list of tree elements
             with 'percentage' field
+
     Returns:
         True if no percentage of zero is found.
+
     Raises:
         ValueError: if a percentage of zero is found.
     """
@@ -63,9 +66,11 @@ def verify_no_zero_percentage(tree_element_list):
 
 def read_recipe_records(recipe_tree):
     """Parse recipe tree and yield (layer, m-type, e-type)-tuples.
+
     Args:
         recipe_tree: xml.etree.ElementTree.ElementTree or
                      xml.etree.ElementTree.Element
+
     Yields:
         (layer, m-type, e-type)-tuples
     """
@@ -83,8 +88,10 @@ def read_recipe_records(recipe_tree):
 def read_mm_recipe(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
+
     Args:
         recipe_filename(str): filename of recipe (XML/YAML)
+
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
@@ -99,8 +106,10 @@ def read_mm_recipe(recipe_filename):
 def read_mm_recipe_yaml(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
+
     Args:
         recipe_filename(str): filename of recipe (YAML)
+
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
@@ -125,8 +134,10 @@ def read_mm_recipe_yaml(recipe_filename):
 def read_mm_recipe_xml(recipe_filename):
     """Read a BBP builder recipe and return a pandas.DataFrame with all
     possible (layer, m-type, e-type)-combinations.
+
     Args:
         recipe_filename(str): filename of recipe (XML)
+
     Returns:
         A pandas.DataFrame with fields "layer", "fullmtype", and "etype".
     """
@@ -138,9 +149,11 @@ def read_mm_recipe_xml(recipe_filename):
 def read_morph_records(morph_tree):
     """Parse morphology tree and yield (name, fullmtype, mtype, msubtype,
     layer)-tuples.
+
     Args:
         morph_tree: xml.etree.ElementTree.ElementTree or
                     xml.etree.ElementTree.Element
+
     Yields:
         (name, fullmtype, mtype, msubtype, layer)-tuples
     """
@@ -232,6 +245,7 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     result to a pandas.DataFrame. In the absence of the key "etype", "mtype",
     or "morph_name" in the e-model e-type map, the regular expression ".*" is
     assumed.
+
     Args:
         emodel_etype_map: A dict mapping e-models to a dict with keys
             "mm_recipe" and "layer". Optional additional keys are "etype",
@@ -239,6 +253,7 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
             In absence of these keys, the regular expression ".*" is assumed.
         fullmtypes: A set of unique full m-types
         etypes: A set of unique e-types
+
     Returns:
         A pandas.DataFrame with fields 'emodel', 'layer', 'fullmtype', 'etype',
         'morph_regex', and 'original_emodel'. Each row corresponds to a unique
@@ -247,7 +262,8 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     morph_name_regexs_cache = {}
 
     def read_records():
-        """Read records"""
+        """Read records
+        """
         for original_emodel, etype_map in emodel_etype_map.items():
             etype_regex = re.compile(etype_map.get('etype', '.*'))
             mtype_regex = re.compile(etype_map.get('mtype', '.*'))

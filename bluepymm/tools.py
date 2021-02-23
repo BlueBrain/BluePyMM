@@ -191,7 +191,7 @@ def get_neuron_compliant_template_name(name):
         name: string
 
     Returns:
-        If `name' is NEURON-compliant, the same string is return. Otherwise,
+        If `name` is NEURON-compliant, the same string is return. Otherwise,
         hyphens are replaced by underscores and if appropriate, the string is
         shortened. Leading numbers are removed.
     """
