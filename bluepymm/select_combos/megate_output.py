@@ -99,6 +99,7 @@ def save_megate_results(extneurondb, output_dir,
                 #        extneurondb[null_rows]))
                 print("WARNING ! There are rows with None for "
                       "holding current: %s" % str(extneurondb[null_rows]))
+                extneurondb = extneurondb[~extneurondb[extra_values_key].isnull()]
 
     extneurondb.to_csv(
         mecombo_emodel_path,
