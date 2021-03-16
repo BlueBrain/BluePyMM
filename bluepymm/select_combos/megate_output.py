@@ -81,7 +81,6 @@ def save_megate_results(extneurondb, output_dir,
         extneurondb = extneurondb.sort_values(sort_key).reset_index(drop=True)
 
     extneurondb_path = os.path.join(output_dir, extneurondb_filename)
-    _write_extneurondbdat(extneurondb, extneurondb_path)
     print(
         'Wrote extneurondb.dat to {}'.format(
             os.path.abspath(extneurondb_path)))
@@ -99,8 +98,11 @@ def save_megate_results(extneurondb, output_dir,
                 #        extneurondb[null_rows]))
                 print("WARNING ! There are rows with None for "
                       "holding current: %s" % str(extneurondb[null_rows]))
-                extneurondb = extneurondb[~extneurondb[extra_values_key].isnull()]
+                extneurondb = extneurondb[
+                    ~extneurondb[extra_values_key].isnull()
+                ]
 
+    _write_extneurondbdat(extneurondb, extneurondb_path)
     extneurondb.to_csv(
         mecombo_emodel_path,
         columns=[
