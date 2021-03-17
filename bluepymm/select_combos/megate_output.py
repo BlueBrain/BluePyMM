@@ -48,7 +48,7 @@ def save_megate_results(extneurondb, output_dir,
                         mecombo_emodel_filename='mecombo_emodel.tsv',
                         sort_key=None,
                         make_names_neuron_compliant=False,
-                        extra_value_errors=True):
+                        extra_value_errors=False):
     """Write results of megating to two files.
 
     Args:

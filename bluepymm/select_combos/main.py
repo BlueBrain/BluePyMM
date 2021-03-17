@@ -97,7 +97,8 @@ def select_combos_from_conf(conf_dict, n_processes=None):
             ext_neurondb,
             output_dir,
             sort_key='combo_name',
-            make_names_neuron_compliant=compliant)
+            make_names_neuron_compliant=compliant,
+            extra_value_errors=conf_dict.get('extra_value_errors', False))
 
     emodels_hoc_path = conf_dict['emodels_hoc_dir']
 
