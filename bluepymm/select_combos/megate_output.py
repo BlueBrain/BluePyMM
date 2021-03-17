@@ -92,10 +92,9 @@ def save_megate_results(extneurondb, output_dir,
         if null_rows.sum() > 0:
             if extra_value_errors:
                 # TODO reenable this for release !
-                raise ValueError(
-                   "There are rows with None for "
-                   "holding current: %s" % str(
-                       extneurondb[null_rows]))
+                raise ValueError("There are rows with None for "
+                                 "holding current: %s" % str(
+                                     extneurondb[null_rows]))
             else:
                 print("WARNING ! There are rows with None for "
                       "holding current: %s" % str(extneurondb[null_rows]))
