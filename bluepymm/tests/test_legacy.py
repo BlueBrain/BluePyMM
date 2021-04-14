@@ -34,6 +34,11 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_legacy')
 
 
+def teardown_module():
+    """Remove the temporary files."""
+    shutil.rmtree(TMP_DIR)
+
+
 def _new_prepare_json(original_filename, test_dir):
     """Helper function to prepare new configuration file for prepare_combos."""
     config = bluepymm.tools.load_json(original_filename)
