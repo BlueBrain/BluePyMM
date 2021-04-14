@@ -34,6 +34,11 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_prepare_emodel_dirs')
 
 
+def teardown_module():
+    """Remove the temporary files."""
+    shutil.rmtree(TMP_DIR)
+
+
 @attr('unit')
 def test_check_emodels_in_repo():
     """prepare_combos.prepare_emodel_dirs: test check_emodels_in_repo.
