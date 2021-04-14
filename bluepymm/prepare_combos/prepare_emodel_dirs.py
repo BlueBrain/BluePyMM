@@ -33,10 +33,6 @@ import tarfile
 from bluepymm import tools
 
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, '../templates')
-
-
 def check_emodels_in_repo(conf_dict):
     """Check whether input e-models are organized in branches of a repository.
 
@@ -123,7 +119,7 @@ def get_emodel_dicts(emodels_dir, final_json_path, emodel_etype_map_path):
 
 
 def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
-                              template, template_dir=None, morph_path=None,
+                              template, morph_path=None,
                               model_name=None):
     """Create .hoc code for a given e-model based on code from
     '<emodel_dir>/setup', e-model parameters and a given template, and write
@@ -137,8 +133,6 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
                  out.
         emodel_params: a dict with e-model parameters
         template: template file used for the creation of the .hoc file
-        template_dir: directory that contains the template. If None, a template
-                      provided by BluePyMM is used. Default is None.
         morph_path: path to morphology file, used to overwrite the original
                     morphology of an e-model. Default is None.
         model_name: used to name the .hoc file. If None, the e-model name is
@@ -167,8 +161,7 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
             sys.stdout = old_stdout
 
     # create hoc code
-    if template_dir is None:
-        template_dir = TEMPLATE_DIR
+    template_dir = os.path.dirname(template)
 
     for mechanism in evaluator.cell_model.mechanisms:
         if 'Stoch' in mechanism.prefix:
@@ -195,6 +188,7 @@ def prepare_emodel_dir(input_args):
             - opt_dir: directory with all opt e-models (TODO: clarify)
             - hoc_dir: absolute path to the directory to which the .hoc
             files will be written out
+            - hoc_template: path to the jinja hoc template
             - emodels_in_repo: True if the input e-models are organized
             in separate branches of
             a git repository, false if the e-models are organized into
@@ -206,7 +200,7 @@ def prepare_emodel_dir(input_args):
         A dict mapping the e-model and the original e-model to the e-model dir
     """
     original_emodel, emodel, emodel_dict, emodels_dir, \
-        opt_dir, hoc_dir, emodels_in_repo, continu = input_args
+        opt_dir, hoc_dir, hoc_template, emodels_in_repo, continu = input_args
 
     try:
         print('Preparing: %s' % emodel)
@@ -245,7 +239,7 @@ def prepare_emodel_dir(input_args):
 
                     create_and_write_hoc_file(
                         emodel, emodel_dir, hoc_dir, emodel_dict['params'],
-                        'cell_template_neurodamus.jinja2')
+                        template=hoc_template)
 
                 os.remove(tar_filename)
 
@@ -262,6 +256,7 @@ def prepare_emodel_dirs(
     opt_dir,
     emodels_hoc_dir,
     emodels_in_repo,
+    hoc_template,
     continu=False,
     n_processes=None,
 ):
@@ -279,6 +274,7 @@ def prepare_emodel_dirs(
         emodels_in_repo: True if the input e-models are organized in separate
             branches of a git repository, false if the e-models are organized
             into separate subdirectories.
+        hoc_template: path to the jinja hoc template.
         continu: True if this BluePyMM run builds on a previous run, False
             otherwise. Default is False.
         n_processes: the integer number of processes. If `None`,
@@ -301,6 +297,7 @@ def prepare_emodel_dirs(
              emodels_dir,
              opt_dir,
              emodels_hoc_dir,
+             hoc_template,
              emodels_in_repo,
              continu))
 

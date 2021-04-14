@@ -73,7 +73,7 @@ def load_combinations_dict(mecombo_emodel_path):
 
 
 def run_create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
-                                  template, template_dir, morph_path,
+                                  template, morph_path,
                                   model_name):
     """Run create_and_write_hoc_file in isolated environment.
 
@@ -83,7 +83,7 @@ def run_create_and_write_hoc_file(emodel, setup_dir, hoc_dir, emodel_params,
     pool = multiprocessing.pool.Pool(1, maxtasksperchild=1)
     pool.apply(prepare_combos.prepare_emodel_dirs.create_and_write_hoc_file,
                (emodel, setup_dir, hoc_dir, emodel_params, template,
-                template_dir, morph_path, model_name))
+                morph_path, model_name))
     pool.terminate()
     pool.join()
     del pool
@@ -112,8 +112,7 @@ def create_hoc_files(combinations_dict, emodels_dir, final_dict, template,
                                       setup_dir,
                                       hoc_dir,
                                       emodel_params,
-                                      os.path.basename(template),
-                                      os.path.dirname(template),
+                                      template,
                                       morph_path,
                                       combination)
 

@@ -168,7 +168,7 @@ def test_run_create_and_write_hoc_file():
         bluepymm.tools.makedirs(hoc_dir)
         bluepymm.legacy.create_hoc_files.run_create_and_write_hoc_file(
             emodel, emodel_dir, hoc_dir, emodel_parameters, template,
-            template_dir, morph_path, model_name)
+            morph_path, model_name)
 
         # verify output directory. TODO: test hoc file contents
         expected_nb_files = 1
