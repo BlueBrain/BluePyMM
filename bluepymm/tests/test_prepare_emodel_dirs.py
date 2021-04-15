@@ -32,6 +32,7 @@ from bluepymm import tools
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_prepare_emodel_dirs')
+TEMPLATE_DIR = os.path.join(BASE_DIR, '../templates')
 
 
 def teardown_module():
@@ -238,6 +239,10 @@ def test_prepare_emodel_dir():
     emodels_dir = os.path.join(test_dir, 'tmp/emodels/')
     opt_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
     hoc_dir = os.path.join(test_dir, 'output/emodels_hoc/')
+    hoc_template = os.path.join(
+        TEMPLATE_DIR, "cell_template_neurodamus.jinja2"
+    )
+    hoc_template = os.path.abspath(hoc_template)
     emodels_in_repo = False
     continu = False
 
@@ -246,7 +251,8 @@ def test_prepare_emodel_dir():
         for path in [emodels_dir, hoc_dir]:
             tools.makedirs(path)
         arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
-                    os.path.abspath(hoc_dir), emodels_in_repo, continu)
+                    os.path.abspath(hoc_dir),
+                    hoc_template, emodels_in_repo, continu)
         ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
 
         # test side effects: creation of .hoc-file
@@ -299,6 +305,10 @@ def test_prepare_emodel_dirs_single_process():
     emodels_dir = os.path.join(test_dir, 'tmp/emodels/')
     opt_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
     emodels_hoc_dir = os.path.join(test_dir, './output/emodels_hoc/')
+    hoc_template = os.path.join(
+        TEMPLATE_DIR, "cell_template_neurodamus.jinja2"
+    )
+    hoc_template = os.path.abspath(hoc_template)
     emodels_in_repo = False
     continu = False
 
@@ -306,7 +316,8 @@ def test_prepare_emodel_dirs_single_process():
     with tools.cd(TEST_DATA_DIR):
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
-            emodels_hoc_dir, emodels_in_repo, continu, n_processes=1)
+            emodels_hoc_dir, emodels_in_repo, hoc_template, continu,
+            n_processes=1)
 
     # verify output
     expected_ret = {emodel: os.path.join(
@@ -354,6 +365,10 @@ def test_prepare_emodel_dirs_multi_process():
     emodels_dir = os.path.join(test_dir, 'tmp/emodels/')
     opt_dir = os.path.join(TEST_DATA_DIR, 'data/emodels_dir/subdir/')
     emodels_hoc_dir = os.path.join(test_dir, './output/emodels_hoc/')
+    hoc_template = os.path.join(
+        TEMPLATE_DIR, "cell_template_neurodamus.jinja2"
+    )
+    hoc_template = os.path.abspath(hoc_template)
     emodels_in_repo = False
     continu = False
 
@@ -361,7 +376,8 @@ def test_prepare_emodel_dirs_multi_process():
     with tools.cd(TEST_DATA_DIR):
         ret = prepare_emodel_dirs.prepare_emodel_dirs(
             final_dict, emodel_etype_map, emodels_dir, opt_dir,
-            emodels_hoc_dir, emodels_in_repo, continu, n_processes=None)
+            emodels_hoc_dir, emodels_in_repo, hoc_template, continu,
+            n_processes=None)
 
     # verify output
     expected_ret = {emodel: os.path.join(
