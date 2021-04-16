@@ -48,7 +48,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path, n_processes):
         conf_dict['emodel_etype_map_path'])
 
     if "template" in conf_dict.keys():
-        hoc_template = conf_dict["template"]
+        hoc_template = os.path.abspath(conf_dict["template"])
     else:
         base_dir = os.path.abspath(os.path.dirname(__file__))
         template_dir = os.path.join(base_dir, '../templates')
