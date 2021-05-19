@@ -4,18 +4,14 @@ from __future__ import print_function
 
 """
 Copyright (c) 2018, EPFL/Blue Brain Project
-
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
-
  This library is free software; you can redistribute it and/or modify it under
  the terms of the GNU Lesser General Public License version 3.0 as published
  by the Free Software Foundation.
-
  This library is distributed in the hope that it will be useful, but WITHOUT
  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
  details.
-
  You should have received a copy of the GNU Lesser General Public License
  along with this library; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
@@ -37,10 +33,8 @@ from bluepymm import tools
 
 def _parse_xml_tree(filename):
     """Read xml tree from file.
-
     Args:
         filename(str): filename of recipe (XML)
-
     Returns:
         xml.etree.ElementTree
     """
@@ -80,10 +74,10 @@ def read_recipe_records(recipe_tree):
     Yields:
         (layer, m-type, e-type)-tuples
     """
-    for layer in recipe_tree.findall('NeuronTypes')[0].getchildren():
-        for mtype in layer.getchildren():
+    for layer in list(recipe_tree.findall('NeuronTypes')[0]):
+        for mtype in list(layer):
             if mtype.tag == "StructuralType":
-                for etype in mtype.getchildren():
+                for etype in list(mtype):
                     if etype.tag == "ElectroType":
                         verify_no_zero_percentage([layer, mtype, etype])
                         yield (layer.attrib['id'],
@@ -175,10 +169,8 @@ def read_morph_records(morph_tree):
 def read_mtype_morph_map(neurondb_filename):
     """Read morphology database and return a pandas.DataFrame with all
     morphology records.
-
     Args:
         neurondb_filename(str): filename of morphology database (XML)
-
     Returns:
         A pandas.DataFrame with field "morph_name", "fullmtype", "mtype",
         "submtype", "layer".
@@ -270,7 +262,8 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
     morph_name_regexs_cache = {}
 
     def read_records():
-        """Read records"""
+        """Read records
+        """
         for original_emodel, etype_map in emodel_etype_map.items():
             etype_regex = re.compile(etype_map.get('etype', '.*'))
             mtype_regex = re.compile(etype_map.get('mtype', '.*'))

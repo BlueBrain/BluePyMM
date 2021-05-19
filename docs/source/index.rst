@@ -1,6 +1,10 @@
-Contents:
+.. include:: ../../README.rst
+   :end-before: .. substitutions
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
 
-   modules.rst
+   Home <self>
+   bluepymm.rst
+
+.. |banner| image:: /logo/BluePyMMBanner.png

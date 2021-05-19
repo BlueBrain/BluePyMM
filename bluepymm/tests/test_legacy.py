@@ -34,6 +34,11 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_legacy')
 
 
+def teardown_module():
+    """Remove the temporary files."""
+    shutil.rmtree(TMP_DIR)
+
+
 def _new_prepare_json(original_filename, test_dir):
     """Helper function to prepare new configuration file for prepare_combos."""
     config = bluepymm.tools.load_json(original_filename)
@@ -163,7 +168,7 @@ def test_run_create_and_write_hoc_file():
         bluepymm.tools.makedirs(hoc_dir)
         bluepymm.legacy.create_hoc_files.run_create_and_write_hoc_file(
             emodel, emodel_dir, hoc_dir, emodel_parameters, template,
-            template_dir, morph_path, model_name)
+            morph_path, model_name)
 
         # verify output directory. TODO: test hoc file contents
         expected_nb_files = 1

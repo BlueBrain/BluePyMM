@@ -47,12 +47,21 @@ def prepare_emodels(conf_dict, continu, scores_db_path, n_processes):
         tmp_emodels_dir, conf_dict['final_json_path'],
         conf_dict['emodel_etype_map_path'])
 
+    if "template" in conf_dict.keys():
+        hoc_template = os.path.abspath(conf_dict["template"])
+    else:
+        base_dir = os.path.abspath(os.path.dirname(__file__))
+        template_dir = os.path.join(base_dir, '../templates')
+        hoc_template = os.path.join(
+            template_dir, 'cell_template_neurodamus.jinja2')
+        hoc_template = os.path.abspath(hoc_template)
     print('Preparing emodels in %s' % emodels_dir)
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
     # Clone the emodels repo and prepare the dirs for all the emodels
     emodel_dirs = prepare_dirs.prepare_emodel_dirs(
         final_dict, emodel_etype_map, emodels_dir, opt_dir, emodels_hoc_dir,
-        emodels_in_repo, continu=continu, n_processes=n_processes)
+        emodels_in_repo, hoc_template, continu=continu,
+        n_processes=n_processes)
 
     if not continu:
         print('Creating sqlite db at %s' % scores_db_path)

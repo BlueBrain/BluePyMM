@@ -37,6 +37,7 @@ from nose.tools import with_setup
 import bluepymm.run_combos as run_combos
 from bluepymm import tools
 
+nt.assert_equal.__self__.maxDiff = None
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')

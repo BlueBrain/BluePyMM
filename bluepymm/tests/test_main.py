@@ -35,6 +35,11 @@ TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/main')
 
 
+def teardown_module():
+    """Remove the temporary files."""
+    shutil.rmtree(TMP_DIR)
+
+
 def _verify_emodel_json(filename, output_dir, nb_emodels):
     """Helper function to verify the emodel json file"""
     data_json = os.path.join(output_dir, filename)
