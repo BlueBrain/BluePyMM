@@ -1,2 +1,6 @@
 include versioneer.py
 include bluepymm/_version.py
+include LICENSE.txt
+include COPYING
+include COPYING.lesser
+include AUTHORS.txt
