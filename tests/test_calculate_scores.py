@@ -339,9 +339,7 @@ def ipp_cluster_fixture():
     time.sleep(10)
     yield "resource"
     print("teardown")
-    c = ipp.Client()
-    c.shutdown(hub=True)
-
+    ip_proc.terminate()
 
 
 @pytest.mark.unit
