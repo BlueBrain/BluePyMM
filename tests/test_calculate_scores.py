@@ -332,13 +332,11 @@ def test_expand_scores_to_score_values_table_error():
 
 @pytest.fixture()
 def ipp_cluster_fixture():
-    """Starts and terminas the ipcluster engine."""
-    print("setup")
+    """Starts and terminates the ipcluster engine."""
     ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
     # ensure that ipcluster has enough time to start
-    time.sleep(10)
-    yield "resource"
-    print("teardown")
+    time.sleep(15)
+    yield
     ip_proc.terminate()
 
 
