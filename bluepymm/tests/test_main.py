@@ -25,8 +25,6 @@ import os
 import shutil
 import filecmp
 
-import nose.tools as nt
-
 import bluepymm
 
 
@@ -43,9 +41,9 @@ def teardown_module():
 def _verify_emodel_json(filename, output_dir, nb_emodels):
     """Helper function to verify the emodel json file"""
     data_json = os.path.join(output_dir, filename)
-    nt.assert_true(os.path.isfile(data_json))
+    assert os.path.isfile(data_json)
     data = bluepymm.tools.load_json(data_json)
-    nt.assert_equal(len(data), nb_emodels)
+    assert len(data) == nb_emodels
     return data
 
 
@@ -53,24 +51,24 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
                                   nb_emodels):
     """Helper function to verify the output of the prepare combos step"""
     # TODO: test database contents
-    nt.assert_true(os.path.isfile(scores_db))
+    assert os.path.isfile(scores_db)
 
-    nt.assert_true(os.path.isdir(emodels_hoc_dir))
+    assert os.path.isdir(emodels_hoc_dir)
     hoc_files = os.listdir(emodels_hoc_dir)
-    nt.assert_equal(len(hoc_files), nb_emodels)
+    assert len(hoc_files) == nb_emodels
     for hoc_file in hoc_files:
-        nt.assert_equal(hoc_file[-4:], '.hoc')
+        assert hoc_file.endswith('.hoc')
 
     _verify_emodel_json('final.json', output_dir, nb_emodels)
     emodel_dirs = _verify_emodel_json('emodel_dirs.json', output_dir,
                                       nb_emodels)
     for emodel in emodel_dirs:
-        nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
+        assert os.path.isdir(emodel_dirs[emodel])
 
 
 def _verify_run_combos_output(scores_db):
     """Helper function to verify the output of the run combos step"""
-    nt.assert_true(os.path.isfile(scores_db))
+    assert os.path.isfile(scores_db)
 
     # TODO: test database contents
     # Disabled for now, there are absolute paths in db
@@ -100,7 +98,7 @@ def _verify_select_combos_output(benchmark_dir, output_dir):
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
-    nt.assert_equal(len(matches[0]), len(files))
+    assert len(matches[0]) == len(files)
 
 
 def _new_prepare_json(original_filename, test_dir):

@@ -30,34 +30,18 @@ import json
 import subprocess
 import time
 
-from nose.plugins.attrib import attr
-import nose.tools as nt
-from nose.tools import with_setup
+import pytest
 
 import bluepymm.run_combos as run_combos
 from bluepymm import tools
 
-nt.assert_equal.__self__.maxDiff = None
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/')
 
 
-def setup_ipcluster():
-    """Starts the ipcluster engine."""
-    ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
-    # ensure that ipcluster has enough time to start
-    time.sleep(10)
-
-
-def teardown_ipcluster():
-    """Terminates the ipcluster."""
-    c = ipp.Client()
-    c.shutdown(hub=True)
-
-
-@attr('unit')
+@pytest.mark.unit
 def test_run_emodel_morph_isolated():
     """run_combos.calculate_scores: test run_emodel_morph_isolated."""
     uid = 0
@@ -83,10 +67,10 @@ def test_run_emodel_morph_isolated():
                                      'threshold_current': None},
                     'scores': {'Step1.SpikeCount': 20.0},
                     'uid': 0}
-    nt.assert_dict_equal(ret, expected_ret)
+    assert ret == expected_ret
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_run_emodel_morph_isolated_exception():
     """run_combos.calculate_scores: test run_emodel_morph_isolated exception.
     """
@@ -115,13 +99,13 @@ def test_run_emodel_morph_isolated_exception():
                     'extra_values': None,
                     'scores': None,
                     'uid': 0}
-    nt.assert_list_equal(sorted(ret.keys()), sorted(expected_ret.keys()))
+    assert ret.keys() == expected_ret.keys()
     for k in ['extra_values', 'scores', 'uid']:
-        nt.assert_equal(ret[k], expected_ret[k])
-    nt.assert_true(emodel in ret['exception'])
+        assert ret[k] == expected_ret[k]
+    assert emodel in ret['exception']
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_run_emodel_morph():
     """run_combos.calculate_scores: test run_emodel_morph."""
     emodel = 'emodel1'
@@ -143,11 +127,11 @@ def test_run_emodel_morph():
     expected_scores = {'Step1.SpikeCount': 20.0}
     expected_extra_values = {'holding_current': None,
                              'threshold_current': None}
-    nt.assert_dict_equal(ret[0], expected_scores)
-    nt.assert_dict_equal(ret[1], expected_extra_values)
+    assert ret[0] == expected_scores
+    assert ret[1] == expected_extra_values
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_run_emodel_morph_exception():
     """run_combos.calculate_scores: test run_emodel_morph exception."""
     emodel = 'emodel_doesnt_exist'
@@ -158,13 +142,12 @@ def test_run_emodel_morph_exception():
     morph_dir = os.path.join(TEST_DIR, 'data/morphs')
     morph_path = os.path.join(morph_dir, '%s.asc' % morph_name)
 
-    nt.assert_raises(
-        Exception,
-        run_combos.calculate_scores.run_emodel_morph,
-        emodel,
-        emodel_dir,
-        emodel_params,
-        morph_path)
+    with pytest.raises(Exception):
+        run_combos.calculate_scores.run_emodel_morph(
+            emodel,
+            emodel_dir,
+            emodel_params,
+            morph_path)
 
 
 def _write_test_scores_database(row, testsqlite_filename):
@@ -174,7 +157,7 @@ def _write_test_scores_database(row, testsqlite_filename):
         df.to_sql('scores', conn, if_exists='replace')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_arg_list():
     """run_combos.calculate_scores: test create_arg_list."""
     # write database
@@ -219,10 +202,10 @@ def test_create_arg_list():
                      params,
                      os.path.abspath(morph_path),
                      0, extra_values_error)]
-    nt.assert_list_equal(ret, expected_ret)
+    assert ret == expected_ret
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_arg_list_exception():
     """run_combos.calculate_scores: test create_arg_list for ValueError."""
     # write database
@@ -253,12 +236,11 @@ def test_create_arg_list_exception():
     final_dict = {emodel: {'params': params}}
 
     # emodel is None -> raises ValueError
-    nt.assert_raises(
-        ValueError,
-        run_combos.calculate_scores.create_arg_list,
-        testsqlite_filename,
-        emodel_dirs,
-        final_dict)
+    with pytest.raises(ValueError):
+        run_combos.calculate_scores.create_arg_list(
+            testsqlite_filename,
+            emodel_dirs,
+            final_dict)
 
 
 def _dict_factory(cursor, row):
@@ -269,7 +251,7 @@ def _dict_factory(cursor, row):
     return d
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_save_scores():
     """run_combos.calculate_scores: test save_scores"""
     # create test database with single entry 'row'
@@ -302,20 +284,15 @@ def test_save_scores():
         scores_db.row_factory = _dict_factory
         scores_cursor = scores_db.execute('SELECT * FROM scores')
         db_row = scores_cursor.fetchall()[0]
-        nt.assert_dict_equal(db_row, expected_db_row)
+        assert db_row == expected_db_row
 
     # value already updated -> error
-    nt.assert_raises(
-        ValueError,
-        run_combos.calculate_scores.save_scores,
-        testsqlite_filename,
-        uid,
-        scores,
-        extra_values,
-        exception)
+    with pytest.raises(ValueError):
+        run_combos.calculate_scores.save_scores(
+            testsqlite_filename, uid, scores, extra_values, exception
+        )
 
-
-@attr('unit')
+@pytest.mark.unit
 def test_expand_scores_to_score_values_table():
     """run_combos.calculate_scores: test expand_scores_to_score_values_table"""
     # create database
@@ -336,7 +313,7 @@ def test_expand_scores_to_score_values_table():
     pandas.testing.assert_frame_equal(score_values, expected_df)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_expand_scores_to_score_values_table_error():
     """run_combos.calculate_scores: test expand_scores_to_score_values_table 2
     """
@@ -349,15 +326,26 @@ def test_expand_scores_to_score_values_table_error():
     _write_test_scores_database(row, db_path)
 
     # process database
-    nt.assert_raises(
-        Exception,
-        run_combos.calculate_scores.expand_scores_to_score_values_table,
-        db_path)
+    with pytest.raises(Exception):
+        run_combos.calculate_scores.expand_scores_to_score_values_table(db_path)
 
 
-@attr('unit')
-@with_setup(setup_ipcluster, teardown_ipcluster)
-def test_calculate_scores():
+@pytest.fixture()
+def ipp_cluster_fixture():
+    """Starts and terminas the ipcluster engine."""
+    print("setup")
+    ip_proc = subprocess.Popen(["ipcluster", "start", "-n=2"])
+    # ensure that ipcluster has enough time to start
+    time.sleep(10)
+    yield "resource"
+    print("teardown")
+    c = ipp.Client()
+    c.shutdown(hub=True)
+
+
+
+@pytest.mark.unit
+def test_calculate_scores(ipp_cluster_fixture):
     """run_combos.calculate_scores: test calculate_scores"""
     # write database
     test_db_filename = os.path.join(TMP_DIR, 'test4.sqlite')
@@ -418,17 +406,16 @@ def test_calculate_scores():
             scores_db.row_factory = _dict_factory
             scores_cursor = scores_db.execute('SELECT * FROM scores')
             db_row = scores_cursor.fetchall()[0]
-            nt.assert_dict_equal(db_row, expected_db_row)
+            assert db_row == expected_db_row
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_apical_point():
-    """run_combos.calculate_scores: test read_apical_point"""
-
+    """run_combos.calculate_scores: test read_apical_point."""
     morph_name = 'morph'
     morph_dir = os.path.join(TEST_DIR, 'data/morphs')
 
     apical_point_isec = run_combos.calculate_scores.read_apical_point(
         morph_dir, morph_name)
 
-    nt.assert_equal(apical_point_isec, 0)
+    assert apical_point_isec == 0

@@ -22,30 +22,29 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 
 import re
 
-import nose.tools as nt
-from nose.plugins.attrib import attr
+import pytest
 
 from bluepymm.select_combos import process_megate_config as proc_config
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_join_regex():
     """select_combos.process_megate_config: test join_regex"""
     test_list = ['one', '.*', 'three']
     joined_list = '(one$)|(.*$)|(three$)'
     ret = proc_config.join_regex(test_list)
-    nt.assert_equal(ret, re.compile(joined_list))
+    assert ret == re.compile(joined_list)
 
 
 def _test_read_to_skip_features(skip_features, conf_dict):
     """Test read_to_skip_features helper function"""
     r_patterns, r_features = proc_config.read_to_skip_features(conf_dict)
-    nt.assert_equal(skip_features, r_features)
+    assert skip_features == r_features
     exp_patterns = [re.compile(f) for f in skip_features]
-    nt.assert_equal(exp_patterns, r_patterns)
+    assert exp_patterns == r_patterns
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_to_skip_features():
     """select_combos.process_megate_config: test read_to_skip_features"""
 
@@ -68,7 +67,7 @@ def test_read_to_skip_features():
 
 '''
 # Disabling this test for now because it is unstable (give stochastic results)
-@attr('unit')
+@pytest.mark.unit
 def test_read_megate_thresholds():
     """select_combos.process_megate_config: test read_megate_thresholds"""
 

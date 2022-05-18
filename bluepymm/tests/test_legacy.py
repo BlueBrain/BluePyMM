@@ -23,8 +23,7 @@ import os
 import shutil
 import csv
 
-from nose.plugins.attrib import attr
-import nose.tools as nt
+import pytest
 
 import bluepymm
 
@@ -76,13 +75,13 @@ def _prepare_config_jsons(prepare_config_template_filename,
     return prepare_config_path, hoc_config_path
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_get_parser():
     """bluepymm.legacy: test get_parser"""
     ret = bluepymm.legacy.create_hoc_files.get_parser()
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_add_full_paths():
     """bluepymm.legacy: test add_full_paths"""
     # input parameters
@@ -96,10 +95,10 @@ def test_add_full_paths():
     # run function and verify output
     expected_ret = {'test': test_dir, 'int': 1}
     ret = bluepymm.legacy.create_hoc_files.add_full_paths(test_dict, directory)
-    nt.assert_dict_equal(ret, expected_ret)
+    assert ret == expected_ret
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_load_combinations_dict():
     """bluepymm.legacy: test load_combinations_dict"""
     test_path = os.path.join(TEST_DATA_DIR,
@@ -137,10 +136,10 @@ def test_load_combinations_dict():
                     'emodel2_mtype1_1_morph1': emodel2_mtype1_1_morph1,
                     }
     ret = bluepymm.legacy.create_hoc_files.load_combinations_dict(test_path)
-    nt.assert_dict_equal(ret, expected_ret)
+    assert ret == expected_ret
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_run_create_and_write_hoc_file():
     """bluepymm.legacy: test run_create_and_write_hoc_file"""
     # create test directory, where output of this test will be created
@@ -155,7 +154,6 @@ def test_run_create_and_write_hoc_file():
     hoc_dir = os.path.join(test_dir, 'emodels_hoc')
     emodel_parameters = {'cm': 1.0}
     template = 'cell_template_neuron.jinja2'
-    template_dir = '.'
     morph_path = 'morph.asc'
     model_name = 'test'
 
@@ -173,13 +171,13 @@ def test_run_create_and_write_hoc_file():
         # verify output directory. TODO: test hoc file contents
         expected_nb_files = 1
         list_of_files = os.listdir(hoc_dir)
-        nt.assert_equal(len(list_of_files), expected_nb_files)
+        assert len(list_of_files) == expected_nb_files
         hoc_filename = '{}.hoc'.format(model_name)
         hoc_path = os.path.join(hoc_dir, hoc_filename)
-        nt.assert_true(os.path.isfile(hoc_path))
+        assert os.path.isfile(hoc_path)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_hoc_files():
     """bluepymm.legacy: test create_hoc_files"""
     # create test directory, where output of this test will be created
@@ -227,10 +225,10 @@ def test_create_hoc_files():
         # verify output directory. TODO: test hoc file contents
         expected_nb_files = 1
         list_of_files = os.listdir(hoc_dir)
-        nt.assert_equal(len(list_of_files), expected_nb_files)
+        assert len(list_of_files) == expected_nb_files
         hoc_filename = '{}.hoc'.format(model_name)
         hoc_path = os.path.join(hoc_dir, hoc_filename)
-        nt.assert_true(os.path.isfile(hoc_path))
+        assert os.path.isfile(hoc_path)
 
 
 def _verify_output(hoc_config_path):
@@ -238,16 +236,16 @@ def _verify_output(hoc_config_path):
     hoc_config = bluepymm.tools.load_json(hoc_config_path)
 
     # verify .hoc-files existence - TODO: verify content
-    nt.assert_true(os.path.isdir(hoc_config['hoc_output_dir']))
+    assert os.path.isdir(hoc_config['hoc_output_dir'])
     with open(hoc_config['mecombo_emodel_filename']) as f:
         reader = csv.DictReader(f, delimiter='\t')
         for row in reader:
             hoc_path = os.path.join(hoc_config['hoc_output_dir'],
                                     '{}.hoc'.format(row['combo_name']))
-            nt.assert_true(os.path.isfile(hoc_path))
+            assert os.path.isfile(hoc_path)
 
 
-def test_create_hoc_files():
+def test_create_hoc_files_example_simple1():
     """bluepymm.legacy: test creation legacy .hoc files for example simple1"""
     prepare_config_template_filename = 'simple1_conf_prepare.json'
     hoc_config_template_filename = 'simple1_conf_hoc.json'

@@ -25,8 +25,6 @@ import os
 import shutil
 import filecmp
 
-import nose.tools as nt
-
 from bluepymm import tools, select_combos
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -40,13 +38,8 @@ def _verify_output(benchmark_dir, output_dir):
     matches = filecmp.cmpfiles(benchmark_dir, output_dir, files)
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
-    nt.assert_equal(len(matches[0]), len(files))
-
-    nt.assert_true(
-        os.path.exists(
-            os.path.join(
-                output_dir,
-                'mecombo_release.json')))
+    assert len(matches[0]) == len(files)
+    assert os.path.exists(os.path.join(output_dir,'mecombo_release.json'))
 
 
 def _config_select_combos(config_template_path, tmp_dir):

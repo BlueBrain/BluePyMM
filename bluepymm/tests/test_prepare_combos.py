@@ -23,8 +23,6 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 
 import os
 
-import nose.tools as nt
-
 from bluepymm import tools, prepare_combos
 
 
@@ -36,9 +34,9 @@ TMP_DIR = os.path.join(BASE_DIR, 'tmp/prepare_combos')
 def _verify_emodel_json(filename, output_dir, nb_emodels):
     """Helper function to verify emodel json output"""
     data_json = os.path.join(output_dir, filename)
-    nt.assert_true(os.path.isfile(data_json))
+    assert os.path.isfile(data_json)
     data = tools.load_json(data_json)
-    nt.assert_equal(len(data), nb_emodels)
+    assert len(data) == nb_emodels
     return data
 
 
@@ -46,19 +44,19 @@ def _verify_prepare_combos_output(scores_db, emodels_hoc_dir, output_dir,
                                   nb_emodels):
     """Helper function to verify output of prepare combos"""
     # TODO: test database contents
-    nt.assert_true(os.path.isfile(scores_db))
+    assert os.path.isfile(scores_db)
 
-    nt.assert_true(os.path.isdir(emodels_hoc_dir))
+    assert os.path.isdir(emodels_hoc_dir)
     hoc_files = os.listdir(emodels_hoc_dir)
-    nt.assert_equal(len(hoc_files), nb_emodels)
+    assert len(hoc_files) == nb_emodels
     for hoc_file in hoc_files:
-        nt.assert_equal(hoc_file[-4:], '.hoc')
+        assert hoc_file.endswith('.hoc')
 
     _verify_emodel_json('final.json', output_dir, nb_emodels)
     emodel_dirs = _verify_emodel_json('emodel_dirs.json', output_dir,
                                       nb_emodels)
     for emodel in emodel_dirs:
-        nt.assert_true(os.path.isdir(emodel_dirs[emodel]))
+        assert os.path.isdir(emodel_dirs[emodel])
 
 
 def _prepare_config_json(original_filename, test_dir):
