@@ -25,8 +25,7 @@ import pandas
 import filecmp
 import os
 
-from nose.plugins.attrib import attr
-import nose.tools as nt
+import pytest
 
 import bluepymm.select_combos as select_combos
 from bluepymm import tools
@@ -53,14 +52,14 @@ def _test_save_megate_results(data, sort_key, test_dir, compliant):
     matches = filecmp.cmpfiles(benchmark_dir, test_dir, files)
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
-    nt.assert_equal(len(matches[0]), len(files))
+    assert len(matches[0]) == len(files)
 
     if compliant:
         logfile_path = os.path.join(test_dir, 'log_neuron_compliance.csv')
-        nt.assert_true(os.path.isfile(logfile_path))
+        assert os.path.isfile(logfile_path)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_save_megate_results_no_sort():
     """bluepymm.select_combos: test save_megate_results."""
     data = [('morph1', 1, 'mtype1', 'etype1', 'emodel1',
@@ -74,7 +73,7 @@ def test_save_megate_results_no_sort():
     _test_save_megate_results(data, None, test_dir, False)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_save_megate_results_sort():
     """bluepymm.select_combos: test save_megate_results sorted."""
     data = [('morph1', 1, 'mtype1', 'etype1', 'emodel1',
@@ -88,7 +87,7 @@ def test_save_megate_results_sort():
     _test_save_megate_results(data, 'combo_name', test_dir, False)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_save_megate_results_compliant():
     """bluepymm.select_combos: test save_megate_results neuron compliant."""
     data = [('morph1', 1, 'mtype1', 'etype1', 'emodel1',

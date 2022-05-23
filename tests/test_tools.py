@@ -23,8 +23,7 @@ import os
 import pandas
 from string import digits
 
-import nose.tools as nt
-from nose.plugins.attrib import attr
+import pytest
 
 from bluepymm import tools
 
@@ -33,18 +32,18 @@ EXAMPLES = os.path.join(BASE_DIR, 'examples')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/tools')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_cd():
     """bluepymm.tools: test cd"""
 
     old_cwd = os.getcwd()
     with tools.cd(EXAMPLES):
-        nt.assert_equal(os.getcwd(), EXAMPLES)
+        assert os.getcwd() == EXAMPLES
 
-    nt.assert_equal(old_cwd, os.getcwd())
+    assert old_cwd == os.getcwd()
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_json():
     """bluepymm.tools: test load_json and write_json"""
     output_dir = TMP_DIR
@@ -53,65 +52,70 @@ def test_json():
 
     tools.makedirs(output_dir)
     ret_path = tools.write_json(output_dir, output_name, config)
-    nt.assert_equal(os.path.join(output_dir, output_name), ret_path)
+    assert os.path.join(output_dir, output_name) == ret_path
     ret = tools.load_json(ret_path)
-    nt.assert_dict_equal(config, ret)
+    assert config == ret
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_makedirs():
     """bluepymm.tools: test makedirs"""
     make_dir = os.path.join(TMP_DIR, 'make_dir')
     tools.makedirs(make_dir)
-    nt.assert_true(os.path.isdir(make_dir))
+    assert os.path.isdir(make_dir)
 
     # try again -> no error
     make_dir = os.path.join(TMP_DIR, 'make_dir')
     tools.makedirs(make_dir)
-    nt.assert_true(os.path.isdir(make_dir))
+    assert os.path.isdir(make_dir)
 
     # causes error that is not caught
-    nt.assert_raises(OSError, tools.makedirs, '')
+    with pytest.raises(OSError):
+        tools.makedirs('')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_no_null_nan_values():
     """bluepymm.tools: test check_no_null_nan_values"""
     data = pandas.DataFrame([[1, 2], [3, 4]], columns=list('AB'))
-    nt.assert_true(tools.check_no_null_nan_values(data, 'test'))
+    assert tools.check_no_null_nan_values(data, 'test')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_no_null_nan_values_nan():
     """bluepymm.tools: test check_no_null_nan_values with nan"""
     data = pandas.DataFrame([[1, float('nan')], [3, 4]], columns=list('AB'))
-    nt.assert_raises(Exception, tools.check_no_null_nan_values, data, 'test')
+    with pytest.raises(Exception):
+        tools.check_no_null_nan_values(data, 'test')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_no_null_nan_values_none():
     """bluepymm.tools: test check_no_null_nan_values with None"""
     data = pandas.DataFrame([[1, 2], [None, 4]], columns=list('AB'))
-    nt.assert_raises(Exception, tools.check_no_null_nan_values, data, 'test')
+    with pytest.raises(Exception):
+        tools.check_no_null_nan_values(data, 'test')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_all_combos_have_run():
     """bluepymm.tools: test check_all_combos_have_run"""
     data = pandas.DataFrame({'to_run': [False, False, False],
                              'field': [1, 2, 3]})
-    nt.assert_true(tools.check_all_combos_have_run(data, 'test'))
+    assert tools.check_all_combos_have_run(data, 'test')
 
     data = pandas.DataFrame({'to_run': [True, True, True],
                              'field': [1, 2, 3]})
-    nt.assert_raises(Exception, tools.check_all_combos_have_run, data, 'test')
+    with pytest.raises(Exception):
+        tools.check_all_combos_have_run(data, 'test')
 
     data = pandas.DataFrame({'to_run': [False, True, False],
                              'field': [1, 2, 3]})
-    nt.assert_raises(Exception, tools.check_all_combos_have_run, data, 'test')
+    with pytest.raises(Exception):
+        tools.check_all_combos_have_run(data, 'test')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_load_module():
     """bluepymm.tools: test load_module"""
     # load module
@@ -126,67 +130,67 @@ def test_load_module():
     evaluator.create('emodel1')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_compliance_with_neuron():
     """bluepymm.tools: test check compliance with neuron template name rules"""
     not_compl = ['', '1test', 'test-test',
                  'testtesttesttesttesttesttesttesttesttesttesttesttesttesttes']
     for name in not_compl:
-        nt.assert_false(tools.check_compliance_with_neuron(name))
+        assert not tools.check_compliance_with_neuron(name)
 
     compliant = ['test_tesT', 'test123test', 'Test']
     for name in compliant:
-        nt.assert_true(tools.check_compliance_with_neuron(name))
+        assert tools.check_compliance_with_neuron(name)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_shorten_and_hash_string():
     """bluepymm.tools: test convert string"""
     label = 'testtesttesttesttesttesttesttesttest'
-    nt.assert_equal(label, tools.shorten_and_hash_string(label))
+    assert label == tools.shorten_and_hash_string(label)
 
     keep_length = 3
     hash_length = 20
     expected_length = keep_length + hash_length + 1
     ret = tools.shorten_and_hash_string(label, keep_length=keep_length,
                                         hash_length=hash_length)
-    nt.assert_not_equal(label, ret)
-    nt.assert_equal(len(ret), expected_length)
-    nt.assert_equal(label[0:keep_length], ret[0:keep_length])
-    nt.assert_equal('_', ret[keep_length])
+    assert label != ret
+    assert len(ret) == expected_length
+    assert label[0:keep_length] == ret[0:keep_length]
+    assert '_' == ret[keep_length]
 
     hash_length = 21
-    nt.assert_raises(ValueError, tools.shorten_and_hash_string, label,
-                     keep_length, hash_length)
+    with pytest.raises(ValueError):
+        tools.shorten_and_hash_string(label, keep_length, hash_length)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_get_neuron_compliant_template_name():
     """bluepymm.tools: test get neuron-compliant template name"""
     name = 'test'
-    nt.assert_true(tools.check_compliance_with_neuron(name))
+    assert tools.check_compliance_with_neuron(name)
     ret = tools.get_neuron_compliant_template_name(name)
-    nt.assert_equal(ret, name)
-    nt.assert_true(tools.check_compliance_with_neuron(ret))
+    assert ret == name
+    assert tools.check_compliance_with_neuron(ret)
 
     name = '123test-test'
-    nt.assert_false(tools.check_compliance_with_neuron(name))
+    assert not tools.check_compliance_with_neuron(name)
     ret = tools.get_neuron_compliant_template_name(name)
-    nt.assert_equal(ret, name.lstrip(digits).replace('-', '_'))
-    nt.assert_true(tools.check_compliance_with_neuron(ret))
+    assert ret == name.lstrip(digits).replace('-', '_')
+    assert tools.check_compliance_with_neuron(ret)
 
     name = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttest'
-    nt.assert_false(tools.check_compliance_with_neuron(name))
+    assert not tools.check_compliance_with_neuron(name)
     ret = tools.get_neuron_compliant_template_name(name)
-    nt.assert_true(tools.check_compliance_with_neuron(ret))
+    assert tools.check_compliance_with_neuron(ret)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_decode_bstring():
     """bluepymm.tools test the bstring decoding function."""
     bstr_obj = b"this is a byte string"
     decoded_bstr = "this is a byte string"
-    nt.assert_equal(tools.decode_bstring(bstr_obj), decoded_bstr)
+    assert tools.decode_bstring(bstr_obj) == decoded_bstr
 
     str_obj = "this is a string"
-    nt.assert_equal(tools.decode_bstring(str_obj), str_obj)
+    assert tools.decode_bstring(str_obj) == str_obj

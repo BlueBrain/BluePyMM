@@ -25,8 +25,7 @@ import re
 import os
 import json
 
-from nose.plugins.attrib import attr
-import nose.tools as nt
+import pytest
 
 from bluepymm.prepare_combos import create_mm_sqlite
 from bluepymm import tools
@@ -36,7 +35,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_morphology_existence():
     """prepare_combos.create_mm_sqlite: tests check_morphology_existence"""
     morph_name = 'morph1.asc'
@@ -44,15 +43,16 @@ def test_check_morphology_existence():
     morph_dir = os.path.join(TEST_DIR, 'data/morphs', morph_name)
     ret = create_mm_sqlite.check_morphology_existence(morph_name, morph_type,
                                                       morph_dir)
-    nt.assert_true(ret)
+    assert ret
 
     morph_name = 'does_not_exist.asc'
     morph_dir = os.path.join(TEST_DIR, 'data/morphs', morph_name)
-    nt.assert_raises(ValueError, create_mm_sqlite.check_morphology_existence,
-                     morph_name, morph_type, morph_dir)
+
+    with pytest.raises(ValueError):
+        create_mm_sqlite.check_morphology_existence(morph_name, morph_type, morph_dir)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_exemplar_rows_skip_repaired_exemplar():
     """prepare_combos.create_mm_sqlite: test create_exemplar_rows
     based on test example 'simple1'.
@@ -124,7 +124,7 @@ def test_create_exemplar_rows_skip_repaired_exemplar():
     pandas.testing.assert_frame_equal(ret, expected_ret)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_remove_morph_regex_failures():
     """prepare_combos.create_mm_sqlite: test remove_morph_regex_failures"""
     data = pandas.DataFrame([('morph1', re.compile('morph1')),
@@ -139,7 +139,7 @@ def test_remove_morph_regex_failures():
     pandas.testing.assert_frame_equal(ret, expected_ret)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_mm_sqlite():
     """prepare_combos.create_mm_sqlite: test create_mm_sqlite
     based on test example 'simple1'.
@@ -165,7 +165,7 @@ def test_create_mm_sqlite():
                                           final_dict,
                                           emodel_dirs,
                                           skip_repaired_exemplar)
-        nt.assert_true(os.path.isfile(output_filename))
+        assert os.path.isfile(output_filename)
         # TODO: test database contents
 
         # clear output

@@ -22,8 +22,7 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 
 import os
 
-import nose.tools as nt
-from nose.plugins.attrib import attr
+import pytest
 
 import pandas
 import xml.etree.ElementTree as ET
@@ -33,7 +32,7 @@ from bluepymm.prepare_combos import parse_files
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_circuitmvd3():
     """bluepymm.prepare_combos.parse_files: test reading a circuit.mvd3"""
 
@@ -51,17 +50,13 @@ def test_read_circuitmvd3():
         for index in range(1, 6):
             expected_morphnames += ['M%d_C060114A5' %
                                     index, 'M%d_mtC191200B_idA' % index]
-        nt.assert_equal(list(cmvd3_content['layer'].values), expected_layers)
-        nt.assert_equal(
-            list(cmvd3_content['fullmtype'].values),
-            expected_mtypes)
-        nt.assert_equal(list(cmvd3_content['etype'].values), expected_etypes)
-        nt.assert_equal(
-            list(cmvd3_content['morph_name'].values),
-            expected_morphnames)
+        assert list(cmvd3_content['layer'].values) == expected_layers
+        assert list(cmvd3_content['fullmtype'].values) == expected_mtypes
+        assert list(cmvd3_content['etype'].values) == expected_etypes
+        assert list(cmvd3_content['morph_name'].values) == expected_morphnames
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_verify_no_zero_percentage_no_zero():
     """bluepymm.prepare_combos.parse_files: test nonzero perc in recipe"""
     tree_string = """
@@ -75,13 +70,13 @@ def test_verify_no_zero_percentage_no_zero():
     children = [child for child in data]
     try:
         ret = parse_files.verify_no_zero_percentage(children)
-        nt.assert_true(ret)
+        assert ret
     except ValueError:
         throws_exception = True
-    nt.assert_false(throws_exception)
+    assert not throws_exception
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_verify_no_zero_percentage_zero():
     """bluepymm.prepare_combos.parse_files: test zero perc in recipe"""
     tree_string = """
@@ -92,11 +87,11 @@ def test_verify_no_zero_percentage_zero():
         """
     data = ET.fromstring(tree_string)
     children = [child for child in data]
-    nt.assert_raises(ValueError, parse_files.verify_no_zero_percentage,
-                     children)
+    with pytest.raises(ValueError):
+        parse_files.verify_no_zero_percentage(children)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_recipe_records():
     """bluepymm.prepare_combos.parse_files: test read_recipe_records.
     """
@@ -127,10 +122,10 @@ def test_read_recipe_records():
                         ("two", "mtype1", "etype2"), ]
     recipe_tree = ET.fromstring(tree_string)
     records = [r for r in parse_files.read_recipe_records(recipe_tree)]
-    nt.assert_list_equal(records, expected_records)
+    assert records == expected_records
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_mm_recipe_xml():
     """bluepymm.prepare_combos.parse_files: test read_mm_recipe with an xml
     recipe from test example "simple1".
@@ -148,13 +143,11 @@ def test_read_mm_recipe_xml():
     pandas.testing.assert_frame_equal(df, expected_df)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_mm_recipe_yaml():
     """bluepymm.prepare_combos.parse_files: test read_mm_recipe with a yaml
     recipe from test example "simple1".
     """
-
-    import yaml
     recipe_filename = os.path.join(
         BASE_DIR,
         'examples/simple1/data/simple1_recipe.yaml')
@@ -175,7 +168,7 @@ def test_read_mm_recipe_yaml():
     pandas.testing.assert_frame_equal(df, expected_df, check_dtype=False)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_morph_records():
     """bluepymm.prepare_combos.parse_files: test read_morph_records.
     """
@@ -202,10 +195,10 @@ def test_read_morph_records():
                          "layer2")]
     morph_tree = ET.fromstring(tree_string)
     records = [r for r in parse_files.read_morph_records(morph_tree)]
-    nt.assert_list_equal(records, expected_records)
+    assert records == expected_records
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_mtype_morph_map():
     """bluepymm.prepare_combos.parse_files: test read_mtype_morph_map with
     morphology database from test example "simple1".
@@ -227,19 +220,18 @@ def _test_convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes,
     """test convert emodel etype map"""
     df = parse_files.convert_emodel_etype_map(emodel_etype_map, fullmtypes,
                                               etypes)
-    nt.assert_equal(len(df.index), len(fullmtypes) * len(layers))
-    nt.assert_equal(df["original_emodel"].unique(), ["emodel1"])
-    nt.assert_equal(df["emodel"].unique(), ["emodel2"])
+    assert len(df) == len(fullmtypes) * len(layers)
+    assert df["original_emodel"].unique() == ["emodel1"]
+    assert df["emodel"].unique() == ["emodel2"]
 
     for mtype in fullmtypes:
         df_layers = list(df[df["fullmtype"] == mtype]["layer"].unique())
-        nt.assert_list_equal(df_layers, layers)
+        assert df_layers == layers
 
-    nt.assert_equal(len(df.drop_duplicates().index),
-                    len(fullmtypes) * len(layers))
+    assert len(df.drop_duplicates().index) == len(fullmtypes) * len(layers)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_convert_emodel_etype_map_no_regex():
     """prepare_combos.parse_files: test emodel etype map convert w/ regex"""
     layers = ["layer1", "2"]
@@ -251,7 +243,7 @@ def test_convert_emodel_etype_map_no_regex():
                                    layers)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_convert_emodel_etype_map_etype_regex():
     """prepare_combos.parse_files: test emodeletype map convert mtype regex"""
     layers = ["layer1", "2"]
@@ -264,7 +256,7 @@ def test_convert_emodel_etype_map_etype_regex():
                                    layers)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_convert_emodel_etype_map_mtype_regex():
     """prepare_combos.parse_files: test emodel etype map convert etype regex"""
 
@@ -278,7 +270,7 @@ def test_convert_emodel_etype_map_mtype_regex():
                                    layers)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_convert_emodel_etype_map_morph_name_regex():
     """prepare_combos.parse_files: test emodel etype map convert morph regex"""
 

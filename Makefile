@@ -5,16 +5,10 @@ install: clean
 	pip install `ls dist/bluepymm-*.tar.gz` --upgrade
 test: install_tox
 	tox
-test2: install_tox
-	tox -e py27-unit-functional
 test3: install_tox
 	tox -e py3-unit-functional
-unit2: install_tox
-	tox -e py27-unit
 unit3: install_tox
 	tox -e py3-unit
-func2: install_tox
-	tox -e py27-functional
 func3: install_tox
 	tox -e py3-functional
 install_tox:
@@ -25,21 +19,19 @@ clean:
 	rm -rf bluepymm.egg-info
 	rm -rf dist
 	find . -name '*.pyc' -delete
-	rm -rf bluepymm/tests/examples/simple1/tmp
-	rm -rf bluepymm/tests/examples/simple1/tmp_git
-	rm -rf bluepymm/tests/examples/simple1/output
-	rm -rf bluepymm/tests/examples/simple1/output_megate
-	rm -rf bluepymm/tests/examples/simple1/hoc
-	rm -rf bluepymm/tests/tmp
+	rm -rf tests/examples/simple1/tmp
+	rm -rf tests/examples/simple1/tmp_git
+	rm -rf tests/examples/simple1/output
+	rm -rf tests/examples/simple1/output_megate
+	rm -rf tests/examples/simple1/hoc
+	rm -rf tests/tmp
 	rm -rf docs/build
 	rm -rf build
 	rm -rf .coverage
 	rm -rf cov_reports
-
-	mkdir bluepymm/tests/tmp
-
+	mkdir tests/tmp
 simple1_git:
-	cd bluepymm/tests/examples/simple1; python build_git.py
+	cd tests/examples/simple1; python build_git.py
 autopep8: clean
 	 pip install autopep8
 	 find bluepymm -name '*.py' -exec autopep8 -i '{}' \;

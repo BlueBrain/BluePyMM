@@ -24,8 +24,7 @@ import sqlite3
 import os
 import pandas
 
-from nose.plugins.attrib import attr
-import nose.tools as nt
+import pytest
 
 from bluepymm.select_combos import sqlite_io
 from bluepymm import tools
@@ -44,7 +43,7 @@ def _create_database(test_dir, filename, scores, score_values):
     return path
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_and_process_sqlite_score_tables():
     """select_combos.sqlite_io: test read_and_process_sqlite_score_tables"""
     # create database
@@ -62,13 +61,13 @@ def test_read_and_process_sqlite_score_tables():
     ret_scs, ret_sc_vals = sqlite_io.read_and_process_sqlite_score_tables(path)
 
     # verify output
-    nt.assert_false('index' in ret_sc_vals.columns.values)
+    assert 'index' not in ret_sc_vals.columns.values
 
     pandas.testing.assert_frame_equal(ret_scs, scores)
     pandas.testing.assert_frame_equal(ret_sc_vals, score_values)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_read_and_process_sqlite_score_tables_error():
     """select_combos.sqlite_io: test read_and_process_sqlite_score_tables excep
     """
@@ -84,5 +83,5 @@ def test_read_and_process_sqlite_score_tables_error():
     path = _create_database(test_dir, filename, scores, score_values)
 
     # read database, number of rows incompatible -> exception
-    nt.assert_raises(Exception, sqlite_io.read_and_process_sqlite_score_tables,
-                     path)
+    with pytest.raises(Exception):
+        sqlite_io.read_and_process_sqlite_score_tables(path)

@@ -22,8 +22,6 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 import os
 import shutil
 
-import nose.tools as nt
-
 from bluepymm import tools, run_combos
 
 
@@ -35,7 +33,7 @@ TMP_DIR = os.path.join(BASE_DIR, 'tmp/run_combos')
 def _verify_run_combos_output(scores_db):
     """Helper function to verify output run combos"""
     # TODO: test database contents
-    nt.assert_true(os.path.isfile(scores_db))
+    assert os.path.isfile(scores_db)
 
 
 def test_run_combos():

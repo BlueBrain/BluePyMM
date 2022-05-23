@@ -26,8 +26,7 @@ import os
 import re
 from string import digits
 
-import nose.tools as nt
-from nose.plugins.attrib import attr
+import pytest
 
 from bluepymm.select_combos import table_processing
 from bluepymm.select_combos import process_megate_config as proc_config
@@ -38,7 +37,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_convert_extra_values():
     """select_combos.table_processing: test convert_extra_values"""
 
@@ -47,17 +46,17 @@ def test_convert_extra_values():
         value = 42
         data = {'extra_values': json.dumps({field: value})}
         ret = table_processing.convert_extra_values(data)
-        nt.assert_equal(ret[field], value)
+        assert ret[field] == value
 
     # dict does not change
     for field in ['random']:
         value = 42
         data = {'extra_values': json.dumps({field: value})}
         ret = table_processing.convert_extra_values(data)
-        nt.assert_dict_equal(ret, data)
+        assert ret == data
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_row_threshold_transform():
     """select_combos.table_processing: test row_threshold_transform"""
 
@@ -71,8 +70,7 @@ def test_row_threshold_transform():
          'fullmtype': proc_config.join_regex(['test2']), 'etype':
          proc_config.join_regex(['test3'])}]
     ret = table_processing.row_threshold_transform(row, patterns)
-    nt.assert_dict_equal(ret['megate_feature_threshold'][0],
-                         patterns[0]['megate_feature_threshold'])
+    assert ret['megate_feature_threshold'][0] == patterns[0]['megate_feature_threshold']
 
     # megate_feature_threshold is not None
     row = {'emodel': 'test1', 'fullmtype': 'test2', 'etype': 'test3',
@@ -81,11 +79,10 @@ def test_row_threshold_transform():
     ret = table_processing.row_threshold_transform(row, patterns)
     expected_list = [patterns[0]['megate_feature_threshold'],
                      patterns[0]['megate_feature_threshold']]
-    nt.assert_list_equal(ret['megate_feature_threshold'],
-                         expected_list)
+    assert ret['megate_feature_threshold'] == expected_list
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_opt_scores():
     """select_combos.table_processing: test check_opt_scores"""
     # everything OK
@@ -103,8 +100,8 @@ def test_check_opt_scores():
                    'scores': [json.dumps({'Step2.SpikeCount': 20.0})],
                    }
     scores = pandas.DataFrame(scores_dict)
-    nt.assert_raises(Exception, table_processing.check_opt_scores, emodel,
-                     scores)
+    with pytest.raises(Exception):
+        table_processing.check_opt_scores(emodel, scores)
 
     # different score values
     scores_dict = {'emodel': [emodel], 'is_exemplar': [1], 'is_repaired': [0],
@@ -112,11 +109,11 @@ def test_check_opt_scores():
                    'scores': [json.dumps({'Step1.SpikeCount': 10.0})],
                    }
     scores = pandas.DataFrame(scores_dict)
-    nt.assert_raises(Exception, table_processing.check_opt_scores, emodel,
-                     scores)
+    with pytest.raises(Exception):
+        table_processing.check_opt_scores(emodel, scores)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_process_emodel():
     # input parameters
     emodel = 'emodel1'
@@ -161,8 +158,6 @@ def test_process_emodel():
      mtypes, emodel_megate_passed_all, emodel_median_scores,
      passed_combos) = emodel_info
 
-    nt.assert_equal(emodel, emodel)
-
     # expected results
     columns = ['morph_name', 'layer', 'fullmtype', 'etype', 'emodel',
                'combo_name', 'threshold_current', 'holding_current']
@@ -195,7 +190,7 @@ def test_process_emodel():
     pandas.testing.assert_series_equal(mtypes, exp_mtypes)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_process_emodel_no_exemplars():
     # input parameters
     emodel = 'emodel1'
@@ -238,10 +233,10 @@ def test_process_emodel_no_exemplars():
         skip_repaired_exemplar, enable_check_opt_scores, select_best_perc))
 
     # verify results
-    nt.assert_is_none(ret)
+    assert ret is None
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_process_emodel_too_many_exemplars():
     # input parameters
     emodel = 'emodel1'
@@ -277,12 +272,13 @@ def test_process_emodel_too_many_exemplars():
     enable_check_opt_scores = True
 
     # run function
-    nt.assert_raises(Exception, table_processing.process_emodel, emodel,
+    with pytest.raises(Exception):
+        table_processing.process_emodel(emodel,
                      scores, score_values, to_skip_patterns, megate_patterns,
                      skip_repaired_exemplar, enable_check_opt_scores)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_process_emodel_no_released_morphologies():
     # input parameters
     emodel = 'emodel1'
@@ -324,10 +320,10 @@ def test_process_emodel_no_released_morphologies():
         skip_repaired_exemplar, enable_check_opt_scores, select_best_perc))
 
     # verify results
-    nt.assert_equal(ret, ('emodel1', None))
+    assert ret == ('emodel1', None)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_process_combo_name():
     """select_combos.table_processing: test process_combo_name"""
     combo_names = [
@@ -341,22 +337,22 @@ def test_process_combo_name():
 
     # compose expected NEURON-compliant names
     expected_names = []
-    nt.assert_true(tools.check_compliance_with_neuron(combo_names[0]))
+    assert tools.check_compliance_with_neuron(combo_names[0])
     expected_names.append(combo_names[0])
-    nt.assert_false(tools.check_compliance_with_neuron(combo_names[1]))
+    assert not tools.check_compliance_with_neuron(combo_names[1])
     name = combo_names[1].lstrip(digits).replace('-', '_')
-    nt.assert_true(tools.check_compliance_with_neuron(name))
+    assert tools.check_compliance_with_neuron(name)
     expected_names.append(name)
-    nt.assert_false(tools.check_compliance_with_neuron(combo_names[2]))
+    assert not tools.check_compliance_with_neuron(combo_names[2])
     name = tools.get_neuron_compliant_template_name(combo_names[2])
-    nt.assert_true(tools.check_compliance_with_neuron(name))
+    assert tools.check_compliance_with_neuron(name)
     expected_names.append(name)
 
     expected_df = pandas.DataFrame(expected_names, columns=['combo_name'])
 
     table_processing.process_combo_name(data, log_filename)
     pandas.testing.assert_frame_equal(data, expected_df)
-    nt.assert_true(os.path.isfile(log_filename))
+    assert os.path.isfile(log_filename)
     # clear output
     if os.path.isfile(log_filename):
         os.remove(log_filename)

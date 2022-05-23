@@ -22,8 +22,7 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 import os
 import shutil
 
-import nose.tools as nt
-from nose.plugins.attrib import attr
+import pytest
 
 from bluepymm.prepare_combos import prepare_emodel_dirs
 from bluepymm import tools
@@ -32,7 +31,7 @@ from bluepymm import tools
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_DATA_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 TMP_DIR = os.path.join(BASE_DIR, 'tmp/test_prepare_emodel_dirs')
-TEMPLATE_DIR = os.path.join(BASE_DIR, '../templates')
+TEMPLATE_DIR = os.path.join(BASE_DIR, '../bluepymm/templates')
 
 
 def teardown_module():
@@ -40,23 +39,23 @@ def teardown_module():
     shutil.rmtree(TMP_DIR)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_check_emodels_in_repo():
     """prepare_combos.prepare_emodel_dirs: test check_emodels_in_repo.
     """
     config = {'emodels_repo': 'test'}
-    nt.assert_true(prepare_emodel_dirs.check_emodels_in_repo(config))
+    assert prepare_emodel_dirs.check_emodels_in_repo(config)
 
     config = {'emodels_dir': 'test'}
-    nt.assert_false(prepare_emodel_dirs.check_emodels_in_repo(config))
+    assert not prepare_emodel_dirs.check_emodels_in_repo(config)
 
     config = {'emodels_dir': 'test', 'emodels_repo': 'test'}
-    nt.assert_raises(ValueError, prepare_emodel_dirs.check_emodels_in_repo,
-                     config)
+    with pytest.raises(ValueError):
+        prepare_emodel_dirs.check_emodels_in_repo(config)
 
     config = {}
-    nt.assert_raises(ValueError, prepare_emodel_dirs.check_emodels_in_repo,
-                     config)
+    with pytest.raises(ValueError):
+        prepare_emodel_dirs.check_emodels_in_repo(config)
 
 
 def _test_convert_emodel_input(test_dir, emodels_in_repo, conf_dict, continu):
@@ -64,12 +63,12 @@ def _test_convert_emodel_input(test_dir, emodels_in_repo, conf_dict, continu):
     with tools.cd(test_dir):
         ret_dir = prepare_emodel_dirs.convert_emodel_input(emodels_in_repo,
                                                            conf_dict, continu)
-        nt.assert_true(os.path.isdir(ret_dir))
+        assert os.path.isdir(ret_dir)
         for k in ['emodel_etype_map_path', 'final_json_path']:
-            nt.assert_true(os.path.isfile(os.path.join(ret_dir, conf_dict[k])))
+            assert os.path.isfile(os.path.join(ret_dir, conf_dict[k]))
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_convert_emodel_input_dir():
     """prepare_combos.prepare_emodel_dirs: test convert_emodel_input for dir
     based on test example 'simple1' with directory input.
@@ -86,7 +85,7 @@ def test_convert_emodel_input_dir():
 
 
 # TODO : how to do the test below?
-# @attr('unit')
+# @pytest.mark.unit
 # def test_convert_emodel_input_repo():
 #     """prepare_combos.prepare_emodel_dirs: test convert_emodel_input for repo
 #     based on test example 'simple1' with repository input.
@@ -104,7 +103,7 @@ def test_convert_emodel_input_dir():
 #                                continu)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_get_emodel_dicts():
     """prepare_combos.prepare_emodel_dirs: test get_emodel_dicts
     based on test example 'simple1'.
@@ -151,9 +150,9 @@ def test_get_emodel_dicts():
         final, ee_map, dict_dir = prepare_emodel_dirs.get_emodel_dicts(
             emodels_dir, final_json_path, emodel_etype_map_path)
 
-    nt.assert_dict_equal(expected_final_dict, final)
-    nt.assert_dict_equal(expected_emodel_etype_map, ee_map)
-    nt.assert_equal(expected_dict_dir, dict_dir)
+    assert expected_final_dict == final
+    assert expected_emodel_etype_map == ee_map
+    assert expected_dict_dir == dict_dir
 
 
 def _test_create_and_write_hoc_file(test_dir,
@@ -176,10 +175,10 @@ def _test_create_and_write_hoc_file(test_dir,
         template_name = model_name or emodel
         hoc_filename = '{}.hoc'.format(template_name)
         hoc_path = os.path.join(hoc_dir, hoc_filename)
-        nt.assert_true(os.path.isfile(hoc_path))
+        assert os.path.isfile(hoc_path)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_and_write_hoc_file_none():
     """prepare_combos.prepare_emodel_dirs: test create_and_write_hoc_file
     based on morph1 of test example 'simple1'.
@@ -197,7 +196,7 @@ def test_create_and_write_hoc_file_none():
                                     model_name)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_create_and_write_hoc_file_morph_path_model_name():
     """prepare_combos.prepare_emodel_dirs: test create_and_write_hoc_file
     based on morph1 of test example 'simple1'.
@@ -215,7 +214,7 @@ def test_create_and_write_hoc_file_morph_path_model_name():
                                     model_name)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_prepare_emodel_dir():
     """prepare_combos.prepare_emodel_dirs: test prepare_emodel_dir
     based on test example 'simple1'.
@@ -253,21 +252,22 @@ def test_prepare_emodel_dir():
         arg_list = (original_emodel, emodel, emodel_dict, emodels_dir, opt_dir,
                     os.path.abspath(hoc_dir),
                     hoc_template, emodels_in_repo, continu)
+
         ret = prepare_emodel_dirs.prepare_emodel_dir(arg_list)
 
         # test side effects: creation of .hoc-file
-        nt.assert_true(os.path.isdir(os.path.join(emodels_dir, emodel)))
+        assert os.path.isdir(os.path.join(emodels_dir, emodel))
         hoc_path = os.path.join(hoc_dir, '{}.hoc'.format(emodel))
-        nt.assert_true(os.path.isfile(hoc_path))
+        assert os.path.isfile(hoc_path)
 
         # test returned dict
         expected_emodel_dir = os.path.join(emodels_dir, emodel)
         expected_ret = {emodel: expected_emodel_dir,
                         original_emodel: expected_emodel_dir}
-        nt.assert_dict_equal(ret, expected_ret)
+        assert ret == expected_ret
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_prepare_emodel_dirs_single_process():
     """prepare_combos.prepare_emodel_dirs_single_process:
     test prepare_emodel_dirs based on test example 'simple1
@@ -322,12 +322,12 @@ def test_prepare_emodel_dirs_single_process():
     # verify output
     expected_ret = {emodel: os.path.join(
         emodels_dir, emodel) for emodel in final_dict}
-    nt.assert_dict_equal(ret, expected_ret)
-    nt.assert_true(os.path.isdir(emodels_dir))
-    nt.assert_true(os.path.isdir(emodels_hoc_dir))
+    assert ret == expected_ret
+    assert os.path.isdir(emodels_dir)
+    assert os.path.isdir(emodels_hoc_dir)
 
 
-@attr('unit')
+@pytest.mark.unit
 def test_prepare_emodel_dirs_multi_process():
     """prepare_combos.prepare_emodel_dirs_multi_process:
     test prepare_emodel_dirs based on test example 'simple1'
@@ -382,6 +382,6 @@ def test_prepare_emodel_dirs_multi_process():
     # verify output
     expected_ret = {emodel: os.path.join(
         emodels_dir, emodel) for emodel in final_dict}
-    nt.assert_dict_equal(ret, expected_ret)
-    nt.assert_true(os.path.isdir(emodels_dir))
-    nt.assert_true(os.path.isdir(emodels_hoc_dir))
+    assert ret == expected_ret
+    assert os.path.isdir(emodels_dir)
+    assert os.path.isdir(emodels_hoc_dir)
