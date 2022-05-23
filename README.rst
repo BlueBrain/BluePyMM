@@ -80,15 +80,30 @@ We are providing support using a chat channel on `Gitter <https://gitter.im/Blue
 Requirements
 ------------
 
-* `Python 2.7+ <https://www.python.org/download/releases/2.7/>`_ or `Python 3.6+ <https://www.python.org/downloads/release/python-360/>`_
-* `pip 9.0+ <https://pip.pypa.io>`_ (installed by default in newer versions of Python, make sure you upgrade pip to a version 9.0+)
-* `Neuron 7.4+ <http://neuron.yale.edu/>`_ (compiled with Python support)
-* `eFEL eFeature Extraction Library <https://github.com/BlueBrain/eFEL>`_ (automatically installed by pip)
-* `BluePyOpt <https://github.com/BlueBrain/BluePyOpt>`_ (automatically installed by pip)
-* `NumPy <http://www.numpy.org>`_ (automatically installed by pip)
-* `pandas <http://pandas.pydata.org/>`_ (automatically installed by pip)
-* `matplotlib <https://matplotlib.org/>`_ (automatically installed by pip)
-* `sh <https://pypi.python.org/pypi/sh>`_ (automatically installed by pip)
+* `Python 3.6+ <https://www.python.org/downloads/release/python-360/>`_
+* `Neuron 7.4+ <http://neuron.yale.edu/>`_
+* `eFEL eFeature Extraction Library <https://github.com/BlueBrain/eFEL>`_
+* `BluePyOpt <https://github.com/BlueBrain/BluePyOpt>`_
+* `NumPy <http://www.numpy.org>`_
+* `pandas <http://pandas.pydata.org/>`_
+* `matplotlib <https://matplotlib.org/>`_
+* `sh <https://pypi.python.org/pypi/sh>`_
+* `ipyparallel <https://pypi.python.org/pypi/ipyparallel>`_
+* `lxml <https://pypi.python.org/pypi/lxml>`_
+* `h5py <https://pypi.python.org/pypi/h5py>`_
+* `pyyaml <https://pypi.python.org/pypi/pyyaml>`_
+
+All of the requirements besides `Neuron` are automatically installed with bluepymm.
+The decision on how to install `Neuron` is left to the user.
+
+One simple way of installing Neuron is through pip
+
+.. code-block:: bash
+
+    pip install NEURON
+
+Neuron can also be installed from the source and used by bluepymm provided that it is compiled with Python support.
+
 
 Installation
 ------------
