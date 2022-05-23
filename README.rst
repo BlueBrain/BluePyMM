@@ -93,7 +93,7 @@ Requirements
 * `h5py <https://pypi.python.org/pypi/h5py>`_
 * `pyyaml <https://pypi.python.org/pypi/pyyaml>`_
 
-All of the requirements besides `Neuron` are automatically installed with bluepymm.
+All of the requirements except for `Neuron` are automatically installed with bluepymm.
 The decision on how to install `Neuron` is left to the user.
 
 One simple way of installing Neuron is through pip
