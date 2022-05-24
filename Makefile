@@ -27,8 +27,6 @@ clean:
 	rm -rf tests/tmp
 	rm -rf docs/build
 	rm -rf build
-	rm -rf .coverage
-	rm -rf cov_reports
 	mkdir tests/tmp
 simple1_git:
 	cd tests/examples/simple1; python build_git.py

@@ -1,2 +1,2 @@
-[run]
+[report]
 omit=bluepymm/_version.py
