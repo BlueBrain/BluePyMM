@@ -70,7 +70,10 @@ def test_row_threshold_transform():
          'fullmtype': proc_config.join_regex(['test2']), 'etype':
          proc_config.join_regex(['test3'])}]
     ret = table_processing.row_threshold_transform(row, patterns)
-    assert ret['megate_feature_threshold'][0] == patterns[0]['megate_feature_threshold']
+    assert (
+        ret["megate_feature_threshold"][0]
+        == patterns[0]["megate_feature_threshold"]
+    )
 
     # megate_feature_threshold is not None
     row = {'emodel': 'test1', 'fullmtype': 'test2', 'etype': 'test3',
@@ -273,9 +276,15 @@ def test_process_emodel_too_many_exemplars():
 
     # run function
     with pytest.raises(Exception):
-        table_processing.process_emodel(emodel,
-                     scores, score_values, to_skip_patterns, megate_patterns,
-                     skip_repaired_exemplar, enable_check_opt_scores)
+        table_processing.process_emodel(
+            emodel,
+            scores,
+            score_values,
+            to_skip_patterns,
+            megate_patterns,
+            skip_repaired_exemplar,
+            enable_check_opt_scores,
+        )
 
 
 @pytest.mark.unit

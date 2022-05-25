@@ -292,6 +292,7 @@ def test_save_scores():
             testsqlite_filename, uid, scores, extra_values, exception
         )
 
+
 @pytest.mark.unit
 def test_expand_scores_to_score_values_table():
     """run_combos.calculate_scores: test expand_scores_to_score_values_table"""
@@ -327,7 +328,8 @@ def test_expand_scores_to_score_values_table_error():
 
     # process database
     with pytest.raises(Exception):
-        run_combos.calculate_scores.expand_scores_to_score_values_table(db_path)
+        run_combos.calculate_scores.expand_scores_to_score_values_table(
+            db_path)
 
 
 @pytest.fixture()
