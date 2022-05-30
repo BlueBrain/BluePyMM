@@ -39,7 +39,7 @@ def _verify_output(benchmark_dir, output_dir):
     if len(matches[0]) != len(files):
         print('Mismatch in files: {}'.format(matches[1]))
     assert len(matches[0]) == len(files)
-    assert os.path.exists(os.path.join(output_dir,'mecombo_release.json'))
+    assert os.path.exists(os.path.join(output_dir, 'mecombo_release.json'))
 
 
 def _config_select_combos(config_template_path, tmp_dir):

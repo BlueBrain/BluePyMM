@@ -49,7 +49,8 @@ def test_check_morphology_existence():
     morph_dir = os.path.join(TEST_DIR, 'data/morphs', morph_name)
 
     with pytest.raises(ValueError):
-        create_mm_sqlite.check_morphology_existence(morph_name, morph_type, morph_dir)
+        create_mm_sqlite.check_morphology_existence(
+            morph_name, morph_type, morph_dir)
 
 
 @pytest.mark.unit
