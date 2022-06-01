@@ -61,10 +61,7 @@ def run_emodel_morph_isolated(input_args):
         extra_values_error
     ) = input_args
 
-    return_dict = {}
-    return_dict['uid'] = uid
-    return_dict['exception'] = None
-
+    return_dict = {'uid': uid, 'exception': None}
     pool = tools.NestedPool(1, maxtasksperchild=1)
 
     try:
