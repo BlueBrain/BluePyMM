@@ -1,7 +1,9 @@
 """Create sqlite database"""
 
+
 from __future__ import print_function
 
+import itertools
 """
 Copyright (c) 2018, EPFL/Blue Brain Project
  This file is part of BluePyMM <https://github.com/BlueBrain/BluePyMM>
@@ -273,17 +275,16 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
                 morph_name_regex, re.compile(morph_name_regex))
 
             emodel = etype_map['mm_recipe']
-            for layer in etype_map['layer']:
-                for fullmtype in fullmtypes:
-                    if fullmatch(mtype_regex, fullmtype):
-                        for etype in etypes:
-                            if fullmatch(etype_regex, etype):
-                                yield (emodel,
-                                       str(layer),
-                                       fullmtype,
-                                       etype,
-                                       morph_name_regex,
-                                       original_emodel,)
+            for layer, fullmtype in itertools.product(etype_map['layer'], fullmtypes):
+                if fullmatch(mtype_regex, fullmtype):
+                    for etype in etypes:
+                        if fullmatch(etype_regex, etype):
+                            yield (emodel,
+                                   str(layer),
+                                   fullmtype,
+                                   etype,
+                                   morph_name_regex,
+                                   original_emodel,)
 
     columns = ['emodel', 'layer', 'fullmtype', 'etype', 'morph_regex',
                'original_emodel']
