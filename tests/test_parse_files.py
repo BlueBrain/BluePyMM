@@ -67,7 +67,7 @@ def test_verify_no_zero_percentage_no_zero():
         """
     data = ET.fromstring(tree_string)
     throws_exception = False
-    children = [child for child in data]
+    children = list(data)
     try:
         ret = parse_files.verify_no_zero_percentage(children)
         assert ret
@@ -86,7 +86,7 @@ def test_verify_no_zero_percentage_zero():
         </tree>
         """
     data = ET.fromstring(tree_string)
-    children = [child for child in data]
+    children = list(data)
     with pytest.raises(ValueError):
         parse_files.verify_no_zero_percentage(children)
 
@@ -121,7 +121,7 @@ def test_read_recipe_records():
                         ("1", "mtype2", "etype1"),
                         ("two", "mtype1", "etype2"), ]
     recipe_tree = ET.fromstring(tree_string)
-    records = [r for r in parse_files.read_recipe_records(recipe_tree)]
+    records = list(parse_files.read_recipe_records(recipe_tree))
     assert records == expected_records
 
 
@@ -194,7 +194,7 @@ def test_read_morph_records():
                         ("morph2", "mtype2:subtype2", "mtype2", "subtype2",
                          "layer2")]
     morph_tree = ET.fromstring(tree_string)
-    records = [r for r in parse_files.read_morph_records(morph_tree)]
+    records = list(parse_files.read_morph_records(morph_tree))
     assert records == expected_records
 
 
