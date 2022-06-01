@@ -41,16 +41,15 @@ TEST_DIR = os.path.join(BASE_DIR, 'examples/simple1')
 def test_convert_extra_values():
     """select_combos.table_processing: test convert_extra_values"""
 
+    value = 42
     # dict grows with given field
     for field in ['threshold_current', 'holding_current']:
-        value = 42
         data = {'extra_values': json.dumps({field: value})}
         ret = table_processing.convert_extra_values(data)
         assert ret[field] == value
 
     # dict does not change
     for field in ['random']:
-        value = 42
         data = {'extra_values': json.dumps({field: value})}
         ret = table_processing.convert_extra_values(data)
         assert ret == data
