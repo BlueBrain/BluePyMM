@@ -275,7 +275,8 @@ def convert_emodel_etype_map(emodel_etype_map, fullmtypes, etypes):
                 morph_name_regex, re.compile(morph_name_regex))
 
             emodel = etype_map['mm_recipe']
-            for layer, fullmtype in itertools.product(etype_map['layer'], fullmtypes):
+            layer_mtypes = itertools.product(etype_map['layer'], fullmtypes)
+            for layer, fullmtype in layer_mtypes:
                 if fullmatch(mtype_regex, fullmtype):
                     for etype in etypes:
                         if fullmatch(etype_regex, etype):
