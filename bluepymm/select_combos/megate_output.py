@@ -127,16 +127,11 @@ def write_mecomboreleasejson(
         mecombo_emodel_path):
     """Write json file contain info about release"""
 
-    release = {}
-
-    release['version'] = '1.0'
-
     output_paths = {}
     output_paths['emodels_hoc'] = os.path.abspath(emodels_hoc_path)
     output_paths['extneurondb.dat'] = os.path.abspath(extneurondb_path)
     output_paths['mecombo_emodel.tsv'] = os.path.abspath(mecombo_emodel_path)
-    release['output_paths'] = output_paths
-
+    release = {'version': '1.0', 'output_paths': output_paths}
     tools.write_json(
         output_dir,
         'mecombo_release.json',

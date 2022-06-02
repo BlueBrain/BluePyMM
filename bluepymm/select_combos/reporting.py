@@ -295,8 +295,6 @@ def plot_median_per_metype(combos, passed_median_scores, csv_path):
     metype_medians.to_csv(csv_path)
     print('Wrote me-type median scores to %s' % os.path.abspath(csv_path))
 
-    import matplotlib.pyplot as plt
-
     ax = plt.pcolor(metype_medians)
     ax = plt.gca()
     cbar = plt.colorbar()

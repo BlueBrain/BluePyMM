@@ -61,10 +61,7 @@ def run_emodel_morph_isolated(input_args):
         extra_values_error
     ) = input_args
 
-    return_dict = {}
-    return_dict['uid'] = uid
-    return_dict['exception'] = None
-
+    return_dict = {'uid': uid, 'exception': None}
     pool = tools.NestedPool(1, maxtasksperchild=1)
 
     try:
@@ -357,17 +354,12 @@ def calculate_scores(final_dict, emodel_dirs, scores_db_filename,
         pool = tools.NestedPool(processes=n_processes)
         results = pool.imap_unordered(run_emodel_morph_isolated, arg_list)
 
-    # keep track of the number of received results
-    uids_received = 0
-
     # every time a result comes in, save the score in the database
-    for result in results:
+    for uids_received, result in enumerate(results, start=1):
         uid = result['uid']
         scores = result['scores']
         extra_values = result['extra_values']
         exception = result['exception']
-        uids_received += 1
-
         save_scores(scores_db_filename, uid, scores, extra_values, exception)
 
         print('Saved scores for uid %s (%d out of %d) %s' %

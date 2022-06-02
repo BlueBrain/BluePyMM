@@ -160,7 +160,7 @@ def _apply_megating(emodel_mtype_etype_thresholds, emodel_score_values,
         column
         for column in
         emodel_score_values_thresholds.columns
-        if not any([pattern.match(column) for pattern in to_skip_patterns])]
+        if not any(pattern.match(column) for pattern in to_skip_patterns)]
 
     emodel_megate_pass = \
         emodel_score_values_thresholds[non_skipped_columns].apply(
@@ -254,7 +254,7 @@ def calc_median_scores(emodel_score_values, to_skip_patterns):
         column
         for column in
         columns
-        if not any([pattern.match(column) for pattern in to_skip_patterns])]
+        if not any(pattern.match(column) for pattern in to_skip_patterns)]
 
     emodel_median_scores = emodel_score_values[non_skipped_columns].median(
         axis=1, skipna=True).to_frame('median_score')

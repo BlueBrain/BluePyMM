@@ -245,10 +245,7 @@ def test_create_arg_list_exception():
 
 def _dict_factory(cursor, row):
     """Helper function to create dictionaries from database rows."""
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+    return {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
 
 
 @pytest.mark.unit
