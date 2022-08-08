@@ -95,7 +95,7 @@ def row_threshold_transform(row, megate_patterns):
     etype = row['etype']
 
     for pattern_dict in megate_patterns:
-        if(pattern_dict['emodel'].match(emodel) and
+        if (pattern_dict['emodel'].match(emodel) and
            pattern_dict['fullmtype'].match(fullmtype) and
            pattern_dict['etype'].match(etype)):
             if row['megate_feature_threshold'] is None:
