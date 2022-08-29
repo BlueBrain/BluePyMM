@@ -90,6 +90,9 @@ def convert_emodel_input(emodels_in_repo, conf_dict, continu):
             with tools.cd(tmp_emodels_dir):
                 sh.git('checkout', conf_dict['emodels_githash'])
         else:
+            if (os.path.exists(tmp_emodels_dir)
+               and os.path.isdir(tmp_emodels_dir)):
+                shutil.rmtree(tmp_emodels_dir)
             shutil.copytree(conf_dict['emodels_dir'], tmp_emodels_dir)
     return tmp_emodels_dir
 

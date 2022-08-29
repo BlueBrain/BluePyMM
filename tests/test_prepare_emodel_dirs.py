@@ -82,7 +82,10 @@ def test_convert_emodel_input_dir():
     continu = False
     _test_convert_emodel_input(TEST_DATA_DIR, emodels_in_repo, conf_dict,
                                continu)
-
+    # the second run is to make sure that the tmp_dir gets deleted and recopied
+    # in the consecutive runs
+    _test_convert_emodel_input(TEST_DATA_DIR, emodels_in_repo, conf_dict,
+                               continu)
 
 # TODO : how to do the test below?
 # @pytest.mark.unit
