@@ -42,8 +42,7 @@ setuptools.setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3',
         'Operating System :: POSIX',
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities',
