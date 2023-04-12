@@ -377,7 +377,7 @@ def process_emodel(args):
     emodel_mtype_etype_thresholds['megate_feature_threshold'] = None
 
     print('Getting megating thresholds for emodel %s' % emodel)
-    emodel_mtype_etype_thresholds.apply(
+    emodel_mtype_etype_thresholds = emodel_mtype_etype_thresholds.apply(
         lambda row: row_threshold_transform(row, megate_patterns),
         axis=1)
 
