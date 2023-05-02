@@ -374,12 +374,21 @@ def create_final_db_and_write_report(pdf_filename,
                     emodel_megate_passed_all, emodel_median_scores, \
                     emodel_passed_combos = \
                     emodel_info
-                ext_neurondb = ext_neurondb.append(emodel_ext_neurondb_rows)
+                ext_neurondb = pandas.concat(
+                    [ext_neurondb, emodel_ext_neurondb_rows], axis=0
+                ).reset_index(drop=True)
 
-                megate_passed_all = megate_passed_all.append(
-                    emodel_megate_passed_all)
-                median_scores = median_scores.append(emodel_median_scores)
-                passed_combos = passed_combos.append(emodel_passed_combos)
+                megate_passed_all = pandas.concat(
+                    [megate_passed_all, emodel_megate_passed_all], axis=0
+                ).reset_index(drop=True)
+
+                median_scores = pandas.concat(
+                    [median_scores, emodel_median_scores], axis=0
+                ).reset_index(drop=True)
+
+                passed_combos = pandas.concat(
+                    [passed_combos, emodel_passed_combos], axis=0
+                ).reset_index(drop=True)
 
                 # Reporting per e-model
                 add_plot_to_report(
