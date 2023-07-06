@@ -4,3 +4,4 @@ Christian Roessert @ BBP
 Mike Gevaert @ BBP
 Jean-Denis Courcol @ BBP
 James King @ BBP
+Aurélien Jaquier @ BBP
