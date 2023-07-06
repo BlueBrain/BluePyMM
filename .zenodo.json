@@ -1,0 +1,42 @@
+{
+  "title" : "BluePyMM",
+  "license": "LGPLv3",
+  "upload_type": "software",
+  "description": "BluePyMM is a software built to do Cell Model Management (MM). It takes as input a morphology release, a circuit recipe and a set of e-models with some extra information. Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination. Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.",
+  "creators": [
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "Van Geit, Werner",
+      "orcid": "0000-0002-2915-720X"
+    },
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "Vanherpe, Liesbeth",
+      "orcid": "0000-0002-1226-0526"
+    },
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "Rössert, Christian"
+    },
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "Gevaert, Michael",
+      "orcid": "0000-0002-7547-3297"
+    },
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "Courcol, Jean-Denis",
+      "orcid": "0000-0002-9351-1461"
+    },
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "King, James Gonzalo",
+      "orcid": "0000-0003-0906-8389"
+    },
+    {
+      "affiliation": "Blue Brain Project, EPFL",
+      "name": "Jaquier, Aurélien",
+      "orcid": "0000-0001-6202-6175"
+    }
+  ]
+}
