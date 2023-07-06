@@ -31,7 +31,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
-          DEFAULT_BUMP: minor
+          DEFAULT_BUMP: patch
 
       - name: Build a source tarball and wheel
         run: |
