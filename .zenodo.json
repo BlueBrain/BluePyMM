@@ -1,6 +1,6 @@
 {
   "title" : "BluePyMM",
-  "license": "LGPLv3",
+  "license": "LGPL-3.0",
   "upload_type": "software",
   "description": "BluePyMM is a software built to do Cell Model Management (MM). It takes as input a morphology release, a circuit recipe and a set of e-models with some extra information. Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination. Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.",
   "creators": [
