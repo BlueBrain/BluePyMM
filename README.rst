@@ -50,7 +50,15 @@ BluePyMM
 		<td>Gitter</td>
 		<td>
 			<a href="https://gitter.im/bluebrain/bluepymm">
-			<img src="https://badges.gitter.im/Join%20Chat.svg"
+			<img src="https://badges.gitter.im/Join%20Chat.svg" />
+		</a>
+		</td>
+	</tr>
+	<tr>
+		<td>Citation</td>
+		<td>
+			<a href="https://doi.org/10.5281/zenodo.8146238">
+			<img src="https://zenodo.org/badge/DOI/10.5281/zenodo.8146238.svg" alt="DOI"/>
 		</a>
 		</td>
 	</tr>
@@ -70,7 +78,29 @@ This process is called Cell Model Management (MM). It takes as input a morpholog
 Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination.
 Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.
 
+Citation
+--------
 
+When you use this BluePyMM software for your research, we ask you to cite the following publications (this includes poster presentations):
+
+.. code-block:: 
+
+    @article{bluepymm, 
+        title={BluePyMM}, 
+        DOI={10.5281/zenodo.8146238},
+        url={https://doi.org/10.5281/zenodo.8146238} 
+        abstractNote={BluePyMM is a software built to do Cell Model Management (MM). It takes as input a morphology release, a circuit recipe and a set of e-models with some extra information. Next, it finds all possible (morphology, e-model)-combinations (me-combos) based on e-type, m-type, and layer as described by the circuit recipe, and calculates the scores for every combination. Finally, it writes out the resulting accepted me-combos to a database, and produces a report with information on the number of matches.}, 
+        publisher={Zenodo}, 
+        author={Van Geit, Werner and
+				Vanherpe, Liesbeth and
+				Rössert, Christian and
+				Gevaert, Michael and
+				Courcol, Jean-Denis and
+				King, James Gonzalo and
+				Jaquier, Aurélien},
+        year={2023}, 
+        month={Jul} 
+    }
 
 Support
 -------
