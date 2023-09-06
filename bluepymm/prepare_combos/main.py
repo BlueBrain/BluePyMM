@@ -53,7 +53,7 @@ def prepare_emodels(conf_dict, continu, scores_db_path, n_processes):
         base_dir = os.path.abspath(os.path.dirname(__file__))
         template_dir = os.path.join(base_dir, '../templates')
         hoc_template = os.path.join(
-            template_dir, 'cell_template_neurodamus.jinja2')
+            template_dir, 'cell_template_neurodamus_sbo.jinja2')
         hoc_template = os.path.abspath(hoc_template)
     print('Preparing emodels in %s' % emodels_dir)
     emodels_hoc_dir = os.path.abspath(conf_dict['emodels_hoc_dir'])
