@@ -60,6 +60,7 @@ setuptools.setup(
     entry_points={'console_scripts': ['bluepymm=bluepymm.main:main'], },
     package_data={
         'bluepymm': ['templates/cell_template_neuron.jinja2',
-                     'templates/cell_template_neurodamus.jinja2'],
+                     'templates/cell_template_neurodamus.jinja2',
+                     'templates/cell_template_neurodamus_sbo.jinja2'],
     }
 )
