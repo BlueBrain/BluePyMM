@@ -38,7 +38,7 @@ setuptools.setup(
         "h5py",
         "pyyaml",
     ],
-    packages=setuptools.find_packages(exclude=('notebook',)),
+    packages=setuptools.find_packages(exclude=('notebook','tests',)),
     author="BlueBrain Project, EPFL",
     author_email="werner.vangeit@epfl.ch",
     description="Model Management Python Library (bluepymm)",
