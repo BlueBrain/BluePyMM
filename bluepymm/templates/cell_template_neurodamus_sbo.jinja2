@@ -138,16 +138,27 @@ func getThreshold() { return 0.0 }
 
 proc load_morphology(/* morphology_dir, morphology_name */) {localobj morph, import, sf, extension, commands, pyobj
   strdef morph_path
-  sprint(morph_path, "%s/%s", $s1, $s2)  sf = new StringFunctions()
-  extension = new String()  sscanf(morph_path, "%s", extension.s)
+  sprint(morph_path, "%s/%s", $s1, $s2)
+  sf = new StringFunctions()
+  extension = new String()
+  sscanf(morph_path, "%s", extension.s)
 
-  // TODO fix the `-3` here.
   sf.right(extension.s, sf.len(extension.s)-3)
   
-  if( strcmp(extension.s, ".asc") == 0 ) {
+  if( strcmp(extension.s, "asc") == 0 ) {
      morph = new Import3d_Neurolucida3()
-  } else if( strcmp(extension.s, ".swc" ) == 0) {
+     morph.quiet = 1
+     morph.input(morph_path)
+
+     import = new Import3d_GUI(morph, 0)
+     import.instantiate(this)
+  } else if( strcmp(extension.s, "swc" ) == 0) {
      morph = new Import3d_SWC_read()
+     morph.quiet = 1
+     morph.input(morph_path)
+
+     import = new Import3d_GUI(morph, 0)
+     import.instantiate(this)
   } else if( strcmp(extension.s, ".h5") == 0 ) {
     if(nrnpython ("from morphio_wrapper import MorphIOWrapper") == 1) {
         pyobj = new PythonObject()
@@ -181,7 +192,8 @@ proc distribute_distance(){local x localobj sl
   this.soma[0] distance(0, 0.5)
   sprint(distfunc, "%%s %s(%%f) = %s", mech, distfunc)
   forsec sl for(x, 0) {
-    sprint(stmp, distfunc, secname(), x, distance(x))
+    // use distance(x) twice for the step distribution case, e.g. for calcium hotspot
+    sprint(stmp, distfunc, secname(), x, distance(x), distance(x))
     execute(stmp)
   }
 }
