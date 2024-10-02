@@ -174,7 +174,7 @@ Programme for Research and Innovation under the Specific Grant Agreement No. 945
 This project/research was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), 
 from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
 
-Copyright (c) 2016-2022 Blue Brain Project/EPFL
+Copyright (c) 2016-2024 Blue Brain Project/EPFL
 
 ..
     The following image is also defined in the index.rst file, as the relative path is 

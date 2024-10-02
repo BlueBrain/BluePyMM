@@ -21,7 +21,7 @@ Copyright (c) 2018, EPFL/Blue Brain Project
 
 import contextlib
 import errno
-import imp
+import importlib
 import json
 import os
 import sys
@@ -103,7 +103,7 @@ def check_all_combos_have_run(database, description):
 def load_module(name, path):
     """Try and load module `name` but *only* in `path`
 
-    from https://docs.python.org/2/library/imp.html#examples
+    from https://docs.python.org/3.6/library/importlib.html#importing-a-source-file-directly
     """
     # Fast path: see if the module has already been imported.
     try:
@@ -111,12 +111,11 @@ def load_module(name, path):
     except KeyError:
         pass
 
-    fp, pathname, description = imp.find_module(name, [path])
-    try:
-        return imp.load_module(name, fp, pathname, description)
-    finally:
-        if fp:
-            fp.close()
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    sys.modules[name] = module
+    return module
 
 
 def check_compliance_with_neuron(template_name):
