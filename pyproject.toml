@@ -11,6 +11,7 @@ description="Model Management Python Library (bluepymm)"
 readme = "README.rst"
 license = {file = "LICENSE.txt"}
 requires-python = ">= 3.8"
+dynamic = ["version"]
 dependencies = [
     "sh",
     "bluepyopt",
