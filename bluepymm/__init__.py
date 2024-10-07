@@ -19,10 +19,6 @@ Copyright (c) 2018, EPFL/Blue Brain Project
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
-
 import bluepymm.legacy  # NOQA
 
 from .main import run  # NOQA

@@ -61,10 +61,6 @@ bluepymm = [
 [tool.setuptools.packages.find]
 exclude = ["notebook", "tests",]
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440-minor"
-versionfile_source = "bluepymm/_version.py"
-versionfile_build = "bluepymm/_version.py"
-tag_prefix = ""
-parentdir_prefix = ""
+[tool.setuptools_scm]
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
