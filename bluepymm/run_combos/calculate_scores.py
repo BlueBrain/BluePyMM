@@ -129,7 +129,9 @@ def run_emodel_morph(
         print('Running e-model %s on morphology %s in %s' %
               (emodel, morph_path, emodel_dir))
 
-        setup = tools.load_module('setup', os.path.join(emodel_dir, 'setup/__init__.py'))
+        setup = tools.load_module(
+            'setup', os.path.join(emodel_dir, 'setup/__init__.py')
+        )
 
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):

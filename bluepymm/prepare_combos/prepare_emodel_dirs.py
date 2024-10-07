@@ -141,7 +141,9 @@ def create_and_write_hoc_file(emodel, emodel_dir, hoc_dir, emodel_params,
         model_name: used to name the .hoc file. If None, the e-model name is
                     used. Default is None.
     """
-    setup = tools.load_module('setup', emodel_dir)
+    setup = tools.load_module(
+        'setup', os.path.join(emodel_dir, 'setup/__init__.py')
+    )
 
     with open(os.devnull, 'w') as devnull:
         old_stdout = sys.stdout

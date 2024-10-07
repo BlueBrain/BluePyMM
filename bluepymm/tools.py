@@ -103,7 +103,7 @@ def check_all_combos_have_run(database, description):
 def load_module(name, path):
     """Try and load module `name` but *only* in `path`
 
-    from https://docs.python.org/3.6/library/importlib.html#importing-a-source-file-directly
+    from https://docs.python.org/3.6/library/importlib.html
     """
     # Fast path: see if the module has already been imported.
     try:

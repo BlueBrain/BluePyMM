@@ -120,13 +120,17 @@ def test_load_module():
     """bluepymm.tools: test load_module"""
     # load module
     module_dir = os.path.join(EXAMPLES, 'simple1/data/emodels_dir/subdir/')
-    setup = tools.load_module('setup', os.path.join(module_dir, 'setup/__init__.py'))
+    setup = tools.load_module(
+        'setup', os.path.join(module_dir, 'setup/__init__.py')
+    )
     # try and execute something from loaded module
     setup.evaluator.create('emodel1')
 
     # load as file
     setup_dir = os.path.join(module_dir, 'setup')
-    evaluator = tools.load_module('evaluator', os.path.join(setup_dir, 'evaluator.py'))
+    evaluator = tools.load_module(
+        'evaluator', os.path.join(setup_dir, 'evaluator.py')
+    )
     evaluator.create('emodel1')
 
 
