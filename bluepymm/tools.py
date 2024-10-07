@@ -112,9 +112,11 @@ def load_module(name, path):
         pass
 
     spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None:
+        return None
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
     sys.modules[name] = module
+    spec.loader.exec_module(module)
     return module
 
 
