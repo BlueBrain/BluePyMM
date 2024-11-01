@@ -3,66 +3,21 @@
 BluePyMM
 ========
 
-.. raw:: html
-
-	<table>
-	<tr>
-	  <td>Latest Release</td>
-	  <td>
-	    <a href="https://pypi.org/project/bluepymm/">
-	    <img src="https://img.shields.io/pypi/v/bluepymm.svg" alt="latest release" />
-	    </a>
-	  </td>
-	</tr>
-	<tr>
-	  <td>Documentation</td>
-	  <td>
-	    <a href="https://bluepymm.readthedocs.io/en/latest/">
-	    <img src="https://readthedocs.org/projects/bluepymm/badge/?version=latest" alt="latest documentation" />
-	    </a>
-	  </td>
-	</tr>
-	<tr>
-	  <td>License</td>
-	  <td>
-	    <a href="https://github.com/BlueBrain/bluepymm/blob/master/LICENSE.txt">
-	    <img src="https://img.shields.io/pypi/l/bluepymm.svg" alt="license" />
-	    </a>
-	</td>
-	</tr>
-	<tr>
-	  <td>Build Status</td>
-	  <td>  
-	    <a href="https://github.com/BlueBrain/BluePyMM/actions">
-	    <img src="https://github.com/BlueBrain/BluePyMM/workflows/Build/badge.svg?branch=master" alt="Actions build status" />
-	    </a>
-	  </td>
-	</tr>
-	<tr>
-	  <td>Coverage</td>
-	  <td>
-	    <a href="https://codecov.io/gh/BlueBrain/bluepymm">
-	    <img src="https://codecov.io/github/BlueBrain/BluePyMM/coverage.svg?branch=master" alt="coverage" />
-	    </a>
-	  </td>
-	</tr>
-	<tr>
-		<td>Gitter</td>
-		<td>
-			<a href="https://gitter.im/bluebrain/bluepymm">
-			<img src="https://badges.gitter.im/Join%20Chat.svg" />
-		</a>
-		</td>
-	</tr>
-	<tr>
-		<td>Citation</td>
-		<td>
-			<a href="https://doi.org/10.5281/zenodo.8146238">
-			<img src="https://zenodo.org/badge/DOI/10.5281/zenodo.8146238.svg" alt="DOI"/>
-		</a>
-		</td>
-	</tr>
-	</table>
++----------------+------------+
+| Latest Release | |pypi|     |
++----------------+------------+
+| Documentation  | |docs|     |
++----------------+------------+
+| License        | |license|  |
++----------------+------------+
+| Build Status 	 | |tests|    |
++----------------+------------+
+| Coverage       | |coverage| |
++----------------+------------+
+| Citation       | |zenodo|   |
++----------------+------------+
+| Gitter         | |gitter|   |
++----------------+------------+
 
 Introduction
 ------------
@@ -110,7 +65,7 @@ We are providing support using a chat channel on `Gitter <https://gitter.im/Blue
 Requirements
 ------------
 
-* `Python 3.7+ <https://www.python.org/downloads/release/python-360/>`_
+* `Python 3.9+ <https://www.python.org/downloads/release/python-390/>`_
 * `Neuron 7.4+ <http://neuron.yale.edu/>`_
 * `eFEL eFeature Extraction Library <https://github.com/BlueBrain/eFEL>`_
 * `BluePyOpt <https://github.com/BlueBrain/BluePyOpt>`_
@@ -174,7 +129,29 @@ Programme for Research and Innovation under the Specific Grant Agreement No. 945
 This project/research was supported by funding to the Blue Brain Project, a research center of the École polytechnique fédérale de Lausanne (EPFL), 
 from the Swiss government’s ETH Board of the Swiss Federal Institutes of Technology.
 
-Copyright (c) 2016-2022 Blue Brain Project/EPFL
+Copyright (c) 2016-2024 Blue Brain Project/EPFL
+
+.. |pypi| image:: https://img.shields.io/pypi/v/bluepymm.svg
+               :target: https://pypi.org/project/bluepymm/
+               :alt: latest release
+.. |docs| image:: https://readthedocs.org/projects/bluepymm/badge/?version=latest
+               :target: https://bluepymm.readthedocs.io/en/latest/
+               :alt: latest documentation
+.. |license| image:: https://img.shields.io/pypi/l/bluepymm.svg
+                  :target: https://github.com/BlueBrain/bluepymm/blob/master/LICENSE.txt
+                  :alt: license
+.. |tests| image:: https://github.com/BlueBrain/BluePyMM/workflows/Build/badge.svg?branch=master
+                :target: https://github.com/BlueBrain/BluePyMM/actions
+                :alt: Actions build status
+.. |coverage| image:: https://codecov.io/github/BlueBrain/BluePyMM/coverage.svg?branch=master
+                   :target: https://codecov.io/gh/BlueBrain/bluepymm
+                   :alt: coverage
+.. |gitter| image:: https://badges.gitter.im/Join%20Chat.svg
+                 :target: https://gitter.im/bluebrain/bluepymm
+                 :alt: gitter
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8146238.svg
+                 :target: https://doi.org/10.5281/zenodo.8146238
+                 :alt: DOI
 
 ..
     The following image is also defined in the index.rst file, as the relative path is 

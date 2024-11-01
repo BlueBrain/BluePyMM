@@ -129,7 +129,9 @@ def run_emodel_morph(
         print('Running e-model %s on morphology %s in %s' %
               (emodel, morph_path, emodel_dir))
 
-        setup = tools.load_module('setup', emodel_dir)
+        setup = tools.load_module(
+            'setup', os.path.join(emodel_dir, 'setup/__init__.py')
+        )
 
         print("Changing path to %s" % emodel_dir)
         with tools.cd(emodel_dir):
@@ -213,7 +215,10 @@ def create_arg_list(scores_db_filename, emodel_dirs, final_dict,
         one_row = scores_db.execute('SELECT * FROM scores LIMIT 1').fetchone()
 
         apical_points_isec = {}
-        setup = tools.load_module('setup', emodel_dirs[one_row['emodel']])
+        setup = tools.load_module(
+            'setup',
+            os.path.join(emodel_dirs[one_row['emodel']], 'setup/__init__.py')
+        )
         if hasattr(setup, 'multieval') and use_apical_points:
             apical_points_isec = tools.load_json(
                 os.path.join(one_row['morph_dir'], "apical_points_isec.json")
