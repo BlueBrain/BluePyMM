@@ -65,7 +65,7 @@ We are providing support using a chat channel on `Gitter <https://gitter.im/Blue
 Requirements
 ------------
 
-* `Python 3.7+ <https://www.python.org/downloads/release/python-360/>`_
+* `Python 3.9+ <https://www.python.org/downloads/release/python-390/>`_
 * `Neuron 7.4+ <http://neuron.yale.edu/>`_
 * `eFEL eFeature Extraction Library <https://github.com/BlueBrain/eFEL>`_
 * `BluePyOpt <https://github.com/BlueBrain/BluePyOpt>`_
